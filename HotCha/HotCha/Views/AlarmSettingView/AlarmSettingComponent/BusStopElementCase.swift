@@ -21,7 +21,7 @@ enum BusStopElementCase {
         case .ableStop:
             return .gray100
         case .disableStop:
-            return .gray // 수정필요
+            return .gray150.opacity(0.4)
         case .currentStop, .alarmStop, .destinationStop:
             return .mainpurple
         }
@@ -30,7 +30,7 @@ enum BusStopElementCase {
     var line_color: Color {
         switch self {
         case .disableStop:
-            return .gray // 수정필요
+            return .gray150.opacity(0.4)
         default:
             return .gray150
         }
@@ -48,7 +48,7 @@ enum BusStopElementCase {
     var outer_circle_color: Color {
         switch self {
         case .disableStop:
-            return .gray // 수정필요
+            return .gray400
         case .currentStop, .alarmStop, .destinationStop:
             return .mainpurple
         default:
@@ -65,6 +65,7 @@ enum BusStopElementCase {
         }
     }
     
+    // 현재 위치 정류장
     var is_shadow: Bool {
         switch self {
         case .currentStop:
@@ -86,3 +87,7 @@ enum BusStopElementCase {
     }
 }
 
+
+#Preview {
+    AlarmSettingView()
+}

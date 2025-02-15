@@ -78,7 +78,6 @@ struct BusStopPoint: View {
     var inner_circle_size: CGFloat = 10 // 작은 원 사이즈
     var outer_circle_size: CGFloat // 큰 원 사이즈
     var outer_circle_color: Color // 큰 원 색상
-    //    var is_shadow: Color // 그림자 여부 ( 현재 위치 정류장 표시용)
     
     var body: some View {
         // currentStop인 경우
