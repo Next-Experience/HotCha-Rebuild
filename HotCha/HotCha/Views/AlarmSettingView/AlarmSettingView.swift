@@ -60,17 +60,13 @@ struct StatusView: View {
 
 struct SearchButtonView: View {
     @State var text: String = ""
+    @State var busStopSearchText:String = ""
     var body: some View {
         VStack(alignment:. leading, spacing: 12){
             Text("간선 1234")
             Text("청강리공영차고지 ↔ 광안역")
-            TextField("텍스트를 입력해주세요", text: $text)
-                           .padding()
-                           .overlay(
-                               RoundedRectangle(cornerRadius: 8)
-                                   .stroke(Color.primary, lineWidth: 1)
-                           )
-                           .keyboardType(.default)
+            BusstopSearchTextField(busStopSearchText: $busStopSearchText)
+                .padding(.horizontal, 20)
             Divider()
             HStack(alignment: .center, spacing: 20) {
                 Text("1/2")
