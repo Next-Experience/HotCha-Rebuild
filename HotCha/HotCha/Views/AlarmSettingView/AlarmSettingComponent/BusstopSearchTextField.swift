@@ -30,7 +30,7 @@ struct BusstopSearchTextField: View {
                     if !busStopSearchText.isEmpty {
                         Button(action: { busStopSearchText = "" }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.gray300)
                         }
                     }
                     else {
