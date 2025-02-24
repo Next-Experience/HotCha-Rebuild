@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-struct Historyannouncement: View {
+struct HistoryAnnounce: View {
     var body: some View {
         VStack {
             VStack(spacing: 8) {
@@ -37,6 +37,6 @@ struct Historyannouncement: View {
 
 struct Historyannouncement_Previews: PreviewProvider {
     static var previews: some View {
-        Historyannouncement()
+        HistoryAnnounce()
     }
 }

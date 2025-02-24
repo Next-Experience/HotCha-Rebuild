@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-struct UsageHistorycardView: View {
+struct UsageHistoryCardView: View {
     @Environment(\.modelContext) private var modelContext
     var history: Usage_history
     

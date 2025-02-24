@@ -43,19 +43,19 @@ struct BookmarkView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     let homebookmark = bookmarkdata.filter { $0.bookmark_type == 1 }
                     if homebookmark.isEmpty {
-                        BookmarkcardnothingView(name: "집", image: "houseicon")
+                        BookmarkCardEmptyView(name: "집", image: "houseicon")
                         } else {
                             ForEach(homebookmark) { bookmark in
-                                BookmarkcardcustomView(isEditMode: isEditMode, bookmark: bookmark)
+                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark)
                             }
                         }
                     
                     let workplacebookmark = bookmarkdata.filter { $0.bookmark_type == 2 }
                     if workplacebookmark.isEmpty {
-                        BookmarkcardnothingView(name: "회사", image: "buildingicon")
+                        BookmarkCardEmptyView(name: "회사", image: "buildingicon")
                         } else {
                             ForEach(workplacebookmark) { bookmark in
-                                BookmarkcardcustomView(isEditMode: isEditMode, bookmark: bookmark)
+                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark)
                             }
                         }
                     }
@@ -63,11 +63,11 @@ struct BookmarkView: View {
                 // 직접 추가하는 즐겨찾기
                 let bookmarks = bookmarkdata.filter { $0.bookmark_type == 0 }
                 LazyVGrid(columns: columns, spacing: 16) { ForEach(bookmarks) { bookmark in
-                    BookmarkcardcustomView(isEditMode: isEditMode, bookmark: bookmark)
+                    BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark)
                 }
                     if bookmarks.count < 4 {
                         if !isEditMode {
-                            BookmarkplusView()
+                            BookmarkPlusView()
                         }
                         }
                 }

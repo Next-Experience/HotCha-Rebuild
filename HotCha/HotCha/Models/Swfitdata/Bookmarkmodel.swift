@@ -16,7 +16,7 @@ class Bookmarkmodel: Identifiable {
     var bus_no: String
     var route_type: String
     var bookmark_label: String
-    var bookmark_type: Int
+    var bookmark_type: Int     // 0은 커스텀 1은 집 2는 회사
 
     init(route_id: String, city_code: String, destination_stop_id: String, destination_stop_name: String, bus_no: String, route_type: String, bookmark_label: String, bookmark_type: Int) {
         self.route_id = route_id

@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct SettingCardversionView: View {
+struct SettingCardVersionView: View {
     let icon: String
     let name: String
     let version: String

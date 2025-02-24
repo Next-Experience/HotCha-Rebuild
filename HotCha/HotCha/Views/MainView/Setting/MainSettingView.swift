@@ -11,7 +11,6 @@ struct MainSettingView: View {
     var body: some View {
         VStack{
             VStack(spacing: 24) {
-                
                VStack(spacing: 12) {
                     HStack {
                         Text("고객지원")
@@ -19,15 +18,10 @@ struct MainSettingView: View {
                             .foregroundStyle(Color("gray800"))
                         Spacer()
                     }
-                    
                     SettingCardView(icon: "mailicon", name: "핫챠 문의하기")
-                    
                     SettingCardView(icon: "questionmarkicon", name: "자주 묻는 질문")
-                    
                     SettingCardView(icon: "fileicon", name: "이용약관 및 개인정보처리방침")
-                    
                 }
-                
                 
                 VStack(spacing: 12) {
                     HStack(spacing: 6) {
@@ -37,14 +31,8 @@ struct MainSettingView: View {
                                                 Spacer()
                     }
                     
-                     
-                    
-                    SettingCardversionView(icon: "fileicon", name: "버전 정보", version: getAppVersion() ?? "0.0.0")
-
+                    SettingCardVersionView(icon: "fileicon", name: "버전 정보", version: getAppVersion() ?? "0.0.0")
                 }
-                
-                
-                
                 
                 Spacer()
             }

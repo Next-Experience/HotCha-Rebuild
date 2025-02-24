@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-struct BookmarkplusView: View {
+struct BookmarkPlusView: View {
     @State private var isTapped: Bool = false
     @State private var showingAddBookmark = false
 

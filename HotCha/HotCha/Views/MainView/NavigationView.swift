@@ -15,11 +15,7 @@ struct NavigationView: View {
                VStack {
                    HStack {
                        // 위치 정보
-                       Image("mappin")
-                           .padding(.leading, 20)
-                       Text("부산광역시")
-                           .font(.pretendard(.semibold, size: 16))
-                           .foregroundStyle(Color("gray150"))
+                       MyLocationView()
                        Spacer()
                        
                        
@@ -61,7 +57,7 @@ struct NavigationView: View {
                    .padding(.top, 54)
                    
 
-                // 아래쪽 탭뷰
+                   // 아래쪽 탭뷰
                    TabView(selection: $selectedTab) {
                        MainView()
                            .cornerRadius(10)
@@ -78,17 +74,12 @@ struct NavigationView: View {
                            .ignoresSafeArea()
                            .padding(.horizontal, 2)
                            .tag(2)
-                   }
-                   
-                   
+                       }
                    // 인디케이터 숨겼음, 페이지 탭뷰로 스와이프 기능 넣음
                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                }.background(Color("gray900")) // 전채 배경색
             // 아래쪽 여백 제거
-            .ignoresSafeArea(.all)
-            
-
-           
+            .ignoresSafeArea(.all)       
     }
 }
 
