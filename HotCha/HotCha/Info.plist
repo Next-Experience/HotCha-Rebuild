@@ -14,5 +14,9 @@
 		<string>Pretendard-Thin.otf</string>
 		<string>Pretendard-Light.otf</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 </dict>
 </plist>

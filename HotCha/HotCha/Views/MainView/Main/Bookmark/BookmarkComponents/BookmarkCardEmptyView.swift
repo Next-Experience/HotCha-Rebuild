@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct BookmarkcardnothingView: View {
+struct BookmarkCardEmptyView: View {
     let name: String
     let image: String
     
@@ -40,6 +40,7 @@ struct BookmarkcardnothingView: View {
                 }
                 .foregroundStyle(Color("gray300"))
                 .font(.pretendard(.medium, size: 14))
+                .frame(height: 42)
             }
             .padding(12)
         }

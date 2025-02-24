@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct BookmarkcardcustomView: View {
+struct BookmarkCardCustomView: View {
     let isEditMode: Bool
     var bookmark: Bookmarkmodel
     @State private var isTapped: Bool = false
@@ -67,6 +67,7 @@ struct BookmarkcardcustomView: View {
                         Spacer()
                     }
                 }
+                .frame(height: 42)
                 
                 
             }
