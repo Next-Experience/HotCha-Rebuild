@@ -14,7 +14,7 @@ struct AlarmSettingView: View {
                 ModalView()
                     .interactiveDismissDisabled(true)
                     .presentationDragIndicator(.visible)
-                    .presentationDetents([.fraction(0.99), .fraction(0.3), .fraction(0.1)])
+                    .presentationDetents([.fraction(0.99), .fraction(0.3)/*, .fraction(0.1)*/])
                     .presentationBackgroundInteraction(.enabled)
             }
     }
@@ -31,7 +31,7 @@ struct ModalView: View{
                 Spacer()
                 
                 SearchButtonView()
-//                StatusView()
+                //                StatusView()
             }
         }
         .edgesIgnoringSafeArea(.all)
@@ -63,33 +63,57 @@ struct SearchButtonView: View {
     @State var busStopSearchText:String = ""
     var body: some View {
         VStack(alignment:. leading, spacing: 12){
-            Text("간선 1234")
-            Text("청강리공영차고지 ↔ 광안역")
-            BusstopSearchTextField(busStopSearchText: $busStopSearchText)
-                .padding(.horizontal, 20)
-            Divider()
-            HStack(alignment: .center, spacing: 20) {
-                Text("1/2")
-                    .foregroundStyle(.gray300)
-                Spacer()
-                Ellipse()
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(.gray200)
-                    .overlay(
-                        Image("bt_up")
-                    )
-               
-                Ellipse()
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(.mainpurple)
-                    .overlay(
-                        Image("bt_down")
-                    )
-                Spacer()
-                Text("정류장 선택")
-                    .foregroundStyle(.mainpurple)
+            VStack(alignment:. leading, spacing: 12){
+                Text("간선 1234")
+                    .font(.pretendard(.semibold, size: 20))
+                    .foregroundStyle(.skybluec)
+                    .padding(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
+                    .background(RoundedRectangle(cornerRadius: 4).fill(.skybluec.opacity(0.1)))
+                
+                HStack(spacing: 6){
+                    Text("청강리공영차고지")
+                    Text("↔")
+                    Text("광안역")
+                }
+                .font(.pretendard(.semibold, size: 18))
+                .foregroundStyle(.gray600)
+                BusstopSearchTextField(busStopSearchText: $busStopSearchText)
             }
-            .padding(EdgeInsets(top: 15, leading: 20, bottom: 37, trailing: 20))
+            .padding(.horizontal, 20)
+            
+            Divider()
+            
+            ZStack(alignment: .center){
+                HStack() {
+                    Text("1/2")
+                        .foregroundStyle(.gray300)
+                    Spacer()
+                    Text("정류장 선택")
+                        .foregroundStyle(.mainpurple)
+                }
+                .padding(EdgeInsets(top: 15, leading: 20, bottom: 37, trailing: 20))
+                
+                HStack(alignment:.center, spacing: 0){
+                        Ellipse()
+                            .frame(width: 32, height: 32)
+                            .foregroundStyle(.gray200)
+                            .overlay(
+                                Image("bt_up")
+                            )
+                            .padding(.trailing, 20)
+                        
+                        Ellipse()
+                            .frame(width: 32, height: 32)
+                            .foregroundStyle(.mainpurple)
+                            .overlay(
+                                Image("bt_down")
+                            )
+                    }
+                .padding(EdgeInsets(top: 15, leading: 0, bottom: 37, trailing: 0))
+                }
+            
+            
+            
         }
     }
 }
