@@ -14,7 +14,7 @@ struct AlarmSettingView: View {
                 ModalView()
                     .interactiveDismissDisabled(true)
                     .presentationDragIndicator(.visible)
-                    .presentationDetents([.fraction(0.99), .fraction(0.3)/*, .fraction(0.1)*/])
+                    .presentationDetents([.fraction(0.99), .fraction(0.32)/*, .fraction(0.1)*/])
                     .presentationBackgroundInteraction(.enabled)
             }
     }
@@ -77,7 +77,9 @@ struct SearchButtonView: View {
                 }
                 .font(.pretendard(.semibold, size: 18))
                 .foregroundStyle(.gray600)
+                .padding(.bottom, 4)
                 BusstopSearchTextField(busStopSearchText: $busStopSearchText)
+                    .padding(.bottom, 12)
             }
             .padding(.horizontal, 20)
             
@@ -137,7 +139,7 @@ struct MainPurpleAlarmButton: View {
                     RoundedRectangle(cornerRadius: 8).fill(.mainpurple)
                         .frame(maxWidth: .infinity)
                 )
-                .padding(EdgeInsets(top: 16, leading: 20, bottom: 36, trailing: 20))
+                .padding(EdgeInsets(top: 3, leading: 20, bottom: 36, trailing: 20))
             Spacer()
         }
     }
