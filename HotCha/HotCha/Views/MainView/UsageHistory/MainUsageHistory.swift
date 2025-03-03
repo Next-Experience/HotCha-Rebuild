@@ -36,6 +36,12 @@ struct MainUsageHistoryView: View {
             // 추후 개발용으로만 사용
             AddUsageHistoryView()
         }
+        .onAppear{
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    hideKeyboard()
+            }
+          
+        }
     }
         
 }
