@@ -9,20 +9,21 @@ import SwiftUI
 struct BusStopSearchView: View {
     @State var text: String = ""
     @State var busStopSearchText:String = ""
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    
     var body: some View {
-        VStack(alignment:. leading, spacing: 12){
-            VStack(alignment:. leading, spacing: 12){
+        VStack(alignment:. leading, spacing: 0){
+            VStack(alignment:. leading, spacing: 0){
                 BusStopInfoSection()
                 BusStopSearchTextField(busStopSearchText: $busStopSearchText)
-                    .padding(.bottom, 12)
+                    .environmentObject(modalStateViewModel)
+                    .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
+                
             }
-            .padding(.horizontal, 20)
             
             Divider()
             
-            AlarmSearchScrollButtonSection()
-            //            MainPurpleAlarmButton()
-            
+            modalStateViewModel.modalState.alarmSettingSearchBottomView
         }
     }
 }
@@ -63,19 +64,27 @@ struct AlarmSearchScrollButtonSection: View {
 
 
 struct MainPurpleAlarmButton: View {
+    @State var isInfoFilled: Bool
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    
     var body: some View {
         HStack(alignment: .center){
             Spacer()
-            Text("알림 시작")
-                .font(.pretendard(.semibold, size: 20))
-                .foregroundStyle(.gray50)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 8).fill(.mainpurple)
-                        .frame(maxWidth: .infinity)
-                )
-                .padding(EdgeInsets(top: 3, leading: 20, bottom: 36, trailing: 20))
+            Button(action: {
+                modalStateViewModel.modalState = .alertStopsMedium
+            }, label: {
+                Text("알림 시작")
+                    .font(.pretendard(.semibold, size: 20))
+                    .foregroundStyle(isInfoFilled ? .gray50 : .gray150)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8).fill(isInfoFilled ? .mainpurple : .gray200)
+                            .frame(maxWidth: .infinity)
+                    )
+                    .padding(EdgeInsets(top: 3, leading: 20, bottom: 36, trailing: 20))
+            })
+
             Spacer()
         }
     }
