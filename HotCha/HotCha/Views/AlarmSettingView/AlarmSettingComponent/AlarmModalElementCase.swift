@@ -7,7 +7,13 @@
 
 import SwiftUI
 
-enum AlarmModalElementCase {
+class AlarmModalViewModel: ObservableObject {
+    @Published var modalState: AlarmSettingModalElementCase = .alarmWait
+    
+}
+
+enum AlarmSettingModalElementCase {
+    case alarmWait // 알람 기다리는 상태
     case alarmStart // 알람세팅 화면 첫 화면, 정류장 선택 후 시작 버튼
     case alarmSearch // 도착 정류장 검색 화면
     case alertStopsSmall // 몇 정거장 전, 알람종료 버튼 표시
@@ -15,34 +21,47 @@ enum AlarmModalElementCase {
     case alertStopsLarge // 위의 Medium에서 알람 세팅 추가(소리, 진동)
     
     
-    var is_star: Bool {
+    var alarmStatusSettingSection: some View {
         switch self {
         case .alertStopsLarge:
-            return true
+            return AnyView(AlertSettingSection())
         default:
-            return false
+            return AnyView(EmptyView())
         }
     }
     
-    var fractionDetent: CGFloat {
+    var alertBusInfoSection: some View {
         switch self {
-        case .alertStopsSmall:
-            return 0.1
-        case .alertStopsMedium:
-            return 0.4
-        case .alertStopsLarge:
-            return 0.99
+        case .alertStopsMedium, .alertStopsLarge:
+            return AnyView(
+                VStack{
+                    BusStopInfoSection()
+                    BusStopDestinationSection()
+                })
         default:
-            return 0.32
+            return AnyView(EmptyView())
         }
     }
-
     
+    var alarmSettingMainView: some View {
+        switch self {
+        case .alarmWait, .alarmStart, .alarmSearch:
+            return AnyView(BusStopSearchView())
+        case .alertStopsSmall, .alertStopsMedium, .alertStopsLarge:
+            return AnyView(AlarmStatusView())
+        }
+    }
     
+    var alarmSettingSearchBottomView: some View {
+        switch self {
+        case .alarmWait:
+            return AnyView(MainPurpleAlarmButton(isInfoFilled: false))
+        case .alarmStart:
+            return AnyView(MainPurpleAlarmButton(isInfoFilled: true))
+        case .alarmSearch:
+            return AnyView(AlarmSearchScrollButtonSection())
+        default:
+            return AnyView(EmptyView())
+        }
+    }
 }
-
-
-#Preview {
-    AlarmSettingView()
-}
-
