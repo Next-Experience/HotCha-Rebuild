@@ -9,10 +9,16 @@ import SwiftUI
 
 struct SplashView: View {
     @State private var isSplashActive = false
+    @AppStorage("OnBoarding_True") var OnBoardingTrue: Bool = false
     
     var body: some View {
         if isSplashActive {
-            NavigationView()
+            if OnBoardingTrue {
+                NavigationView()
+            } else {
+                OnBoardingView()
+            }
+            
         } else {
             VStack {
                 Spacer()
