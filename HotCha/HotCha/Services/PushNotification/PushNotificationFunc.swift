@@ -15,8 +15,11 @@ func sendPushNotification(title: String, body: String, sound: String, delay: Tim
     // 사운드 설정 (사용자가 "default"를 입력하면 기본 사운드 사용)
     if sound.lowercased() == "default" {
         content.sound = .default
+    } else if sound.lowercased() == "novibration" {
+        content.sound = nil
     } else {
         content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: sound))
+
     }
 
     // 지정된 시간 후 알림 전송
