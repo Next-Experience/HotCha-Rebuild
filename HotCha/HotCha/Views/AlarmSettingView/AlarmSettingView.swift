@@ -7,21 +7,40 @@
 import SwiftUI
 
 struct AlarmSettingView: View {
-    @State var showSheet: Bool = true
+    @StateObject private var sheetManager = AlarmSettingModalSheetManager()
+
+    @State private var selectedDetent: PresentationDetent = .fraction(0.4)
+    
     var body: some View {
         BusStopListView()
-            .sheet(isPresented: $showSheet) {
-                ModalView()
+            .onAppear {
+                sheetManager.showAlarmSearchSheet1 = true // 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
+                        }
+            .environmentObject(sheetManager)
+            .sheet(isPresented: $sheetManager.showAlarmSearchSheet1) {
+                SettingModalView()
+                    .environmentObject(sheetManager)
                     .interactiveDismissDisabled(true)
                     .presentationDragIndicator(.visible)
-                    .presentationDetents([.fraction(0.99), .fraction(0.3), .fraction(0.1)])
+                    .presentationDetents([.fraction(0.32)], selection: $selectedDetent)
                     .presentationBackgroundInteraction(.enabled)
+                    .presentationCornerRadius(20)
+            }
+            .sheet(isPresented: $sheetManager.showAlarmInfoSheet2) {
+                SettingModalView()
+                    .environmentObject(sheetManager)
+                    .interactiveDismissDisabled(true)
+                    .presentationDragIndicator(.visible)
+                    .presentationDetents([.fraction(0.99), .fraction(0.4), .fraction(0.1)], selection: $selectedDetent)
+                    .presentationBackgroundInteraction(.enabled)
+                    .presentationCornerRadius(20)
             }
     }
 }
 
-struct ModalView: View{
+struct SettingModalView: View{
     @Environment(\.presentationMode) var presentationMode
+    @StateObject private var modalStateViewModel = AlarmModalViewModel()
     
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -30,71 +49,13 @@ struct ModalView: View{
             VStack(alignment: .center, spacing: 0) {
                 Spacer()
                 
-                SearchButtonView()
-//                StatusView()
+                modalStateViewModel.modalState.alarmSettingMainView
+                    .environmentObject(modalStateViewModel)
+//                AlarmStatusView()
+            
             }
         }
         .edgesIgnoringSafeArea(.all)
-    }
-}
-
-struct StatusView: View {
-    var body: some View {
-        VStack {
-            Text("간선 1234")
-            Text("청강리공영차고지 ↔ 광안역")
-            Spacer()
-            Divider()
-            HStack (alignment: .bottom){
-                Text("6정거장 전")
-                    .font(.headline)
-                    .foregroundStyle(.gray900)
-                Spacer()
-                Text("알림 종료")
-                    .foregroundStyle(.mainpurple)
-            }
-            .padding(EdgeInsets(top: 0, leading: 20, bottom: 48, trailing: 20))
-        }
-    }
-}
-
-struct SearchButtonView: View {
-    @State var text: String = ""
-    var body: some View {
-        VStack(alignment:. leading, spacing: 12){
-            Text("간선 1234")
-            Text("청강리공영차고지 ↔ 광안역")
-            TextField("텍스트를 입력해주세요", text: $text)
-                           .padding()
-                           .overlay(
-                               RoundedRectangle(cornerRadius: 8)
-                                   .stroke(Color.primary, lineWidth: 1)
-                           )
-                           .keyboardType(.default)
-            Divider()
-            HStack(alignment: .center, spacing: 20) {
-                Text("1/2")
-                    .foregroundStyle(.gray300)
-                Spacer()
-                Ellipse()
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(.gray200)
-                    .overlay(
-                        Image("bt_up")
-                    )
-               
-                Ellipse()
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(.mainpurple)
-                    .overlay(
-                        Image("bt_down")
-                    )
-                Spacer()
-                Text("정류장 선택")
-                    .foregroundStyle(.mainpurple)
-            }
-            .padding(EdgeInsets(top: 15, leading: 20, bottom: 37, trailing: 20))
-        }
     }
 }
 

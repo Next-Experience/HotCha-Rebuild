@@ -27,11 +27,6 @@ struct BusStopListView: View {
                         BusStopElement(stopCase: busStops[index])
                     }
                 }
-                
-                
-            
-                
-                
             }
             .padding(0)
         }
