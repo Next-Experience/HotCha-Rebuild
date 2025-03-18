@@ -39,7 +39,7 @@ struct AlarmSearchScrollButtonSection: View {
                 Text("정류장 선택")
                     .foregroundStyle(.mainpurple)
             }
-            .padding(EdgeInsets(top: 15, leading: 20, bottom: 37, trailing: 20))
+            .padding(EdgeInsets(top: 15, leading: 20, bottom: 41, trailing: 20))
             
             HStack(alignment:.center, spacing: 0){
                 Ellipse()
@@ -65,6 +65,7 @@ struct AlarmSearchScrollButtonSection: View {
 
 struct MainPurpleAlarmButton: View {
     @State var isInfoFilled: Bool
+    @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     
     var body: some View {
@@ -72,6 +73,12 @@ struct MainPurpleAlarmButton: View {
             Spacer()
             Button(action: {
                 modalStateViewModel.modalState = .alertStopsMedium
+                // TODO: isInfoFilled가 true이면 바로 아래 코드가 실행되도록 하면됨
+                sheetManager.showAlarmSearchSheet1 = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    sheetManager.showAlarmInfoSheet2 = true
+                }
+            
             }, label: {
                 Text("알림 시작")
                     .font(.pretendard(.semibold, size: 20))
@@ -82,7 +89,7 @@ struct MainPurpleAlarmButton: View {
                         RoundedRectangle(cornerRadius: 8).fill(isInfoFilled ? .mainpurple : .gray200)
                             .frame(maxWidth: .infinity)
                     )
-                    .padding(EdgeInsets(top: 3, leading: 20, bottom: 36, trailing: 20))
+                    .padding(EdgeInsets(top: 16, leading: 20, bottom: 36, trailing: 20))
             })
 
             Spacer()
