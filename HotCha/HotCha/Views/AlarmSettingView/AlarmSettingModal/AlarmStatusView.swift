@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct AlarmStatusView: View {
-    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     
     var body: some View {
         GeometryReader { geometry in
