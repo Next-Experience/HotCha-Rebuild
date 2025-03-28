@@ -15,7 +15,7 @@ struct OnboardingButtonview: View {
         HStack {
             Spacer()
             Text("바로 시작하기")
-                .padding(.vertical, 12)
+                .padding(.vertical, 15)
                 .font(.pretendard(.semibold, size: 20))
                 .foregroundStyle(Color("gray900"))
             Spacer()

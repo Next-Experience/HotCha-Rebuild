@@ -14,6 +14,7 @@ struct SearchView: View {
     var body: some View {
         if textfiledValue.isEmpty {
             SearchHistoryView()
+                
         } else {
             Text("버스 목록")
         }

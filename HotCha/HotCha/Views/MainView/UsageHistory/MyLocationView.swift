@@ -18,7 +18,8 @@ struct MyLocationView: View {
                 {
                 Image("mappin")
                     .padding(.leading, 20)
-                Text("\(administrativeArea) \(address)")
+                Text("\(administrativeArea)")
+//                \(address)
                     .font(.pretendard(.semibold, size: 16))
                     .foregroundStyle(Color("gray150"))
 
@@ -26,7 +27,7 @@ struct MyLocationView: View {
                 Image(systemName: "location.slash.fill")
                     .padding(.leading, 20)
                 Text("위치를 확인할 수 없음")
-                    .font(.pretendard(.semibold, size: 16))
+                    .font(.pretendard(.semibold, size: 10))
                     .foregroundStyle(Color("gray150"))            }
 
         }

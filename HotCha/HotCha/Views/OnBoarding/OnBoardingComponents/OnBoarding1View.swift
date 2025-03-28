@@ -19,10 +19,18 @@ struct OnBoarding1View: View {
                 Spacer()
             }
             Spacer()
+            Image("Onboarding2")
+//                .resizable()
+                .padding(.bottom, 48)
+                .padding(.top, 0)
         }
         .font(.pretendard(.bold, size: 24))
         .foregroundStyle(Color("gray50"))
         .padding(.horizontal, 30)
 
     }
+}
+
+#Preview {
+    OnBoardingView()
 }
