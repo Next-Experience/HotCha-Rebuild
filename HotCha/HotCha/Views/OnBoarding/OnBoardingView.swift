@@ -33,13 +33,11 @@ struct OnBoardingView: View {
                     }
                     // 인디케이터 숨겼음, 페이지 탭뷰로 스와이프 기능 넣음
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                Spacer()
+//                Spacer()
 
                 OnboardingButtonview()
                     .padding(.horizontal, 20)
-                    .onTapGesture {
-                        
-                    }
+                    .padding(.bottom, 21)
                 
             }
            

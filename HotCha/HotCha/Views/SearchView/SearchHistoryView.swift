@@ -17,6 +17,7 @@ struct SearchHistoryView: View {
             Text("최근 이용 기록")
                 .font(.pretendard(.medium, size: 16))
                 .foregroundColor(Color("gray300"))
+                .padding(.top, 6)
             Spacer()
         }
             ScrollView {

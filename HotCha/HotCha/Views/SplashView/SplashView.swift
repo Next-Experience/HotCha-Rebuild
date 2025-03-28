@@ -23,15 +23,25 @@ struct SplashView: View {
             VStack {
                 Spacer()
                 HStack {
-                    Spacer()
-                    Text("안전하게 핫챠하세요")
-                        .font(.pretendard(.bold, size: 24))
-                        .foregroundStyle(Color("gray50"))
-                        .padding(.bottom, 200)
+                    Text("안전하게")
+                        .font(.pretendard(.bold, size: 36))
+                        .foregroundStyle(Color("gray400"))
                     Spacer()
                 }
-                Spacer()
-            }
+                .padding(.horizontal, 30)
+                HStack {
+                    Text("핫챠")
+                        .font(.pretendard(.bold, size: 36))
+                        .foregroundStyle(Color("gray50"))
+                    Text("하세요")
+                        .font(.pretendard(.bold, size: 36))
+                        .foregroundStyle(Color("gray400"))
+                    Spacer()
+                }
+                .padding(.horizontal, 30)
+                Image("splashbus")
+                    .padding(.bottom, 70)
+                }
             .background(Color("gray900"))
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
