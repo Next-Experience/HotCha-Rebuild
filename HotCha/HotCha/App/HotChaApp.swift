@@ -23,7 +23,12 @@ struct HotChaApp: App {
     var body: some Scene {
         WindowGroup {
 //            SplashView()
+<<<<<<< Updated upstream
             SoundTestView()
+=======
+//            ContentView()
+            TestSeoulBusPrint()
+>>>>>>> Stashed changes
                 .modelContainer(HotchaContainer)
         }
     }
