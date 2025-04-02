@@ -6,18 +6,12 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct MainView: View {
     @State var isEditMode: Bool = false
     @State var searchActivate: Bool = false
     @State var textfiledValue: String = ""
     @Binding var isSwipeDisabled : Bool
-    //swift data에 저장유무
-    @AppStorage("Bus_info_seoul_True") var Bus_info_seoul_True: Bool = false
-    
-    @StateObject private var viewModel = BusRouteViewModel()
-    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         // 메인뷰 전체
@@ -43,13 +37,6 @@ struct MainView: View {
         .padding(20)
         .frame( maxWidth: .infinity, maxHeight: .infinity)
         .background(Color("gray50"))
-        .onAppear{
-            if !Bus_info_seoul_True {
-                viewModel.fetchBusRoutes(searchStr: "")
-                saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
-                Bus_info_seoul_True = true
-            }
-        }
 
     }
         
