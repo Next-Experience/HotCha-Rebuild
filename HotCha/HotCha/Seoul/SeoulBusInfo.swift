@@ -9,21 +9,26 @@ import SwiftUI
 import Foundation
 
 struct BusRoute: Identifiable {
-    let id = UUID()
-    let busRouteAbrv: String
-    let busRouteId: String
-    let busRouteNm: String
-    let corpNm: String
-    let stStationNm: String
-    let edStationNm: String
-    let firstBusTm: String
-    let firstLowTm: String
-    let lastBusTm: String
-    let lastBusYn: String
-    let lastLowTm: String
-    let length: String
-    let routeType: String
-    let term: String
+    let id = UUID() // SwiftUI용 고유 식별자 (목록에서 사용)
+
+    let busRouteAbrv: String     // 버스 노선의 간략한 이름 (예: "130", "간선버스"의 숫자만 표시)
+    let busRouteId: String       // 버스 노선 ID (서울시에서 부여한 고유 식별자)
+    let busRouteNm: String       // 버스 노선 이름 (예: "130번", "N26" 등)
+
+    let corpNm: String           // 운수 회사 이름 (예: "서울버스운수(주)")
+    let stStationNm: String      // 기점 정류소 이름 (출발지)
+    let edStationNm: String      // 종점 정류소 이름 (도착지)
+
+    let firstBusTm: String       // 첫차 시간 (일반버스, 24시간 형식: "0430" → 오전 4시 30분)
+    let firstLowTm: String       // 첫차 시간 (저상버스 기준, 없으면 빈 문자열)
+    let lastBusTm: String        // 막차 시간 (일반버스, 24시간 형식: "2330" → 오후 11시 30분)
+    let lastBusYn: String        // 막차 여부 ("Y" 또는 "N") — 이 노선이 막차 운행 여부를 가짐
+
+    let lastLowTm: String        // 막차 시간 (저상버스 기준, 없으면 빈 문자열)
+
+    let length: String           // 총 운행 거리 (단위: km, 문자열 형태, 예: "24.6")
+    let routeType: String        // 노선 유형 (숫자 코드로 제공됨: 1=공항, 2=마을, 3=간선, 4=지선 등)
+    let term: String             // 배차 간격 (분 단위, 예: "12" → 12분 간격)
 }
 
 class BusRouteViewModel: NSObject, ObservableObject, XMLParserDelegate {

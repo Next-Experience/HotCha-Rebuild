@@ -26,6 +26,13 @@ struct MainView: View {
             // '버스번호를 알려주세요' 텍스트 필드
             MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate)
             
+            Button(action: {
+                            viewModel.fetchBusRoutes(searchStr: "")
+                            saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
+                        }) {
+                            Text("데이터 저장")
+                        }
+            
             if searchActivate {
                 // 서치뷰 전환
                 SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate)

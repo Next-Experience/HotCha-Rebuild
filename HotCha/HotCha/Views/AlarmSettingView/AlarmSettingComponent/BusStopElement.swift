@@ -48,7 +48,7 @@ struct BusStopElement: View {
                     }
                 }
                 
-                Text(busStop?.routeid ?? "노선번호 없음")
+                Text(busStop?.nodeid ?? "노선번호 없음")
                     .font(.pretendard(.medium, size: 12))
                     .foregroundStyle(.gray500)
             }
@@ -58,7 +58,6 @@ struct BusStopElement: View {
         .padding(.leading, 60)
         .background(stopCase.background_color)
         .ignoresSafeArea()
-        
     }
 }
 

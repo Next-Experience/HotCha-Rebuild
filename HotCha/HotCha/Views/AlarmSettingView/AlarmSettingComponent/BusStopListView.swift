@@ -38,7 +38,7 @@ struct BusStopListView: View {
         .ignoresSafeArea(.all)
         .background(.gray900)
         .onAppear() {
-            
+            busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId)
         }
     
     }

@@ -133,11 +133,15 @@ struct AlertStopsSection: View {
 
 struct BusStopInfoSection: View {
     @State var isFavorite: Bool = false
+//    @State var startStationName: String? = "시작역 없음"
+//    @State var endStationName: String? = "도착역 없음"
+//    @State var busNumber: String? = "버스번호 없음"
+     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     
     var body: some View {
         VStack(alignment:. leading, spacing: 12){
             HStack (alignment: .center){
-                Text("간선 1234")
+                Text(modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음")
                     .font(.pretendard(.semibold, size: 20))
                     .foregroundStyle(.skybluec)
                     .padding(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
@@ -153,9 +157,9 @@ struct BusStopInfoSection: View {
                 
             }
             HStack(spacing: 6){
-                Text("청강리공영차고지")
+                Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
                 Text("↔")
-                Text("광안역")
+                Text(modalStateViewModel.bus?.edStationNm ?? "도착역 없음")
             }
             .font(.pretendard(.semibold, size: 18))
             .foregroundStyle(.gray600)
