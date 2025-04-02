@@ -9,7 +9,11 @@ import SwiftUI
 
 class AlarmModalViewModel: ObservableObject {
     @Published var modalState: AlarmSettingModalElementCase = .alarmWait
-    
+    @Published var bus: Bus_info_seoul?
+    @Published var cityCode: Int?
+    func print() {
+        Swift.print("bus: \(bus), cityCode: \(cityCode)")
+    }
 }
 
 enum AlarmSettingModalElementCase {

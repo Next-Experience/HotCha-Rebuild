@@ -9,6 +9,11 @@ import SwiftUI
 
 
 struct BusStopListView: View {
+    let bus: Bus_info_seoul // 선택된 버스 정보
+    let cityCode: Int
+    @State var busStopList: [BusStop] = [] // 버스의 노선에 있는 모든 정류장 리스트
+    @StateObject private var busStopSeoulViewModel = BusStopSeoulViewModel()
+   
     let busStops: [BusStopElementCase] =
             Array(repeating: .disableStop, count: 5) +
     [.currentStop] +
@@ -19,12 +24,12 @@ struct BusStopListView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0){
-                ForEach(busStops.indices, id: \.self) { index in
+                ForEach(busStopSeoulViewModel.busStations, id: \.nodeord) { busStop in
                     ZStack(alignment: .bottom) {
                         Divider()
                             .background(.gray100.opacity(0.15))
                         
-                        BusStopElement(stopCase: busStops[index])
+                        BusStopElement(stopCase: .ableStop, busStop: busStop)
                     }
                 }
             }
@@ -32,10 +37,13 @@ struct BusStopListView: View {
         }
         .ignoresSafeArea(.all)
         .background(.gray900)
+        .onAppear() {
+            busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId)
+        }
     
     }
 }
 
-#Preview {
-    AlarmSettingView()
-}
+//#Preview {
+//    AlarmSettingView()
+//}

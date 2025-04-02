@@ -12,8 +12,8 @@ struct SearchView: View {
     @Binding var searchActivate: Bool
     @Environment(\.modelContext) private var modelContext
     @Query var bus_info_seoul: [Bus_info_seoul]
-
-
+    
+    
     var body: some View {
         if textfiledValue.isEmpty {
             SearchHistoryView()
@@ -22,10 +22,12 @@ struct SearchView: View {
             let filteredBusInfo = bus_info_seoul.filter { bus in
                 bus.busRouteNm.contains(textfiledValue)
             }
-
+            
             List(filteredBusInfo) { route in
-                VStack(alignment: .leading) {
-                    Text("\(route.busRouteNm) - \(route.corpNm)").font(.headline)
+                NavigationLink(destination: AlarmSettingView(bus: route, cityCode: 1)){
+                    VStack(alignment: .leading) {
+                        Text("\(route.busRouteNm) - \(route.corpNm)").font(.headline)
+                    }
                 }
             }
         }
