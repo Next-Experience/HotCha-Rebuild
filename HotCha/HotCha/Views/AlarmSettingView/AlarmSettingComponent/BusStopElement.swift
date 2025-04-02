@@ -11,6 +11,7 @@ import SwiftUI
 /// 버스 정류장 리스트 한 칸
 struct BusStopElement: View {
     let stopCase: BusStopElementCase
+    @State var busStop: BusStop?
     
     var body: some View {
         HStack(spacing: 0){
@@ -29,7 +30,7 @@ struct BusStopElement: View {
             // 정류장 텍스트 영역
             VStack(alignment:.leading, spacing: 3) {
                 HStack {
-                    Text("청강리공영차고지")
+                    Text(busStop?.nodenm ?? "이름 없음")
                         .font(.pretendard(.medium, size: 16))
                         .foregroundStyle(stopCase.text_color)
                     
@@ -47,7 +48,7 @@ struct BusStopElement: View {
                     }
                 }
                 
-                Text("09008")
+                Text(busStop?.routeid ?? "노선번호 없음")
                     .font(.pretendard(.medium, size: 12))
                     .foregroundStyle(.gray500)
             }
@@ -98,6 +99,6 @@ struct BusStopPoint: View {
 }
 
 
-#Preview {
-    AlarmSettingView()
-}
+//#Preview {
+//    AlarmSettingView()
+//}

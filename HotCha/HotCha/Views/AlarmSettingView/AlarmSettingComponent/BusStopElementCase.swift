@@ -88,6 +88,6 @@ enum BusStopElementCase {
 }
 
 
-#Preview {
-    AlarmSettingView()
-}
+//#Preview {
+//    AlarmSettingView()
+//}

@@ -24,10 +24,12 @@ struct SearchView: View {
             }
 
             List(filteredBusInfo) { route in
-                VStack(alignment: .leading) {
-                    Text("\(route.busRouteNm) - \(route.corpNm)").font(.headline)
+//                NavigationLink(destination: AlarmSettingView(bus: route, cityCode: 1)){
+                    VStack(alignment: .leading) {
+                        Text("\(route.busRouteNm) - \(route.corpNm)").font(.headline)
+                    }
                 }
-            }
+//            }
         }
     }
 }

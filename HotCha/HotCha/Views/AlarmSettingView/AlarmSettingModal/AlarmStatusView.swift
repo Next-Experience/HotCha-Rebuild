@@ -166,7 +166,7 @@ struct BusStopInfoSection: View {
 }
 
 
-
-#Preview {
-    AlarmSettingView()
-}
+//
+//#Preview {
+//    AlarmSettingView()
+//}

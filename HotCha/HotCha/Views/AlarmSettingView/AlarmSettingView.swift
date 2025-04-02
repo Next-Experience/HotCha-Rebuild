@@ -8,11 +8,12 @@ import SwiftUI
 
 struct AlarmSettingView: View {
     @StateObject private var sheetManager = AlarmSettingModalSheetManager()
-
+    let bus: Bus_info_seoul // 선택된 버스 정보
+    let cityCode: Int
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
     
     var body: some View {
-        BusStopListView()
+        BusStopListView(bus: bus, cityCode: 1)
             .onAppear {
                 sheetManager.showAlarmSearchSheet1 = true // 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
                         }
@@ -59,6 +60,6 @@ struct SettingModalView: View{
     }
 }
 
-#Preview {
-    AlarmSettingView()
-}
+//#Preview {
+//    AlarmSettingView(bus: "109000006", cityCode: 1)
+//}

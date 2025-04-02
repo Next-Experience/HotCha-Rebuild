@@ -6,7 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		12B243382D9D18DE002419B1 /* KoreaLocation.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 12B243372D9D18DE002419B1 /* KoreaLocation.gpx */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		12B243372D9D18DE002419B1 /* KoreaLocation.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = KoreaLocation.gpx; path = HotCha/KoreaLocation.gpx; sourceTree = "<group>"; };
 		9DD91FA92D522CB600789318 /* HotCha.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotCha.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -21,11 +26,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9DB9067F2D97FA78005B20CC /* Seoul */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Seoul;
-			sourceTree = "<group>";
-		};
 		9DD91FAB2D522CB600789318 /* HotCha */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -53,9 +53,9 @@
 		9DD91FA02D522CB600789318 = {
 			isa = PBXGroup;
 			children = (
+				12B243372D9D18DE002419B1 /* KoreaLocation.gpx */,
 				9DD91FAB2D522CB600789318 /* HotCha */,
 				9DD91FAA2D522CB600789318 /* Products */,
-				9DB9067F2D97FA78005B20CC /* Seoul */,
 			);
 			sourceTree = "<group>";
 		};
@@ -83,7 +83,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9DB9067F2D97FA78005B20CC /* Seoul */,
 				9DD91FAB2D522CB600789318 /* HotCha */,
 			);
 			name = HotCha;
@@ -132,6 +131,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				12B243382D9D18DE002419B1 /* KoreaLocation.gpx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
