@@ -21,11 +21,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		9DB9067F2D97FA78005B20CC /* Seoul */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Seoul;
+			sourceTree = "<group>";
+		};
 		9DD91FAB2D522CB600789318 /* HotCha */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				9DD91FEB2D5235A600789318 /* Exceptions for "HotCha" folder in "HotCha" target */,
 			);
+			explicitFileTypes = {
+				Info.plist = "text.plist.app-privacy";
+			};
 			path = HotCha;
 			sourceTree = "<group>";
 		};
@@ -47,6 +55,7 @@
 			children = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
 				9DD91FAA2D522CB600789318 /* Products */,
+				9DB9067F2D97FA78005B20CC /* Seoul */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,6 +83,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				9DB9067F2D97FA78005B20CC /* Seoul */,
 				9DD91FAB2D522CB600789318 /* HotCha */,
 			);
 			name = HotCha;
