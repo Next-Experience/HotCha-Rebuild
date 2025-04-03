@@ -32,8 +32,35 @@ class BusStopSeoulViewModel: ObservableObject {
                     self?.errorMessage = error
                 } else {
                     self?.busStations = stations
+                    self?.setFirstAndLastFlags()
                 }
             }
         }
+    }
+    
+    func setFirstAndLastFlags() {
+        guard !busStations.isEmpty else { return }
+        print("Flag Setting")
+        
+        if let minOrder = busStations.map(\.nodeord).min(),
+           let maxOrder = busStations.map(\.nodeord).max() {
+            
+            busStations = busStations.map { stop in
+                var busStop = stop
+                if busStop.nodeord == minOrder {
+                    busStop.isFirstStop = true
+                }
+                    
+                if busStop.nodeord == maxOrder {
+                    busStop.isLastStop = true
+                }
+                
+                print("nodeord: \(busStop.nodeord) \(busStop.isFirstStop) \(busStop.isLastStop)")
+                
+                return busStop
+            }
+        }
+        
+        print("Flag Setting Last")
     }
 }

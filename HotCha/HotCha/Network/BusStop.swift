@@ -25,7 +25,14 @@ struct BusStop: Codable, Identifiable, Hashable {
     var nodeord: Int
     var gpslati: Double
     var gpslong: Double
-
+    
+    // 앱 내부 로직
+    var busStopCase: BusStopElementCase = .ableStop // 정류장 종류
+    var alarmStation: Bool = false // 알람정류장
+    var arrivalStation: Bool = false // 도착정류장
+    var filtered: Bool = false
+    var isFirstStop: Bool = false // 노선의 첫번째 정류장
+    var isLastStop: Bool = false // 노선의 마지막 정류장
     
     enum CodingKeys: String, CodingKey {
         case routeid, nodeid, nodenm, nodeno, nodeord, gpslati, gpslong
@@ -70,7 +77,7 @@ struct BusStop: Codable, Identifiable, Hashable {
             gpslong = try container.decode(Double.self, forKey: .gpslong)
         }
         
-
+        
     }
     
     // 기본 이니셜라이저 추가
