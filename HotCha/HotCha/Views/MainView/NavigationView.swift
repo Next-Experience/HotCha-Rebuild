@@ -123,9 +123,10 @@ struct NavigationView: View {
                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                        .disabled(isSwipeDisabled)
                    }.background(Color("gray900")) // 전채 배경색
+                .ignoresSafeArea(.all)   
                }
             // 아래쪽 여백 제거
-            .ignoresSafeArea(.all)       
+                
     }
 }
 

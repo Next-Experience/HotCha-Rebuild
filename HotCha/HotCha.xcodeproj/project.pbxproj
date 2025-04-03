@@ -21,11 +21,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9DB9067F2D97FA78005B20CC /* Seoul */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Seoul;
-			sourceTree = "<group>";
-		};
 		9DD91FAB2D522CB600789318 /* HotCha */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -55,7 +50,6 @@
 			children = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
 				9DD91FAA2D522CB600789318 /* Products */,
-				9DB9067F2D97FA78005B20CC /* Seoul */,
 			);
 			sourceTree = "<group>";
 		};
@@ -83,7 +77,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9DB9067F2D97FA78005B20CC /* Seoul */,
 				9DD91FAB2D522CB600789318 /* HotCha */,
 			);
 			name = HotCha;
@@ -212,7 +205,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
@@ -370,7 +363,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
@@ -405,7 +398,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
