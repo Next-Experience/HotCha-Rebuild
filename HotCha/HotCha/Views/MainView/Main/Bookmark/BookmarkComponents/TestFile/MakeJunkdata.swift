@@ -64,15 +64,16 @@ struct AddBookmarkView: View {
                     modelContext.insert(newBookmark)
                     dismiss()
                 }
-            }
-            .navigationTitle("즐겨찾기 추가")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("취소") {
-                        dismiss()
+                .navigationTitle("즐겨찾기 추가")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("취소") {
+                            dismiss()
+                        }
                     }
                 }
             }
+            
         }
     }
 
