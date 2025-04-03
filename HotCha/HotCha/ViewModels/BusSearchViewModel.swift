@@ -37,23 +37,20 @@ class BusSearchViewModel: ObservableObject {
         self.errorMessage = nil
         self.routeList = []  // 기존 결과 초기화
         
-        busAPIService.getBusRouteInfo(routeName: busNumber, cityCode: cityCode)
+        // 유니버설 파서 사용 (도시코드 길이 상관없이)
+        busAPIService.universalBusRouteSearch(routeName: busNumber, cityCode: cityCode)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 self?.isLoading = false
                 
                 if case .failure(let error) = completion {
-                    if case NetworkError.emptyResponse = error {
-                        self?.errorMessage = "검색 결과가 없습니다. 다른 버스 번호나 도시를 선택해 보세요."
-                    } else {
-                        self?.errorMessage = error.description
-                    }
+                    self?.errorMessage = "데이터를 가져올 수 없습니다: \(error.description)"
                 }
             } receiveValue: { [weak self] routeList in
                 self?.routeList = routeList
                 
                 if routeList.isEmpty {
-                    self?.errorMessage = "검색 결과가 없습니다. 다른 버스 번호나 도시를 선택해 보세요."
+                    self?.errorMessage = "검색 결과가 없습니다. 다른 버스 번호나 지역 코드를 선택해 보세요."
                 }
             }
             .store(in: &cancellables)
