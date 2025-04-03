@@ -20,13 +20,16 @@ struct AlarmSettingView: View {
             }
             .environmentObject(sheetManager)
             .sheet(isPresented: $sheetManager.showAlarmSearchSheet1) {
-                SettingModalView(bus: bus, cityCode: 1)
-                    .environmentObject(sheetManager)
-                    .interactiveDismissDisabled(true)
-                    .presentationDragIndicator(.visible)
-                    .presentationDetents(/*[.fraction(0.1),*/[.fraction(0.32)], selection: $selectedDetent)
-                    .presentationBackgroundInteraction(.enabled)
-                    .presentationCornerRadius(20)
+                ScrollView {
+                    SettingModalView(bus: bus, cityCode: 1)
+                        .environmentObject(sheetManager)
+                        .interactiveDismissDisabled(true)
+                        .presentationDragIndicator(.visible)
+                        .presentationDetents(/*[.fraction(0.1),*/[.fraction(0.32)], selection: $selectedDetent)
+                        .presentationBackgroundInteraction(.enabled)
+                        .presentationCornerRadius(20)
+                        .presentationContentInteraction(.resizes)
+                }
             }
             .sheet(isPresented: $sheetManager.showAlarmInfoSheet2) {
                 SettingModalView(bus: bus, cityCode: 1)
