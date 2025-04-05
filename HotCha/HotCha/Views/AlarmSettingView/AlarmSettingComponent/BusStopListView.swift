@@ -23,9 +23,15 @@ struct BusStopListView: View {
                             Divider()
                                 .background(.gray100.opacity(0.15))
                             
-                            BusStopElement(stopCase: busStop.busStopCase, busStop: busStop)
-                                .environmentObject(busStopSeoulViewModel)
-                                .id(busStop.id)
+                            // 정류장 텍스트 영역
+                            Button (action:{
+                                busStopSeoulViewModel.selectDestinationStataion(destIndex: busStop.seq - 1)
+                            }
+                            ){
+                                BusStopElement(stopCase: busStop.busStopCase, busStop: busStop)
+                                    .environmentObject(busStopSeoulViewModel)
+                                    .id(busStop.id)
+                            }
                         }
                     }
                 }

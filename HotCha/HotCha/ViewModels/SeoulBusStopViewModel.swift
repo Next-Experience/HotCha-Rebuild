@@ -19,6 +19,9 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var currentFilteredIndex: Int = 0 // 필터링 인덱스 스크롤을 위한
     @Published var isLastFilteredIndex: Bool = true // 마지막 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
     @Published var isFirstFilteredIndex: Bool = true // 첫번째 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
+    // 현재 선택된 목적지의 인덱스를 저장할 변수 추가
+    private var currentDestinationIndex: Int? = nil
+    
     
     // Route ID를 직접 인자로 받아 데이터를 가져오는 메서드
     func fetchBusStations(routeid: String) {
@@ -50,6 +53,30 @@ class BusStopSeoulViewModel: ObservableObject {
             }
         }
     }
+    
+    // 목적지로 선택된 정류장을 목적지로 변경
+    func selectDestinationStataion(destIndex: Int) {
+        // 이전에 선택된 목적지가 있다면 초기화
+        if let currentDestIndex = currentDestinationIndex {
+            clearDestinationStation(destIndex: currentDestIndex)
+        }
+        
+        // 새 목적지 설정
+        busStations[destIndex].busStopCase = .destinationStop
+        print("selected destination: \(busStations[destIndex].stationNm)")
+        
+        // 현재 목적지 인덱스 업데이트
+        currentDestinationIndex = destIndex
+        
+        // 데이터 업데이트 알림
+        notifyStationsUpdated()
+    }
+    
+    // 다른 정류장을 목적지로 선택 시 이전 목적지 상태를 ableStop으로 초기화함
+    func clearDestinationStation(destIndex: Int) {
+        busStations[destIndex].busStopCase = .ableStop
+    }
+    
     
     // 필터링된 정류장 목록 받아오기
     var filteredStations: [BusStop] {
