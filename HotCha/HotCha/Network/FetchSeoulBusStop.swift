@@ -1,10 +1,3 @@
-//
-//  FetchSeoulBusStop.swift
-//  HotCha
-//
-//  Created by Yeji Seo on 3/29/25.
-//
-
 
 
 import SwiftUI
@@ -15,66 +8,93 @@ class BusSeoulStationParserDelegate: NSObject, XMLParserDelegate {
     private var currentElement = ""
     private var currentBusStation: BusStop?
     private var currentText = ""
-    
-    // XML의 시작 태그를 처리
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+
+    func parser(_ parser: XMLParser, didStartElement elementName: String,
+                namespaceURI: String?, qualifiedName qName: String?,
+                attributes attributeDict: [String : String] = [:]) {
         currentElement = elementName
         
-        // <itemList> 태그 시작 시 새로운 BusStation 객체 생성
         if elementName == "itemList" {
-               // itemList에서 필요한 값을 초기화
-               currentBusStation = BusStop(
-                   routeid: "", // 초기 값 설정
-                   nodeid: "", // 초기 값 설정
-                   nodenm: "", // 초기 값 설정
-                   nodeno: 1,
-                   nodeord: 0, // 초기 값 설정
-                   gpslati: 0.0, // 초기 값 설정
-                   gpslong: 0.0 // 초기 값 설정
-               )
-           }
+            currentBusStation = BusStop(
+                busRouteId: "",
+                busRouteNm: "",
+                seq: 0,
+                station: "",
+                stationNm: "",
+                gpsX: 0.0,
+                gpsY: 0.0,
+                stationNo: 0
+            )
+        }
     }
-    
-    // XML의 텍스트 데이터를 처리
+
     func parser(_ parser: XMLParser, foundCharacters string: String) {
         currentText += string
     }
-    
-    // XML의 종료 태그를 처리
-    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+
+    func parser(_ parser: XMLParser, didEndElement elementName: String,
+                namespaceURI: String?, qualifiedName qName: String?) {
+        guard var busStation = currentBusStation else { return }
+        let trimmedText = currentText.trimmingCharacters(in: .whitespacesAndNewlines)
+
         switch elementName {
         case "busRouteId":
-            currentBusStation?.routeid = currentText.trimmingCharacters(in: .whitespacesAndNewlines)
-        case "gpsX":
-            currentBusStation?.gpslati = Double(currentText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0.0
-        case "gpsY":
-            currentBusStation?.gpslong = Double(currentText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0.0
+            busStation.busRouteId = trimmedText
+        case "busRouteNm":
+            busStation.busRouteNm = trimmedText
         case "seq":
-            currentBusStation?.nodeord = Int(currentText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
-        case "stationNm":
-            currentBusStation?.nodenm = currentText.trimmingCharacters(in: .whitespacesAndNewlines)
+            busStation.seq = Int(trimmedText) ?? 0
         case "station":
-            currentBusStation?.nodeid = currentText.trimmingCharacters(in: .whitespacesAndNewlines)
+            busStation.station = trimmedText
+        case "stationNm":
+            busStation.stationNm = trimmedText
+        case "gpsX":
+            busStation.gpsX = Double(trimmedText) ?? 0.0
+        case "gpsY":
+            busStation.gpsY = Double(trimmedText) ?? 0.0
+        case "stationNo":
+            busStation.stationNo = Int(trimmedText) ?? 0
+        // Optional 값들
+        case "direction":
+            busStation.direction = trimmedText
+        case "section":
+            busStation.section = trimmedText
+        case "routeType":
+            busStation.routeType = Int(trimmedText)
+        case "beginTm":
+            busStation.beginTm = trimmedText
+        case "lastTm":
+            busStation.lastTm = trimmedText
+        case "posX":
+            busStation.posX = Double(trimmedText)
+        case "posY":
+            busStation.posY = Double(trimmedText)
+        case "arsId":
+            busStation.arsId = Int(trimmedText)
+        case "transYn":
+            busStation.transYn = trimmedText
+        case "trnstnid":
+            busStation.trnstnid = trimmedText
+        case "sectSpd":
+            busStation.sectSpd = Int(trimmedText)
+        case "fullSectDist":
+            busStation.fullSectDist = Int(trimmedText)
 
         case "itemList":
-            if let validBusStation = currentBusStation {
-                parsedStations.append(validBusStation)
-//                print("✅ 버스 정류장 추가: \(validBusStation)")
-            }
+            parsedStations.append(busStation)
             currentBusStation = nil
         default:
             break
         }
-        currentText = ""  // 텍스트 초기화 (다음 태그를 위해)
+
+        currentText = ""
+        currentBusStation = busStation
     }
-    
-    // 파싱 중 에러가 발생하면 호출되는 함수
+
     func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
         print("❌ XML 파싱 오류 발생: \(parseError.localizedDescription)")
     }
 }
-
-import Foundation
 
 // 데이터를 가져오는 함수
 func fetchBusStations(routeId: String, completion: @escaping ([BusStop], String?) -> Void) {

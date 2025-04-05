@@ -25,11 +25,12 @@ struct AlarmSettingView: View {
                         .environmentObject(sheetManager)
                         .interactiveDismissDisabled(true)
                         .presentationDragIndicator(.visible)
-                        .presentationDetents(/*[.fraction(0.1),*/[.fraction(0.32)], selection: $selectedDetent)
+                        .presentationDetents([.fraction(0.1),.fraction(0.32)], selection: $selectedDetent)
                         .presentationBackgroundInteraction(.enabled)
                         .presentationCornerRadius(20)
                         .presentationContentInteraction(.resizes)
                 }
+                .scrollDisabled(true)
             }
             .sheet(isPresented: $sheetManager.showAlarmInfoSheet2) {
                 SettingModalView(bus: bus, cityCode: 1)

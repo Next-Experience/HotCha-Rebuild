@@ -33,7 +33,7 @@ struct BusStopElement: View {
             // 정류장 텍스트 영역
             VStack(alignment:.leading, spacing: 3) {
                 HStack {
-                    Text(busStop?.nodenm ?? "이름 없음")
+                    Text(busStop?.stationNm ?? "이름 없음")
                         .font(.pretendard(.medium, size: 16))
                         .foregroundStyle(stopCase.text_color)
                     
@@ -51,7 +51,7 @@ struct BusStopElement: View {
                     }
                 }
                 
-                Text(busStop?.nodeid ?? "노선번호 없음")
+                Text(busStop?.busRouteNm ?? "노선번호 없음")
                     .font(.pretendard(.medium, size: 12))
                     .foregroundStyle(.gray500)
             }

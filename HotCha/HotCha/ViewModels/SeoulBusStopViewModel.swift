@@ -12,6 +12,7 @@ import Foundation
 
 class BusStopSeoulViewModel: ObservableObject {
     @Published var busStations: [BusStop] = []
+    @Published var filteredBusStations: [BusStop] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
@@ -38,24 +39,47 @@ class BusStopSeoulViewModel: ObservableObject {
         }
     }
     
+    func filteredBusStations(searchText: String) {
+        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        if trimmedText.isEmpty {
+            filteredBusStations = busStations // 검색어 없으면 전체
+        } else {
+            filteredBusStations = busStations.filter {
+                $0.stationNm.lowercased().contains(trimmedText)
+            }
+        }
+        print("🔍 원본 정류장 수: \(busStations.count)")
+        print("Filtered Bus Stations: \(filteredBusStations.count)개, \(filteredBusStations)")
+    }
+    
+//    func filteredBusStations(searchText: String) {
+////        filteredBusStations.removeAll()
+//        filteredBusStations = busStations.filter {
+//            $0.nodenm.lowercased().contains(searchText.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
+//        }
+//        
+//        print("Filtered Bus Stations: \(filteredBusStations)")
+//    }
+//    
     func setFirstAndLastFlags() {
         guard !busStations.isEmpty else { return }
         print("Flag Setting")
         
-        if let minOrder = busStations.map(\.nodeord).min(),
-           let maxOrder = busStations.map(\.nodeord).max() {
+        if let minSeq = busStations.map(\.seq).min(),
+           let maxSeq = busStations.map(\.seq).max() {
             
             busStations = busStations.map { stop in
                 var busStop = stop
-                if busStop.nodeord == minOrder {
+                if busStop.seq == minSeq {
                     busStop.isFirstStop = true
                 }
                     
-                if busStop.nodeord == maxOrder {
+                if busStop.seq == maxSeq {
                     busStop.isLastStop = true
                 }
                 
-                print("nodeord: \(busStop.nodeord) \(busStop.isFirstStop) \(busStop.isLastStop)")
+                print("nodeord: \(busStop.seq) \(busStop.isFirstStop) \(busStop.isLastStop)")
                 
                 return busStop
             }

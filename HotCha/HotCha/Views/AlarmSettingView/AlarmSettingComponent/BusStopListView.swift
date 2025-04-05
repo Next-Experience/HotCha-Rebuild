@@ -24,7 +24,7 @@ struct BusStopListView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0){
-                ForEach(busStopSeoulViewModel.busStations, id: \.nodeord) { busStop in
+                ForEach(busStopSeoulViewModel.busStations, id: \.seq) { busStop in
                     ZStack(alignment: .bottom) {
                         Divider()
                             .background(.gray100.opacity(0.15))
@@ -34,6 +34,9 @@ struct BusStopListView: View {
                 }
             }
             .padding(0)
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 250)
+            }
         }
         .ignoresSafeArea(.all)
         .background(.gray900)

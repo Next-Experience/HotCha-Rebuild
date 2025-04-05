@@ -10,7 +10,7 @@ import SwiftUI
 struct BusStopSearchTextField: View {
     @Binding var busStopSearchText: String
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
-    
+    @ObservedObject var busStopSeoulViewModel = BusStopSeoulViewModel()
     
     var body: some View {
         
@@ -24,6 +24,7 @@ struct BusStopSearchTextField: View {
                         .onChange(of: busStopSearchText){
                             if !busStopSearchText.isEmpty {
                                 modalStateViewModel.modalState = .alarmSearch
+                                busStopSeoulViewModel.filteredBusStations(searchText: busStopSearchText)
                             }
                             else {
                                 modalStateViewModel.modalState = .alarmWait
