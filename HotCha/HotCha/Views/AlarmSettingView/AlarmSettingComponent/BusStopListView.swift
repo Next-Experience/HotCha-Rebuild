@@ -29,10 +29,11 @@ struct BusStopListView: View {
                         }
                     }
                 }
-                .padding(0)
-                .safeAreaInset(edge: .bottom) {
-                    Color.clear.frame(height: 250)
-                }
+                .padding(.top, 80)
+                .padding(.bottom, 265)
+//                .safeAreaInset(edge: .bottom) {
+//                    Color.clear.frame(height: 250)
+//                }
             }
             
             .ignoresSafeArea(.all)
