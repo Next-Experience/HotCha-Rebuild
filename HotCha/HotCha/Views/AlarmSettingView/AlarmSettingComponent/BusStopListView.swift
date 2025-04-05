@@ -15,29 +15,40 @@ struct BusStopListView: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0){
-                ForEach(busStopSeoulViewModel.busStations, id: \.seq) { busStop in
-                    ZStack(alignment: .bottom) {
-                        Divider()
-                            .background(.gray100.opacity(0.15))
-                        
-                        BusStopElement(stopCase: busStop.busStopCase, busStop: busStop)
-                            .environmentObject(busStopSeoulViewModel)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 0){
+                    ForEach(busStopSeoulViewModel.busStations, id: \.seq) { busStop in
+                        ZStack(alignment: .bottom) {
+                            Divider()
+                                .background(.gray100.opacity(0.15))
+                            
+                            BusStopElement(stopCase: busStop.busStopCase, busStop: busStop)
+                                .environmentObject(busStopSeoulViewModel)
+                                .id(busStop.id)
+                        }
+                    }
+                }
+                .padding(0)
+                .safeAreaInset(edge: .bottom) {
+                    Color.clear.frame(height: 250)
+                }
+            }
+            
+            .ignoresSafeArea(.all)
+            .background(.gray900)
+            .onAppear() {
+                busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId)
+            }
+            // 현재 필터링된 정류장 ID가 변경될 때마다 스크롤 위치 업데이트
+            .onChange(of: busStopSeoulViewModel.currentFilteredStationID) { newID in
+                if let id = newID {
+                    withAnimation {
+                        proxy.scrollTo(id, anchor: .center)
                     }
                 }
             }
-            .padding(0)
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 250)
-            }
         }
-        .ignoresSafeArea(.all)
-        .background(.gray900)
-        .onAppear() {
-            busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId)
-        }
-    
     }
 }
 

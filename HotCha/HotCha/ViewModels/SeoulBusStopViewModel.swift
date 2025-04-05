@@ -16,6 +16,9 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var stationsUpdated: Bool = false // 데이터 업데이트 알림용 플래그
+    @Published var currentFilteredIndex: Int = 0 // 필터링 인덱스 스크롤을 위한
+    @Published var isLastFilteredIndex: Bool = true // 마지막 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
+    @Published var isFirstFilteredIndex: Bool = true // 첫번째 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
     
     // Route ID를 직접 인자로 받아 데이터를 가져오는 메서드
     func fetchBusStations(routeid: String) {
@@ -48,14 +51,48 @@ class BusStopSeoulViewModel: ObservableObject {
         }
     }
     
-    //        // 검색어 업데이트 및 필터링 적용
-    //        func updateSearchText(_ newText: String) {
-    //            searchText = newText
-    //            applyFiltering(with: newText)
-    //            // 데이터 업데이트 알림
-    //            notifyStationsUpdated()
-    //        }
+    // 필터링된 정류장 목록 받아오기
+    var filteredStations: [BusStop] {
+        return busStations.filter { $0.busStopCase == .filteredStop }
+    }
     
+    
+    
+    // 이전 필터링 항목으로 이동
+    func moveToPreviousFilteredStation() {
+        let filtered = filteredStations
+        if !filtered.isEmpty {
+            if currentFilteredIndex != 0 { // 첫번째 인덱스가 아니면
+                currentFilteredIndex = (currentFilteredIndex - 1 + filtered.count) % filtered.count
+                isFirstFilteredIndex = currentFilteredIndex == 0 ? true : false
+                isLastFilteredIndex = false
+                }
+            } else {
+                isFirstFilteredIndex = true
+            }
+        }
+    
+    // 다음 필터링 항목으로 이동
+    func moveToNextFilteredStation() {
+        let filtered = filteredStations
+        if !filtered.isEmpty {
+            if currentFilteredIndex != filtered.count - 1 { // 마지막 인덱스가 아니면
+                currentFilteredIndex = (currentFilteredIndex + 1) % filtered.count
+                isLastFilteredIndex = currentFilteredIndex == filtered.count - 1 ? true : false
+                isFirstFilteredIndex = false
+            } else {
+                isLastFilteredIndex = true
+            }
+        }
+    }
+    
+    // 현재 선택된 필터링 항목의 ID
+    var currentFilteredStationID: UUID? {
+        let filtered = filteredStations
+        return filtered.isEmpty ? nil : filtered[currentFilteredIndex].id
+    }
+    
+    // 필터링
     func applyFiltering(with searchText: String) {
         self.searchText = searchText
         let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -66,77 +103,32 @@ class BusStopSeoulViewModel: ObservableObject {
             return
         }
         
-        // 디버깅용 로그
-        print("원본 정류장 목록:")
-        for station in busStations {
-            print("정류장: \(station.stationNm)")
-        }
-        
         // 모든 정류장의 상태 업데이트
         var updatedStations = busStations
-        var matchCount = 0
-        
         for i in 0..<updatedStations.count {
-            // 디버깅: 각 정류장과 검색어를 출력
-            print("비교: '\(updatedStations[i].stationNm)' vs '\(trimmedText)'")
-            print("포함여부: \(updatedStations[i].stationNm.contains(trimmedText))")
-            
             // 정류장 이름이 검색어를 포함하면 filteredStop으로 변경
             if updatedStations[i].stationNm.contains(trimmedText) {
                 // 중요 상태가 아닌 정류장만 필터링 상태로 변경
-//                if ![.alarmStop, .currentStop, .destinationStop].contains(updatedStations[i].busStopCase) {
+                if ![.alarmStop, .currentStop, .destinationStop].contains(updatedStations[i].busStopCase) {
                     updatedStations[i].busStopCase = .filteredStop
-                    matchCount += 1
-//                }
+                }
             }
         }
         
         // 상태 업데이트
         busStations = updatedStations
         
+        // 필터링 결과가 있으면 인덱스 초기화
+        if !filteredStations.isEmpty {
+            currentFilteredIndex = 0
+            isLastFilteredIndex = false
+        }
+        
         // 데이터 변경 알림
         notifyStationsUpdated()
-        
-        print("🔍 검색어: \(trimmedText)")
-        print("🔍 필터링된 정류장 수: \(matchCount)")
     }
     
-    // 필터링 적용
-//    func applyFiltering(with searchText: String) {
-//        self.searchText = searchText
-//        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-//        
-//        // 필터링 초기화 (검색어가 비어있으면)
-//        if trimmedText.isEmpty {
-//            clearFiltering()
-//            return
-//        }
-//        
-//        
-//        /// 모든 정류장의 상태 업데이트
-//        var updatedStations = busStations
-//        for i in 0..<updatedStations.count {
-//            // 정류장 이름이 검색어를 포함하면 filteredStop으로 변경, 그렇지 않으면 기존 상태 유지
-//            // 단, alarmStop, currentStop, destinationStop은 우선순위가 높으므로 그대로 유지
-//            if updatedStations[i].stationNm.lowercased().contains(trimmedText) {
-//                // 중요 상태(알람, 현재, 도착)가 아닌 정류장만 필터링 상태로 변경
-//                if ![.alarmStop, .currentStop, .destinationStop].contains(updatedStations[i].busStopCase) {
-//                    updatedStations[i].busStopCase = .filteredStop
-//                }
-//            }
-//        }
-//        
-//        // 상태 업데이트
-//        busStations = updatedStations
-//        
-//        // 데이터 변경 알림
-//        notifyStationsUpdated()
-//        
-//        print("🔍 검색어: \(trimmedText)")
-//        print("🔍 필터링된 정류장 수: \(updatedStations.filter { $0.busStopCase == .filteredStop }.count)")
-//    }
-    
-    // 필터링 초기화
+    // 필터링 초기화 시 인덱스도 초기화
     func clearFiltering() {
         searchText = ""
         var updatedStations = busStations
@@ -149,6 +141,9 @@ class BusStopSeoulViewModel: ObservableObject {
         }
         
         busStations = updatedStations
+        currentFilteredIndex = 0
+        isFirstFilteredIndex = true
+        isLastFilteredIndex = true
         
         // 데이터 변경 알림
         notifyStationsUpdated()
@@ -184,4 +179,3 @@ class BusStopSeoulViewModel: ObservableObject {
         print("Flag Setting Last")
     }
 }
-
