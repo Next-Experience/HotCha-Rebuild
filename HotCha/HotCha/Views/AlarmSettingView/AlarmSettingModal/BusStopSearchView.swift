@@ -55,6 +55,7 @@ struct AlarmSearchScrollButtonSection: View {
                 Button(action: {
                     // 위 버튼: 이전 필터링된 항목으로 이동
                     busStopSeoulViewModel.moveToPreviousFilteredStation()
+                    hideKeyboard()
                 }) {
                     Ellipse()
                         .frame(width: 32, height: 32)
@@ -69,6 +70,7 @@ struct AlarmSearchScrollButtonSection: View {
                 Button(action: {
                     // 아래 버튼: 다음 필터링된 항목으로 이동
                     busStopSeoulViewModel.moveToNextFilteredStation()
+                    hideKeyboard()
                 }) {
                     Ellipse()
                         .frame(width: 32, height: 32)
