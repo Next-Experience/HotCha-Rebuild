@@ -167,7 +167,7 @@ struct SeoulBusInfoTestView: View {
             }) {
                 Text("새로고침")
             }
-            .navigationTitle("버스 노선 정보")
+            //.navigationTitle("버스 노선 정보")
             .onAppear {
                 viewModel.fetchBusRoutes(searchStr: "")
             }
