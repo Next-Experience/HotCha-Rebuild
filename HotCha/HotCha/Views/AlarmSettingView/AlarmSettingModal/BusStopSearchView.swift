@@ -10,6 +10,7 @@ struct BusStopSearchView: View {
     @State var text: String = ""
     @State var busStopSearchText:String = ""
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     
     var body: some View {
         VStack(alignment:. leading, spacing: 0){
@@ -17,6 +18,7 @@ struct BusStopSearchView: View {
                 BusStopInfoSection()
                 BusStopSearchTextField(busStopSearchText: $busStopSearchText)
                     .environmentObject(modalStateViewModel)
+                    .environmentObject(busStopSeoulViewModel)
                     .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
                 
             }
@@ -30,37 +32,60 @@ struct BusStopSearchView: View {
 
 
 struct AlarmSearchScrollButtonSection: View {
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    
     var body: some View {
         ZStack(alignment: .center){
             HStack() {
-                Text("1/2")
-                    .foregroundStyle(.gray300)
+                // 필터링된 항목 인덱스 표시
+                if busStopSeoulViewModel.filteredStations.isEmpty {
+                    Text("0/0")
+                        .foregroundStyle(.gray300)
+                } else {
+                    Text("\(busStopSeoulViewModel.currentFilteredIndex + 1)/\(busStopSeoulViewModel.filteredStations.count)")
+                        .foregroundStyle(.gray300)
+                }
                 Spacer()
                 Text("정류장 선택")
                     .foregroundStyle(.mainpurple)
             }
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 41, trailing: 20))
             
-            HStack(alignment:.center, spacing: 0){
-                Ellipse()
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(.gray200)
-                    .overlay(
-                        Image("bt_up")
-                    )
-                    .padding(.trailing, 20)
+            HStack {
+                Button(action: {
+                    // 위 버튼: 이전 필터링된 항목으로 이동
+                    busStopSeoulViewModel.moveToPreviousFilteredStation()
+                    hideKeyboard()
+                }) {
+                    Ellipse()
+                        .frame(width: 32, height: 32)
+                        .foregroundStyle(busStopSeoulViewModel.isFirstFilteredIndex == true ? .gray200 : .mainpurple)
+                        .overlay(
+                            Image("bt_up")
+                        )
+                }
+                .disabled(busStopSeoulViewModel.filteredStations.isEmpty)
+                .padding(.trailing, 20)
                 
-                Ellipse()
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(.mainpurple)
-                    .overlay(
-                        Image("bt_down")
-                    )
+                Button(action: {
+                    // 아래 버튼: 다음 필터링된 항목으로 이동
+                    busStopSeoulViewModel.moveToNextFilteredStation()
+                    hideKeyboard()
+                }) {
+                    Ellipse()
+                        .frame(width: 32, height: 32)
+                        .foregroundStyle(busStopSeoulViewModel.isLastFilteredIndex == true ? .gray200 : .mainpurple)
+                        .overlay(
+                            Image("bt_down")
+                        )
+                }
+                .disabled(busStopSeoulViewModel.filteredStations.isEmpty)
             }
-            .padding(EdgeInsets(top: 15, leading: 0, bottom: 37, trailing: 0))
         }
+        .padding(EdgeInsets(top: 15, leading: 0, bottom: 37, trailing: 0))
     }
 }
+
 
 
 struct MainPurpleAlarmButton: View {
@@ -78,7 +103,7 @@ struct MainPurpleAlarmButton: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     sheetManager.showAlarmInfoSheet2 = true
                 }
-            
+                
             }, label: {
                 Text("알림 시작")
                     .font(.pretendard(.semibold, size: 20))
@@ -91,7 +116,7 @@ struct MainPurpleAlarmButton: View {
                     )
                     .padding(EdgeInsets(top: 16, leading: 20, bottom: 36, trailing: 20))
             })
-
+            
             Spacer()
         }
     }

@@ -18,11 +18,14 @@ struct BusStopElement: View {
             // 정류장 이미지 표시 영역
             ZStack {
                 VStack (spacing: 0) {
-                    // TODO: 첫번째와 마지막 정류장 line 표시
-                    BusStopLine(line_color: stopCase.line_color)
+                    // 첫번째 정류장이 아니면 일반, 이면 line이 투명색
+                    BusStopLine(line_color: (busStop?.isFirstStop != true) ? stopCase.line_color: .clear)
                         .padding(0)
-                    BusStopLine(line_color: stopCase.line_color)
+                    
+                    // 마지막 정류장이 아니면 일반, 이면 line이 투명색
+                    BusStopLine(line_color: (busStop?.isLastStop != true) ? stopCase.line_color: .clear)
                         .padding(0)
+                    
                 }
                 BusStopPoint(stopCase: stopCase, outer_circle_size: stopCase.outer_circle_size, outer_circle_color: stopCase.outer_circle_color)
                     .frame(width: 16, height: 16)
@@ -30,7 +33,7 @@ struct BusStopElement: View {
             // 정류장 텍스트 영역
             VStack(alignment:.leading, spacing: 3) {
                 HStack {
-                    Text(busStop?.nodenm ?? "이름 없음")
+                    Text(busStop?.stationNm ?? "이름 없음")
                         .font(.pretendard(.medium, size: 16))
                         .foregroundStyle(stopCase.text_color)
                     
@@ -48,7 +51,7 @@ struct BusStopElement: View {
                     }
                 }
                 
-                Text(busStop?.nodeid ?? "노선번호 없음")
+                Text(busStop?.busRouteNm ?? "노선번호 없음")
                     .font(.pretendard(.medium, size: 12))
                     .foregroundStyle(.gray500)
             }

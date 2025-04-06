@@ -14,6 +14,7 @@ enum BusStopElementCase {
     case currentStop // 현재 위치한 정류장
     case alarmStop // 알람이 울릴 정류장
     case destinationStop // 목적지 정류장
+    case filteredStop // 필터링된 정류장
     
     
     var text_color: Color {
@@ -22,7 +23,7 @@ enum BusStopElementCase {
             return .gray100
         case .disableStop:
             return .gray150.opacity(0.4)
-        case .currentStop, .alarmStop, .destinationStop:
+        case .currentStop, .alarmStop, .destinationStop, .filteredStop:
             return .mainpurple
         }
     }
@@ -38,7 +39,7 @@ enum BusStopElementCase {
     
     var outer_circle_size: CGFloat {
         switch self {
-        case .alarmStop, .destinationStop:
+        case .alarmStop, .destinationStop, .filteredStop:
             return 22
         default:
             return 16
@@ -58,7 +59,7 @@ enum BusStopElementCase {
     
     var background_color: Color {
         switch self {
-        case .alarmStop, .destinationStop:
+        case .alarmStop, .destinationStop, .filteredStop:
             return .purpleOpacity10
         default:
             return .clear

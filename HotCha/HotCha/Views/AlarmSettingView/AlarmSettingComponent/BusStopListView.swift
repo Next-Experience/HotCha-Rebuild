@@ -12,35 +12,50 @@ struct BusStopListView: View {
     let bus: Bus_info_seoul // 선택된 버스 정보
     let cityCode: Int
     @State var busStopList: [BusStop] = [] // 버스의 노선에 있는 모든 정류장 리스트
-    @StateObject private var busStopSeoulViewModel = BusStopSeoulViewModel()
-   
-    let busStops: [BusStopElementCase] =
-            Array(repeating: .disableStop, count: 5) +
-    [.currentStop] +
-            Array(repeating: .ableStop, count: 2) +
-    [.alarmStop, .ableStop, .destinationStop]
-    + Array(repeating: .ableStop, count: 2)
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0){
-                ForEach(busStopSeoulViewModel.busStations, id: \.nodeord) { busStop in
-                    ZStack(alignment: .bottom) {
-                        Divider()
-                            .background(.gray100.opacity(0.15))
-                        
-                        BusStopElement(stopCase: .ableStop, busStop: busStop)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 0){
+                    ForEach(busStopSeoulViewModel.busStations, id: \.seq) { busStop in
+                        ZStack(alignment: .bottom) {
+                            Divider()
+                                .background(.gray100.opacity(0.15))
+                            
+                            // 정류장 텍스트 영역
+                            Button (action:{
+                                busStopSeoulViewModel.selectDestinationStataion(destIndex: busStop.seq - 1)
+                            }
+                            ){
+                                BusStopElement(stopCase: busStop.busStopCase, busStop: busStop)
+                                    .environmentObject(busStopSeoulViewModel)
+                                    .id(busStop.id)
+                            }
+                        }
+                    }
+                }
+                .padding(.top, 80)
+                .padding(.bottom, 265)
+//                .safeAreaInset(edge: .bottom) {
+//                    Color.clear.frame(height: 250)
+//                }
+            }
+            
+            .ignoresSafeArea(.all)
+            .background(.gray900)
+            .onAppear() {
+                busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId)
+            }
+            // 현재 필터링된 정류장 ID가 변경될 때마다 스크롤 위치 업데이트
+            .onChange(of: busStopSeoulViewModel.currentFilteredStationID) { newID in
+                if let id = newID {
+                    withAnimation {
+                        proxy.scrollTo(id, anchor: .center)
                     }
                 }
             }
-            .padding(0)
         }
-        .ignoresSafeArea(.all)
-        .background(.gray900)
-        .onAppear() {
-            busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId)
-        }
-    
     }
 }
 
