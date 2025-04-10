@@ -33,6 +33,7 @@ struct BusStopSearchView: View {
 
 struct AlarmSearchScrollButtonSection: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     
     var body: some View {
         ZStack(alignment: .center){
@@ -46,8 +47,15 @@ struct AlarmSearchScrollButtonSection: View {
                         .foregroundStyle(.gray300)
                 }
                 Spacer()
-                Text("정류장 선택")
-                    .foregroundStyle(.mainpurple)
+                Button(action:{
+                    busStopSeoulViewModel.storeDestinationStation()
+                    modalStateViewModel.modalState = .alarmWait
+                    busStopSeoulViewModel.searchText = ""
+                    busStopSeoulViewModel.searchTextFieldfocused = false
+                }){
+                    Text("정류장 선택")
+                        .foregroundStyle(.mainpurple)
+                }
             }
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 41, trailing: 20))
             
@@ -92,26 +100,28 @@ struct MainPurpleAlarmButton: View {
     @State var isInfoFilled: Bool
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     
     var body: some View {
         HStack(alignment: .center){
             Spacer()
             Button(action: {
-                modalStateViewModel.modalState = .alertStopsMedium
-                // TODO: isInfoFilled가 true이면 바로 아래 코드가 실행되도록 하면됨
-                sheetManager.showAlarmSearchSheet1 = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    sheetManager.showAlarmInfoSheet2 = true
+                if busStopSeoulViewModel.currentDestinationIndex != nil {
+                    modalStateViewModel.modalState = .alertStopsMedium
+                    sheetManager.showAlarmSearchSheet1 = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        sheetManager.showAlarmInfoSheet2 = true
+                    }
                 }
                 
             }, label: {
                 Text("알림 시작")
                     .font(.pretendard(.semibold, size: 20))
-                    .foregroundStyle(isInfoFilled ? .gray50 : .gray150)
+                    .foregroundStyle(busStopSeoulViewModel.currentDestinationIndex != nil ? .gray50 : .gray150)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
                     .background(
-                        RoundedRectangle(cornerRadius: 8).fill(isInfoFilled ? .mainpurple : .gray200)
+                        RoundedRectangle(cornerRadius: 8).fill(busStopSeoulViewModel.currentDestinationIndex != nil ? .mainpurple : .gray200)
                             .frame(maxWidth: .infinity)
                     )
                     .padding(EdgeInsets(top: 16, leading: 20, bottom: 36, trailing: 20))

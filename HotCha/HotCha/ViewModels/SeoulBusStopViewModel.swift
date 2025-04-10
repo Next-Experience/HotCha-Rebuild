@@ -19,8 +19,9 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var currentFilteredIndex: Int = 0 // 필터링 인덱스 스크롤을 위한
     @Published var isLastFilteredIndex: Bool = true // 마지막 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
     @Published var isFirstFilteredIndex: Bool = true // 첫번째 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
-    // 현재 선택된 목적지의 인덱스를 저장할 변수 추가
-    private var currentDestinationIndex: Int? = nil
+    // 현재 선택된 목적지의 인덱스를 저장할 변수 추가, 이전에 선택된 것을 초기화 하기위해 필요
+    @Published var currentDestinationIndex: Int? = nil
+    @Published var searchTextFieldfocused: Bool = false // textField가 정류장 선택을 누르면 초기화 되도록 하기위함
     
     
     // Route ID를 직접 인자로 받아 데이터를 가져오는 메서드
@@ -63,6 +64,7 @@ class BusStopSeoulViewModel: ObservableObject {
         
         // 새 목적지 설정
         busStations[destIndex].busStopCase = .destinationStop
+        busStations[destIndex].arrivalStation = true
         print("selected destination: \(busStations[destIndex].stationNm)")
         
         // 현재 목적지 인덱스 업데이트
@@ -74,18 +76,25 @@ class BusStopSeoulViewModel: ObservableObject {
     
     // 다른 정류장을 목적지로 선택 시 이전 목적지 상태를 ableStop으로 초기화함
     func clearDestinationStation(destIndex: Int) {
-        busStations[destIndex].busStopCase = .ableStop
+        let filtered = filteredStations
+        //필터링 리스트에 없으면 일반 정류장으로, 있으면 필터링 정류장으로 초기화
+        if filtered.contains(where: { $0.stationNm == busStations[destIndex].stationNm }) {
+            busStations[destIndex].busStopCase = .filteredStop
+        } else {
+            busStations[destIndex].busStopCase = .ableStop
+        }
+        busStations[destIndex].arrivalStation = false
+    }
+    
+    // 선택된 목적지 정류장을 저장
+    func storeDestinationStation() {
+        if let currentDestIndex = currentDestinationIndex {
+            searchText = busStations[currentDestIndex].stationNm
+        }
     }
     
     
-    // 필터링된 정류장 목록 받아오기
-    var filteredStations: [BusStop] {
-        return busStations.filter { $0.busStopCase == .filteredStop }
-    }
-    
-    
-    
-    // 이전 필터링 항목으로 이동
+    // 이전 필터링 항목으로 이동 (버튼)
     func moveToPreviousFilteredStation() {
         let filtered = filteredStations
         if !filtered.isEmpty {
@@ -93,13 +102,13 @@ class BusStopSeoulViewModel: ObservableObject {
                 currentFilteredIndex = (currentFilteredIndex - 1 + filtered.count) % filtered.count
                 isFirstFilteredIndex = currentFilteredIndex == 0 ? true : false
                 isLastFilteredIndex = false
-                }
-            } else {
-                isFirstFilteredIndex = true
             }
+        } else {
+            isFirstFilteredIndex = true
         }
+    }
     
-    // 다음 필터링 항목으로 이동
+    // 다음 필터링 항목으로 이동 (버튼)
     func moveToNextFilteredStation() {
         let filtered = filteredStations
         if !filtered.isEmpty {
@@ -113,10 +122,20 @@ class BusStopSeoulViewModel: ObservableObject {
         }
     }
     
+    // 필터링된 정류장 목록 받아오기
+    var filteredStations: [BusStop] {
+        return busStations.filter { $0.filtered == true }
+    }
+    
     // 현재 선택된 필터링 항목의 ID
     var currentFilteredStationID: UUID? {
         let filtered = filteredStations
-        return filtered.isEmpty ? nil : filtered[currentFilteredIndex].id
+        // 배열이 비어있거나 인덱스가 범위를 벗어나면 nil 반환
+        guard !filtered.isEmpty, currentFilteredIndex >= 0, currentFilteredIndex < filtered.count else {
+            print("필터링된 배열의 범위가 잘못되었습니다.")
+            return nil
+        }
+        return filtered[currentFilteredIndex].id
     }
     
     // 필터링
@@ -135,10 +154,10 @@ class BusStopSeoulViewModel: ObservableObject {
         for i in 0..<updatedStations.count {
             // 정류장 이름이 검색어를 포함하면 filteredStop으로 변경
             if updatedStations[i].stationNm.contains(trimmedText) {
-                // 중요 상태가 아닌 정류장만 필터링 상태로 변경
-                if ![.alarmStop, .currentStop, .destinationStop].contains(updatedStations[i].busStopCase) {
+                if busStations[i].busStopCase != .destinationStop {
                     updatedStations[i].busStopCase = .filteredStop
                 }
+                updatedStations[i].filtered = true
             }
         }
         
@@ -161,9 +180,13 @@ class BusStopSeoulViewModel: ObservableObject {
         var updatedStations = busStations
         
         for i in 0..<updatedStations.count {
-            // filteredStop 상태의 정류장만 원래의 ableStop으로 복원
-            if updatedStations[i].busStopCase == .filteredStop {
-                updatedStations[i].busStopCase = .ableStop
+            // filtered가 true인 상태의 정류장만 필터링 해제
+            if updatedStations[i].filtered == true {
+                updatedStations[i].filtered = false
+                // destinationStop이 아닌 정류장만 기본 정류장으로 초기화 (UI)
+                if updatedStations[i].busStopCase != .destinationStop {
+                    updatedStations[i].busStopCase = .ableStop
+                }
             }
         }
         
@@ -171,7 +194,6 @@ class BusStopSeoulViewModel: ObservableObject {
         currentFilteredIndex = 0
         isFirstFilteredIndex = true
         isLastFilteredIndex = true
-        
         // 데이터 변경 알림
         notifyStationsUpdated()
     }
@@ -182,13 +204,13 @@ class BusStopSeoulViewModel: ObservableObject {
         stationsUpdated.toggle()
     }
     
+    // 처음 정류장과 마지막 정류장을 구분
     func setFirstAndLastFlags() {
         guard !busStations.isEmpty else { return }
         print("Flag Setting")
         
         if let minSeq = busStations.map(\.seq).min(),
            let maxSeq = busStations.map(\.seq).max() {
-            
             var updatedStations = busStations
             for i in 0..<updatedStations.count {
                 if updatedStations[i].seq == minSeq {

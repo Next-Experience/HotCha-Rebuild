@@ -11,35 +11,55 @@ struct BusStopSearchTextField: View {
     @Binding var busStopSearchText: String
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @FocusState private var textFieldFocused: Bool
     
     var body: some View {
         
         VStack {
             HStack{
                 HStack{
-                    TextField("", text: $busStopSearchText, prompt: Text("도착 정류장을 알려주세요").foregroundColor(.gray300))
-                        .font(.pretendard(.medium, size: 16))
-                        .foregroundStyle(.gray900)
-                        .accentColor(.gray900)
-                        .onChange(of: busStopSearchText) {
-                            // 약간의 지연을 주어 데이터가 준비되었는지 확인
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                if !busStopSearchText.isEmpty {
-                                    modalStateViewModel.modalState = .alarmSearch
-                                    // 현재 정류장 목록 확인 로그
-                                    print("필터링 전 정류장 수: \(busStopSeoulViewModel.busStations.count)")
-                                    // 필터링 적용
-                                    busStopSeoulViewModel.applyFiltering(with: busStopSearchText)
-                                } else {
-                                    modalStateViewModel.modalState = .alarmWait
-                                    busStopSeoulViewModel.clearFiltering()
-                                }
+                    TextField("", text: $busStopSearchText, prompt: busStopSeoulViewModel.currentDestinationIndex == nil ?
+                              Text("도착 정류장을 알려주세요")
+                        .foregroundColor(.gray300)
+                              : Text(busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].stationNm
+                                    ).foregroundColor(.gray300)
+                    )
+                    .font(.pretendard(.medium, size: 16))
+                    .foregroundStyle(.gray900)
+                    .accentColor(.gray900)
+                    .focused($textFieldFocused)
+                    .onChange(of: textFieldFocused) { newValue in
+                        
+                        // textField가 포커스되면 alarmSearch로 상태 변경
+                        if newValue == true {
+                            busStopSeoulViewModel.searchTextFieldfocused = true
+                            modalStateViewModel.modalState = .alarmSearch
+                            print("TextField가 클릭되었습니다")
+                        }
+                    }
+                    .onChange(of: busStopSeoulViewModel.searchTextFieldfocused) { newValue in
+                        // ViewModel에서 포커스 상태가 변경될 때 TextField 업데이트 (정류장 선택 버튼이 눌리면 해당 searchTextFieldfocused의 상태가 변경되고, focus를 해제함)
+                        if textFieldFocused != newValue, newValue == false {
+                            textFieldFocused = newValue
+                        }
+                    }
+                    
+                    .onChange(of: busStopSearchText) {
+                        // 약간의 지연을 주어 데이터가 준비되었는지 확인
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            if !busStopSearchText.isEmpty {
+                                // 현재 정류장 목록 확인 로그
+                                print("필터링 전 정류장 수: \(busStopSeoulViewModel.busStations.count)")
+                                // 필터링 적용
+                                busStopSeoulViewModel.applyFiltering(with: busStopSearchText)
+                            } else {
+                                busStopSeoulViewModel.clearFiltering()
                             }
                         }
+                    }
                     Spacer()
                     if !busStopSearchText.isEmpty {
                         Button(action: {
-                            busStopSearchText = ""
                             // 지우기 버튼 누를 때 하이라이트 제거
                             busStopSeoulViewModel.clearFiltering()
                         }) {
