@@ -152,14 +152,22 @@ class BusStopSeoulViewModel: ObservableObject {
         // 모든 정류장의 상태 업데이트
         var updatedStations = busStations
         for i in 0..<updatedStations.count {
-            // 정류장 이름이 검색어를 포함하면 filteredStop으로 변경
-            if updatedStations[i].stationNm.contains(trimmedText) {
+            // locale을 고려한 문자열 검색, 대소문자 무시
+            let stationName = updatedStations[i].stationNm
+            if stationName.range(of: trimmedText, options: [.caseInsensitive, .diacriticInsensitive]) != nil {
                 if busStations[i].busStopCase != .destinationStop {
                     updatedStations[i].busStopCase = .filteredStop
                 }
                 updatedStations[i].filtered = true
+            } else {
+                // 검색어에 맞지 않으면 필터링 해제
+                updatedStations[i].filtered = false
+                if busStations[i].busStopCase != .destinationStop {
+                    updatedStations[i].busStopCase = .ableStop
+                }
             }
         }
+        
         
         // 상태 업데이트
         busStations = updatedStations
