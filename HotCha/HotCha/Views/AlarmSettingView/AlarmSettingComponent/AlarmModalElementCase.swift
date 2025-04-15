@@ -13,6 +13,7 @@ class AlarmModalViewModel: ObservableObject {
     @Published var cityCode: Int?
 }
 
+
 enum AlarmSettingModalElementCase {
     case alarmWait // 알람 기다리는 상태
     case alarmStart // 알람세팅 화면 첫 화면, 정류장 선택 후 시작 버튼

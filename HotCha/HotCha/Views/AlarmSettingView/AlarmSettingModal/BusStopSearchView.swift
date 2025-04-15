@@ -111,6 +111,8 @@ struct MainPurpleAlarmButton: View {
                     sheetManager.showAlarmSearchSheet1 = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         sheetManager.showAlarmInfoSheet2 = true
+                        busStopSeoulViewModel.setAlarmTwoStationsBeforeDestination() // 도착정류장의 2 정류장 전에 알람 정류장으로 설정
+                        busStopSeoulViewModel.switchToAlarmMode() // 알람 모드로 전환
                     }
                 }
                 

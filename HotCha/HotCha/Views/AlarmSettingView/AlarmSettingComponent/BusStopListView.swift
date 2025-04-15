@@ -13,12 +13,16 @@ struct BusStopListView: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     
     var body: some View {
-        // item drag를 커스텀 한 UIKit 테이블 뷰 사용
+        // 드래그 가능한 UIKit 테이블 뷰 사용
         DraggableBusStopList(
             busStops: busStopSeoulViewModel.busStations,
             onArrivalStationChanged: { index in
-                busStopSeoulViewModel.selectDestinationStataion(destIndex: index)
-            }
+                busStopSeoulViewModel.selectDestinationStation(destIndex: index)
+            },
+            onAlarmStationChanged: { index in
+                busStopSeoulViewModel.selectAlarmStation(alarmIndex: index)
+            },
+            isDraggingDestination: busStopSeoulViewModel.isDraggingDestination
         )
         .ignoresSafeArea()
         .background(Color.gray900)
@@ -27,3 +31,4 @@ struct BusStopListView: View {
         }
     }
 }
+

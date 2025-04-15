@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct AlarmStatusView: View {
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     
     var body: some View {
         GeometryReader { geometry in
@@ -25,6 +27,7 @@ struct AlarmStatusView: View {
                 // 중간 이상 크기일 때만 표시
                 if isMedium || isLarge {
                     BusStopDestinationSection()
+                        .environmentObject(busStopSeoulViewModel)
                 }
                 
                 if isLarge {
@@ -42,23 +45,36 @@ struct AlarmStatusView: View {
     }
 }
 struct BusStopDestinationSection: View {
+    @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    
     var body: some View {
         VStack(spacing: 0){
             // 첫 번째 정류장
-            HStack {
-                Image("map_pin")
-                    .frame(width: 16, height: 16)
-                    .foregroundColor(.mainpurple)
-                    .padding(.leading,16)
-                
-                Text("올림픽교차로(광안역방면)")
-                    .font(.system(size: 16))
-                    .padding(.vertical, 16)
-                    .padding(.leading, 8)
-                
-                Spacer()
+            Button(action: {
+                modalStateViewModel.modalState = .alarmWait
+                sheetManager.showAlarmInfoSheet2 = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    sheetManager.showAlarmSearchSheet1 = true
+                    busStopSeoulViewModel.switchToDestinationMode()
+                }
+            }){
+                HStack {
+                    Image("map_pin")
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.mainpurple)
+                        .padding(.leading,16)
+                    
+                    Text("올림픽교차로(광안역방면)")
+                        .font(.system(size: 16))
+                        .padding(.vertical, 16)
+                        .padding(.leading, 8)
+                    
+                    Spacer()
+                }
+                .background(.gray150)
             }
-            .background(.gray150)
             
             Divider()
             
@@ -133,10 +149,10 @@ struct AlertStopsSection: View {
 
 struct BusStopInfoSection: View {
     @State var isFavorite: Bool = false
-//    @State var startStationName: String? = "시작역 없음"
-//    @State var endStationName: String? = "도착역 없음"
-//    @State var busNumber: String? = "버스번호 없음"
-     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    //    @State var startStationName: String? = "시작역 없음"
+    //    @State var endStationName: String? = "도착역 없음"
+    //    @State var busNumber: String? = "버스번호 없음"
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     
     var body: some View {
         VStack(alignment:. leading, spacing: 12){
