@@ -42,7 +42,7 @@ struct SearchView: View {
                 .frame(height: 1)
             
         }
-        .contentShape(Rectangle()) // 전체 영역을 탭 가능하게
+        .contentShape(Rectangle())
     }
     
     var body: some View {
