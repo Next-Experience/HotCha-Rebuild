@@ -51,19 +51,19 @@
 			);
 			target = 9DD91FA82D522CB600789318 /* HotCha */;
 		};
+		D955ED672DAFDE9200922A08 /* Exceptions for "BeforeBusStop" folder in "HotCha" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				BeforeBusStopLiveActivity.swift,
+			);
+			target = 9DD91FA82D522CB600789318 /* HotCha */;
+		};
 		D9E37FAB2DA955F0009A5719 /* Exceptions for "BeforeBusStop" folder in "BeforeBusStopExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = D9E37F8F2DA955EF009A5719 /* BeforeBusStopExtension */;
-		};
-		D9E37FAE2DA9576C009A5719 /* Exceptions for "BeforeBusStop" folder in "HotCha" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				BeforeBusStopLiveActivity.swift,
-			);
-			target = 9DD91FA82D522CB600789318 /* HotCha */;
 		};
 		D9E37FB12DA96C2D009A5719 /* Exceptions for "HotCha" folder in "BeforeBusStopExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -88,7 +88,7 @@
 		D9E37F962DA955EF009A5719 /* BeforeBusStop */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D9E37FAE2DA9576C009A5719 /* Exceptions for "BeforeBusStop" folder in "HotCha" target */,
+				D955ED672DAFDE9200922A08 /* Exceptions for "BeforeBusStop" folder in "HotCha" target */,
 				D9E37FAB2DA955F0009A5719 /* Exceptions for "BeforeBusStop" folder in "BeforeBusStopExtension" target */,
 			);
 			path = BeforeBusStop;

@@ -5,6 +5,7 @@
 //  Created by Yeji Seo on 2/8/25.
 //
 import SwiftUI
+import ActivityKit
 
 struct AlarmSettingView: View {
     @Environment(\.dismiss) var dismiss
@@ -15,11 +16,18 @@ struct AlarmSettingView: View {
     @StateObject private var modalStateViewModel = AlarmModalViewModel()
     @StateObject private var busStopSeoulViewModel = BusStopSeoulViewModel()
     
+    @State private var liveActivityStated = false // Live Activity 중복 실행 방지
+    
     var body: some View {
         NavigationStack {
             BusStopListView(bus: bus, cityCode: 1)
                 .onAppear {
                     sheetManager.showAlarmSearchSheet1 = true // 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
+                    
+                    if !liveActivityStated {
+                        startLiveActivity()
+                        liveActivityStated = true
+                    }
                 }
                 .environmentObject(sheetManager)
                 .environmentObject(busStopSeoulViewModel)
@@ -64,6 +72,28 @@ struct AlarmSettingView: View {
         }
         .toolbarBackground(.gray900, for: .navigationBar) // 배경색 설정
         .toolbarBackground(.visible, for: .navigationBar)   // 항상 보이게
+    }
+    
+    private func startLiveActivity() {
+        let attributes = BeforeBusStopAttributes(name: bus.busRouteNm)
+        
+        let contentState = BeforeBusStopAttributes.ContentState(
+            busNumber: bus.busRouteAbrv,
+            busRouteType: bus.routeType,
+            busStopName: bus.stStationNm,
+            remainingStops: 5, // 남은 정류장 수
+            currentStopName: bus.stStationNm,
+            destinationStopName: bus.edStationNm
+        )
+        
+        let content = ActivityContent(state: contentState, staleDate: nil)
+        
+        do {
+            _ = try Activity<BeforeBusStopAttributes>.request(attributes: attributes, content: content, pushType: nil)
+            print("Live Activity 성공적으로 시작 : \(bus.busRouteNm)")
+        } catch {
+            print("Live Activity 시작 실패 : \(error.localizedDescription)")
+        }
     }
 }
 

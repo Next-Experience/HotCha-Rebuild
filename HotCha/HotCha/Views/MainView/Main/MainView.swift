@@ -40,7 +40,6 @@ struct MainView: View {
                     .padding(.top,12)
             }
             Spacer()
-            
 //            VStack {
 //                Button {
 //                    let attributes = BeforeBusStopAttributes(name: "BusStop Sample")
@@ -53,7 +52,7 @@ struct MainView: View {
 //                        print("LiveActivityManager: Error in LiveActivityManager: \(error.localizedDescription)")
 //                    }
 //                } label: {
-//                    Text("Show")
+//                    Text("Test Live Activity")
 //                }
 //            }
 //            .padding()

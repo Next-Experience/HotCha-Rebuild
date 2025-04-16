@@ -12,6 +12,12 @@ import SwiftUI
 struct BeforeBusStopAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         // 실시간으로 업데이트될 버스 정보
+        var busNumber: String // 버스 번호
+        var busRouteType: String // 버스 노선 유형코드
+        var busStopName: String // 현재 정류장 이름
+        var remainingStops: Int // 남은 정류장 수
+        var currentStopName: String // 현재 위치 정류장
+        var destinationStopName: String // 최종 목적지
     }
     
     // Fixed non-changing properties about your activity go here!
@@ -29,7 +35,7 @@ struct BeforeBusStopLiveActivity: Widget {
                     HStack {
                         // 버스 번호 및 정류장 정보
                         HStack {
-                            Text("500")
+                            Text(context.state.busNumber)
                                 .font(.pretendard(.semibold, size: 14))
                                 .foregroundStyle(.skybluec)
                                 .padding(.horizontal, 6)
@@ -37,7 +43,7 @@ struct BeforeBusStopLiveActivity: Widget {
                                 .background(Color.skybluec.opacity(0.2))
                                 .cornerRadius(4)
                             
-                            Text("서울역버스환승센터")
+                            Text(context.state.busStopName)
                                 .font(.pretendard(.semibold, size: 14))
                                 .foregroundStyle(.gray800)
                         }
@@ -45,7 +51,7 @@ struct BeforeBusStopLiveActivity: Widget {
                         Spacer()
                         
                         HStack {
-                            Image("AppIcon")
+                            Image("WidgetAppIcon")
                                 .resizable()
                                 .frame(width: 20, height: 20)
                             
@@ -58,7 +64,7 @@ struct BeforeBusStopLiveActivity: Widget {
                     .padding(.top, 20)
                     
                     HStack {
-                        Text("5")
+                        Text("\(context.state.remainingStops)")
                             .font(.pretendard(.semibold, size: 20))
                             .foregroundStyle(.purplec)
                             .padding(.trailing, 4)
@@ -78,7 +84,7 @@ struct BeforeBusStopLiveActivity: Widget {
                 VStack(spacing: 0) {
                     // 정류장 및 방향 정보
                     HStack {
-                        Text("남대문시장앞.이회영활동터")
+                        Text(context.state.currentStopName)
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(.gray800)
                         
@@ -87,7 +93,7 @@ struct BeforeBusStopLiveActivity: Widget {
                             .foregroundStyle(.gray800)
                             .padding(.horizontal, 4)
                         
-                        Text("장지역환승센터")
+                        Text(context.state.destinationStopName)
                             .font(.pretendard(.medium, size: 12))
                             .foregroundColor(.gray600)
                         
@@ -120,10 +126,27 @@ struct BeforeBusStopLiveActivity: Widget {
     }
     
     
-    func timeFormatter(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
+    private func getBusColor(for routeType: String) -> Color {
+        switch routeType {
+        case "1": // 공항
+            return Color("bluec")
+        case "2": // 마을
+            return Color("olivec")
+        case "3": // 간선
+            return Color("skybluec")
+        case "4": // 지선
+            return Color("greenc")
+        case "5": // 순환
+            return Color("purplec")
+        case "6": // 광역
+            return Color("orangec")
+        case "7": // 인천
+            return Color("bluec")
+        case "8": // 경기
+            return Color("brownc")
+        default:
+            return Color("bluec")
+        }
     }
 }
 
@@ -136,7 +159,14 @@ extension BeforeBusStopAttributes {
 
 extension BeforeBusStopAttributes.ContentState {
     fileprivate static var smiley: BeforeBusStopAttributes.ContentState {
-        BeforeBusStopAttributes.ContentState()
+        BeforeBusStopAttributes.ContentState(
+            busNumber: "500",
+            busRouteType: "3",
+            busStopName: "서울역버스환승센터",
+            remainingStops: 5,
+            currentStopName: "남대문시장앞.이회영활동터",
+            destinationStopName: "장지역환승센터"
+        )
     }
 }
 
