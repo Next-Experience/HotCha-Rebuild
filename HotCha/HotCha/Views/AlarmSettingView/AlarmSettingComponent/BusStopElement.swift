@@ -35,6 +35,10 @@ struct BusStopElement: View {
                 HStack {
                     Text(busStop?.stationNm ?? "이름 없음")
                         .font(.pretendard(.medium, size: 16))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 180, alignment: .leading)
                         .foregroundStyle(stopCase.text_color)
                     
                     Spacer()
