@@ -22,7 +22,9 @@ struct BusStopListView: View {
             onAlarmStationChanged: { index in
                 busStopSeoulViewModel.selectAlarmStation(alarmIndex: index)
             },
-            isDraggingDestination: busStopSeoulViewModel.isDraggingDestination
+            isDraggingDestination: busStopSeoulViewModel.isDraggingDestination,
+            currentFilteredStationID: busStopSeoulViewModel.currentFilteredStationID,
+                        viewModel: busStopSeoulViewModel
         )
         .ignoresSafeArea()
         .background(Color.gray900)

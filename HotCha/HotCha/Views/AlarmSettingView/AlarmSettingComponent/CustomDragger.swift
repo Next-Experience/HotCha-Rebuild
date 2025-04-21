@@ -4,10 +4,50 @@
 //
 //  Created by Yeji Seo on 4/11/25.
 //
-
 import SwiftUI
 import UIKit
+import Combine
 
+
+// MARK: - SwiftUI를 위한 UIViewControllerRepresentable
+struct DraggableBusStopList: UIViewControllerRepresentable {
+    var busStops: [BusStop]
+    var onArrivalStationChanged: (Int) -> Void
+    var onAlarmStationChanged: (Int) -> Void
+    var isDraggingDestination: Bool // 목적지 정류장을 드래그하는지 여부
+    var currentFilteredStationID: UUID? // 현재 필터링된 정류장 ID
+    var viewModel: BusStopSeoulViewModel // 뷰모델 참조를 전달
+    
+    func makeUIViewController(context: Context) -> DraggableBusStopTableViewController {
+        let controller = DraggableBusStopTableViewController(style: .plain)
+        controller.busStops = busStops
+        controller.onArrivalStationChanged = onArrivalStationChanged
+        controller.onAlarmStationChanged = onAlarmStationChanged
+        controller.isDraggingDestination = isDraggingDestination
+        controller.viewModel = viewModel
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: DraggableBusStopTableViewController, context: Context) {
+        // 이전 상태와 동일한 경우 불필요한 업데이트를 방지
+        if uiViewController.busStops != busStops || uiViewController.isDraggingDestination != isDraggingDestination {
+            uiViewController.busStops = busStops
+            uiViewController.isDraggingDestination = isDraggingDestination
+            
+            // 필터링된 항목으로 스크롤 기능
+            if let filteredID = currentFilteredStationID {
+                uiViewController.scrollToFilteredStation(with: filteredID)
+            }
+            
+            // 필요할 때만 테이블 뷰 갱신
+            uiViewController.tableView.reloadData()
+        } else if let filteredID = currentFilteredStationID, filteredID != uiViewController.lastFilteredID {
+            // 필터링 ID만 변경된 경우 스크롤만 수행
+            uiViewController.scrollToFilteredStation(with: filteredID)
+            uiViewController.lastFilteredID = filteredID
+        }
+    }
+}
 
 // MARK: - 드래그 가능한 UIKit 테이블 뷰 (UIKit 부분)
 class DraggableBusStopTableViewController: UITableViewController {
@@ -15,9 +55,12 @@ class DraggableBusStopTableViewController: UITableViewController {
     var onArrivalStationChanged: ((Int) -> Void)? // 선택된 도착 정류장 콜백
     var onAlarmStationChanged: ((Int) -> Void)? // 선택된 알람 정류장 콜백
     var isDraggingDestination: Bool = true // 목적지 정류장을 드래그하는지 여부
+    var viewModel: BusStopSeoulViewModel? // 뷰모델 참조
+    private var cancellables = Set<AnyCancellable>() // Combine 구독 취소용
     
     private var backgroundView: UIView?
     private var sourceIndexPath: IndexPath?
+    var lastFilteredID: UUID? // 마지막으로 필터링된 ID 저장
     
     // 목적지 정류장 인덱스를 찾는 함수
     private func getDestinationIndex() -> Int? {
@@ -36,13 +79,44 @@ class DraggableBusStopTableViewController: UITableViewController {
         tableView.register(BusStopCell.self, forCellReuseIdentifier: "BusStopCell")
         tableView.backgroundColor = UIColor(Color.gray900)
         tableView.separatorStyle = .none
-        tableView.contentInset = UIEdgeInsets(top: 80, left: 0, bottom: 265, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 265, right: 0)
         
         // 드래그 제스처 설정
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         longPress.minimumPressDuration = 0.5
         tableView.addGestureRecognizer(longPress)
+        
+        // 뷰모델의 필터링된 정류장 ID 변경 구독
+        setupFilteredStationObserver()
     }
+    
+    // 필터링된 정류장 ID 변경 모니터링
+    private func setupFilteredStationObserver() {
+        guard let viewModel = viewModel else { return }
+        
+        // 필터링된 정류장 변경 모니터링 (Combine 사용)
+        viewModel.$currentFilteredIndex
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                // 필터링된 정류장 ID가 변경되면 스크롤
+                if let filteredID = viewModel.currentFilteredStationID,
+                   filteredID != self?.lastFilteredID {
+                    self?.scrollToFilteredStation(with: filteredID)
+                    self?.lastFilteredID = filteredID
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    // ID로 필터링된 정류장으로 스크롤
+    func scrollToFilteredStation(with id: UUID) {
+        // ID에 해당하는 정류장 찾기
+        if let index = busStops.firstIndex(where: { $0.id == id }) {
+            let indexPath = IndexPath(row: index, section: 0)
+            tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+        }
+    }
+    
     
     // MARK: 테이블 뷰 데이터 소스
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -92,8 +166,10 @@ class DraggableBusStopTableViewController: UITableViewController {
             updateAlarmStation(at: max(0, index - 2))
         }
         
-        // 테이블 뷰 갱신
-        tableView.reloadData()
+        // 테이블 뷰 갱신 (애니메이션 없이)
+        UIView.performWithoutAnimation {
+            tableView.reloadData()
+        }
         
         // 콜백 호출
         onArrivalStationChanged?(index)
@@ -118,8 +194,10 @@ class DraggableBusStopTableViewController: UITableViewController {
         // 선택된 정류장 알람 설정
         busStops[finalIndex].alarmStation = true
         
-        // 테이블 뷰 갱신
-        tableView.reloadData()
+        // 테이블 뷰 갱신 (애니메이션 없이)
+        UIView.performWithoutAnimation {
+            tableView.reloadData()
+        }
         
         // 콜백 호출
         onAlarmStationChanged?(finalIndex)
@@ -233,6 +311,7 @@ class DraggableBusStopTableViewController: UITableViewController {
 // MARK: - 버스 정류장 셀 (UIKit)
 class BusStopCell: UITableViewCell {
     private var hostingController: UIHostingController<AnyView>?
+    private var isCurrentlyFiltered: Bool = false
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -245,12 +324,53 @@ class BusStopCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private var currentBusStop: BusStop?
+    
+    func setFiltered(_ filtered: Bool) {
+        self.isCurrentlyFiltered = filtered
+        if var busStop = currentBusStop {
+            busStop.filtered = filtered
+            self.configureInternal(with: busStop)
+        }
+    }
+    
     func configure(with busStop: BusStop) {
-        // 기존 호스팅 컨트롤러 제거
-        hostingController?.view.removeFromSuperview()
-        hostingController?.removeFromParent()
+        // 기존 hostingController가 제거되지 않도록 최적화
+        if hostingController == nil {
+            configureInternal(with: busStop)
+        } else {
+            // 내용이 변경되었을 때만 업데이트
+            if needsUpdate(with: busStop) {
+                configureInternal(with: busStop)
+            }
+        }
+    }
+    
+    private func needsUpdate(with busStop: BusStop) -> Bool {
+        // 현재 표시 중인 버스 정류장과 새 버스 정류장이 다른지 확인
+        guard let currentBusStop = self.currentBusStop else {
+            return true
+        }
         
-        // 새 호스팅 컨트롤러 생성
+        // 주요 속성이 변경되었는지 확인
+        return currentBusStop.id != busStop.id ||
+        currentBusStop.arrivalStation != busStop.arrivalStation ||
+        currentBusStop.alarmStation != busStop.alarmStation ||
+        currentBusStop.filtered != busStop.filtered ||
+        currentBusStop.busStopCase != busStop.busStopCase
+    }
+    
+    private func configureInternal(with busStop: BusStop) {
+        // 현재 버스 정류장 정보 저장
+        self.currentBusStop = busStop
+        
+        // 기존 호스팅 컨트롤러가 있으면 제거
+        if let existingHostingController = hostingController {
+            existingHostingController.view.removeFromSuperview()
+            existingHostingController.removeFromParent()
+        }
+        
+        // 업데이트된 버스 정류장 정보로 새 호스팅 컨트롤러 생성
         let busStopView = BusStopElement(stopCase: busStop.busStopCase, busStop: busStop)
         let view = AnyView(
             ZStack(alignment: .bottom) {
@@ -258,19 +378,22 @@ class BusStopCell: UITableViewCell {
                     .background(Color.gray100.opacity(0.15))
                 busStopView
             }
-            .background(
-                Group {
-                    if busStop.arrivalStation {
-                        Color.purpleOpacity10
-                    } else if busStop.alarmStation {
-                        Color.purpleOpacity10 // 알람용 색상 조정 가능
-                    } else {
-                        Color.clear
+                .background(
+                    Group {
+                        if busStop.arrivalStation {
+                            Color.purpleOpacity10
+                        } else if busStop.alarmStation {
+                            Color.purpleOpacity10 // 알람용 색상 조정 가능
+                        } else if busStop.filtered {
+                            Color.clear // 필터링된 항목은 배경색 없음, 필요시 변경 가능
+                        } else {
+                            Color.clear
+                        }
                     }
-                }
-            )
+                )
         )
         
+        // 새 호스팅 컨트롤러 생성하고 설정
         hostingController = UIHostingController(rootView: view)
         hostingController?.view.backgroundColor = .clear
         
@@ -284,43 +407,29 @@ class BusStopCell: UITableViewCell {
                 hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
                 hostingView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
             ])
+            
+            // 깜빡임 방지를 위해 투명하게 설정
+            hostingView.layer.opacity = 1.0
         }
         
-        // 배경색 설정
-        if busStop.arrivalStation {
-            backgroundColor = UIColor(Color.purpleOpacity10)
-        } else if busStop.alarmStation {
-            backgroundColor = UIColor(Color.purpleOpacity10) // 알람용 색상 조정 가능
-        } else {
-            backgroundColor = .clear
+        // 배경색 설정 (애니메이션 없이)
+        UIView.performWithoutAnimation {
+            if busStop.arrivalStation {
+                backgroundColor = UIColor(Color.purpleOpacity10)
+            } else if busStop.alarmStation {
+                backgroundColor = UIColor(Color.purpleOpacity10) // 알람용 색상 조정 가능
+            } else if busStop.filtered {
+                // 필터링된 항목은 기본 배경색 유지, 필요시 변경 가능
+                backgroundColor = .clear
+            } else {
+                backgroundColor = .clear
+            }
         }
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
         backgroundColor = .clear
-    }
-}
-
-// MARK: - SwiftUI를 위한 UIViewControllerRepresentable
-struct DraggableBusStopList: UIViewControllerRepresentable {
-    var busStops: [BusStop]
-    var onArrivalStationChanged: (Int) -> Void
-    var onAlarmStationChanged: (Int) -> Void
-    var isDraggingDestination: Bool // 목적지 정류장을 드래그하는지 여부
-    
-    func makeUIViewController(context: Context) -> DraggableBusStopTableViewController {
-        let controller = DraggableBusStopTableViewController(style: .plain)
-        controller.busStops = busStops
-        controller.onArrivalStationChanged = onArrivalStationChanged
-        controller.onAlarmStationChanged = onAlarmStationChanged
-        controller.isDraggingDestination = isDraggingDestination
-        return controller
-    }
-    
-    func updateUIViewController(_ uiViewController: DraggableBusStopTableViewController, context: Context) {
-        uiViewController.busStops = busStops
-        uiViewController.isDraggingDestination = isDraggingDestination
-        uiViewController.tableView.reloadData()
+        // 호스팅 컨트롤러는 제거하지 않고 유지
     }
 }
