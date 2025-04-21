@@ -14,7 +14,7 @@ struct DraggableBusStopList: UIViewControllerRepresentable {
     var busStops: [BusStop]
     var onArrivalStationChanged: (Int) -> Void
     var onAlarmStationChanged: (Int) -> Void
-    var isDraggingDestination: Bool // 목적지 정류장을 드래그하는지 여부
+    var isSelectDestinationMode: Bool // 목적지 정류장을 드래그하는지 여부
     var currentFilteredStationID: UUID? // 현재 필터링된 정류장 ID
     var viewModel: BusStopSeoulViewModel // 뷰모델 참조를 전달
     
@@ -23,16 +23,16 @@ struct DraggableBusStopList: UIViewControllerRepresentable {
         controller.busStops = busStops
         controller.onArrivalStationChanged = onArrivalStationChanged
         controller.onAlarmStationChanged = onAlarmStationChanged
-        controller.isDraggingDestination = isDraggingDestination
+        controller.isSelectDestinationMode = isSelectDestinationMode
         controller.viewModel = viewModel
         return controller
     }
     
     func updateUIViewController(_ uiViewController: DraggableBusStopTableViewController, context: Context) {
         // 이전 상태와 동일한 경우 불필요한 업데이트를 방지
-        if uiViewController.busStops != busStops || uiViewController.isDraggingDestination != isDraggingDestination {
+        if uiViewController.busStops != busStops || uiViewController.isSelectDestinationMode != isSelectDestinationMode {
             uiViewController.busStops = busStops
-            uiViewController.isDraggingDestination = isDraggingDestination
+            uiViewController.isSelectDestinationMode = isSelectDestinationMode
             
             // 필터링된 항목으로 스크롤 기능
             if let filteredID = currentFilteredStationID {
@@ -54,7 +54,7 @@ class DraggableBusStopTableViewController: UITableViewController {
     var busStops: [BusStop] = []
     var onArrivalStationChanged: ((Int) -> Void)? // 선택된 도착 정류장 콜백
     var onAlarmStationChanged: ((Int) -> Void)? // 선택된 알람 정류장 콜백
-    var isDraggingDestination: Bool = true // 목적지 정류장을 드래그하는지 여부
+    var isSelectDestinationMode: Bool = true // true면 dest, false면 alarm 선택 모드
     var viewModel: BusStopSeoulViewModel? // 뷰모델 참조
     private var cancellables = Set<AnyCancellable>() // Combine 구독 취소용
     
@@ -143,11 +143,11 @@ class DraggableBusStopTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         
-        if isDraggingDestination {
+        // 목적지 선택 모드인 경우에만 터치로 도착 정류장 선택 가능
+        if isSelectDestinationMode {
             updateArrivalStation(at: indexPath.row)
-        } else {
-            updateAlarmStation(at: indexPath.row)
         }
+        // 알람 모드일 때는 터치로 선택되지 않도록 함 (drag만 가능)
     }
     
     // MARK: 도착 정류장 업데이트
@@ -212,24 +212,8 @@ class DraggableBusStopTableViewController: UITableViewController {
             if let indexPath = tableView.indexPathForRow(at: location) {
                 sourceIndexPath = indexPath
                 
-                // 목적지 정류장 드래그 모드인 경우
-                if isDraggingDestination {
-                    // 선택된 셀
-                    guard let cell = tableView.cellForRow(at: indexPath) else { return }
-                    
-                    // 배경색 스냅샷 생성
-                    let highlightView = UIView(frame: cell.frame)
-                    highlightView.backgroundColor = UIColor(Color.purpleOpacity10)
-                    
-                    // 배경 뷰 테이블뷰에 추가
-                    tableView.insertSubview(highlightView, belowSubview: cell)
-                    backgroundView = highlightView
-                    
-                    // 도착 정류장 업데이트
-                    updateArrivalStation(at: indexPath.row)
-                }
-                // 알람 정류장 드래그 모드인 경우
-                else {
+                // 알람 정류장 드래그 모드인 경우에만 롱프레스 드래그로 선택 가능
+                if !isSelectDestinationMode {
                     // 목적지 정류장 확인
                     guard let destIndex = getDestinationIndex() else { return }
                     
@@ -250,10 +234,17 @@ class DraggableBusStopTableViewController: UITableViewController {
                         updateAlarmStation(at: indexPath.row)
                     }
                 }
+                // 목적지 모드일 때는 롱프레스 드래그로 선택되지 않도록 함
             }
             
         case .changed:
             guard let backgroundView = backgroundView, let sourceIndexPath = sourceIndexPath else { return }
+            
+            // 드래그 중인데 목적지 선택 모드로 바뀌었다면 드래그 취소
+            if isSelectDestinationMode {
+                cancelDrag()
+                return
+            }
             
             // 배경 뷰를 터치 위치에 맞게 이동
             var frame = backgroundView.frame
@@ -270,13 +261,8 @@ class DraggableBusStopTableViewController: UITableViewController {
             
             // 현재 위치에 해당하는 인덱스 찾기
             if let newIndexPath = tableView.indexPathForRow(at: location), newIndexPath != sourceIndexPath {
-                // 목적지 정류장 드래그 모드인 경우
-                if isDraggingDestination {
-                    // 도착 정류장 업데이트
-                    updateArrivalStation(at: newIndexPath.row)
-                }
-                // 알람 정류장 드래그 모드인 경우
-                else {
+                // 알람 정류장 드래그 모드인 경우에만 처리
+                if !isSelectDestinationMode {
                     // 목적지 정류장 확인
                     guard let destIndex = getDestinationIndex() else { return }
                     
@@ -291,19 +277,24 @@ class DraggableBusStopTableViewController: UITableViewController {
             }
             
         case .ended, .cancelled:
-            guard let backgroundView = backgroundView else { return }
-            
-            // 배경 뷰 제거
-            UIView.animate(withDuration: 0.2, animations: {
-                backgroundView.alpha = 0
-            }) { _ in
-                backgroundView.removeFromSuperview()
-                self.backgroundView = nil
-                self.sourceIndexPath = nil
-            }
+            cancelDrag()
             
         default:
             break
+        }
+    }
+    
+    // 드래그 취소 및 정리
+    private func cancelDrag() {
+        guard let backgroundView = backgroundView else { return }
+        
+        // 배경 뷰 제거
+        UIView.animate(withDuration: 0.2, animations: {
+            backgroundView.alpha = 0
+        }) { _ in
+            backgroundView.removeFromSuperview()
+            self.backgroundView = nil
+            self.sourceIndexPath = nil
         }
     }
 }

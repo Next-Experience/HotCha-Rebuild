@@ -22,7 +22,7 @@ struct BusStopListView: View {
             onAlarmStationChanged: { index in
                 busStopSeoulViewModel.selectAlarmStation(alarmIndex: index)
             },
-            isDraggingDestination: busStopSeoulViewModel.isDraggingDestination,
+            isSelectDestinationMode: busStopSeoulViewModel.isSelectDestinationMode,
             currentFilteredStationID: busStopSeoulViewModel.currentFilteredStationID,
                         viewModel: busStopSeoulViewModel
         )

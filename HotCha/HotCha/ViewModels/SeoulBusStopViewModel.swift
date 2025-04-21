@@ -22,8 +22,11 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var isFirstFilteredIndex: Bool = true // 첫번째 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
     // 현재 선택된 목적지의 인덱스를 저장할 변수 추가, 이전에 선택된 것을 초기화 하기위해 필요
     @Published var currentDestinationIndex: Int? = nil
-    @Published var currentAlarmIndex: Int? = nil
+    @Published var currentAlarmIndex: Int? = nil // 이전에 선택된 알람의 상태를 초기화 하기 위해 필요
     @Published var searchTextFieldfocused: Bool = false // textField가 정류장 선택을 누르면 초기화 되도록 하기위함
+    
+    // 현재 모드 (true면 목적지 or false면 알람 선택)
+    @Published var isSelectDestinationMode: Bool = true
     
     
     // Route ID를 직접 인자로 받아 데이터를 가져오는 메서드
@@ -238,9 +241,12 @@ class BusStopSeoulViewModel: ObservableObject {
         print("Flag Setting Last")
     }
     
-
-        // 현재 드래그 모드 (목적지 or 알람)
-        @Published var isDraggingDestination: Bool = true
+    
+    //
+//    // 현재 모드 (true면 목적지 or false면 알람 선택)
+//    @Published var isSelectDestinationMode: Bool = true
+    
+      
         // 도착 정류장 선택 메서드
         func selectDestinationStation(destIndex: Int) {
             guard destIndex >= 0 && destIndex < busStations.count else { return }
@@ -328,7 +334,7 @@ class BusStopSeoulViewModel: ObservableObject {
             return busStations.firstIndex(where: { $0.alarmStation })
         }
     
-        // 알람 설정 버튼 (다른 View에서 호출)
+        // 알람 정류장 설정 버튼 (다른 View에서 호출)
         func setAlarmTwoStationsBeforeDestination() {
             // 목적지 정류장 확인
             guard let destIndex = getDestinationStationIndex() else { return }
@@ -340,12 +346,12 @@ class BusStopSeoulViewModel: ObservableObject {
             selectAlarmStation(alarmIndex: alarmIndex)
             
             // 드래그 모드를 알람 모드로 변경
-            isDraggingDestination = false
+            isSelectDestinationMode = false
         }
         
         // 목적지 설정 모드로 전환 (다른 View에서 호출)
         func switchToDestinationMode() {
-            isDraggingDestination = true
+            isSelectDestinationMode = true
             if let alarmIndex = getAlarmStationIndex() {
                 busStations[alarmIndex].alarmStation = false
                 busStations[alarmIndex].busStopCase = .ableStop
@@ -355,6 +361,6 @@ class BusStopSeoulViewModel: ObservableObject {
         
         // 알람 설정 모드로 전환 (다른 View에서 호출)
         func switchToAlarmMode() {
-            isDraggingDestination = false
+            isSelectDestinationMode = false
         }
     }
