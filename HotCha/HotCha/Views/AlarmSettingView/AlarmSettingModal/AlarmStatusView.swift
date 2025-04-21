@@ -115,11 +115,13 @@ struct BusStopDestinationSection: View {
                         .frame(width: 16, height: 16)
                         .foregroundColor(.mainpurple)
                         .padding(.leading,16)
-                    
-                    Text("올림픽교차로(광안역방면)")
-                        .font(.system(size: 16))
-                        .padding(.vertical, 16)
-                        .padding(.leading, 8)
+                    if let index = busStopSeoulViewModel.currentDestinationIndex {
+                        Text(busStopSeoulViewModel.busStations[index].stationNm)
+                            .font(.pretendard(.semibold, size: 16))
+                            .foregroundStyle(.gray900)
+                            .padding(.vertical, 16)
+                            .padding(.leading, 8)
+                    }
                     
                     Spacer()
                 }
@@ -135,10 +137,13 @@ struct BusStopDestinationSection: View {
                     .foregroundColor(.mainpurple)
                     .padding(.leading, 16)
                 
-                Text("용궁사, 국립수산과학원")
-                    .font(.system(size: 16))
-                    .padding(.vertical, 16)
-                    .padding(.leading, 8)
+                if let index = busStopSeoulViewModel.currentAlarmIndex {
+                    Text(busStopSeoulViewModel.busStations[index].stationNm)
+                        .font(.pretendard(.semibold, size: 16))
+                        .foregroundStyle(.gray900)
+                        .padding(.vertical, 16)
+                        .padding(.leading, 8)
+                }
                 
                 Spacer()
                 
@@ -218,8 +223,6 @@ struct BusStopInfoSection: View {
                         isFavorite.toggle()
                     }) {
                         Image(isFavorite ? "star_fill" : "star_empty")
-                            .font(.title2)
-                            .foregroundColor(isFavorite ? .yellow : .gray)
                     }
                 }
             }
