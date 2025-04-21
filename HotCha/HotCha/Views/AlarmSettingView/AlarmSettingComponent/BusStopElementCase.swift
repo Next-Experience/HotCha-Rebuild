@@ -79,9 +79,18 @@ enum BusStopElementCase {
     var trailing_icon: Image? {
         switch self {
         case .alarmStop:
-            return Image(systemName: "bell")
+            return Image("bell")
         case .destinationStop:
             return Image("map_pin")
+        default:
+            return nil
+        }
+    }
+    
+    var move_icon: Image? {
+        switch self {
+        case .alarmStop:
+            return Image("code")
         default:
             return nil
         }
