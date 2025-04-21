@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct AlarmStatusView: View {
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    // Status 뷰에서만 backgound에서 크기를 인식해서 모달 상태를 변경하도록 함
+    @State private var isViewActive = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -15,6 +19,7 @@ struct AlarmStatusView: View {
             let isSmall = height < 150
             let isMedium = height >= 250 && height < 600
             let isLarge = height >= 600
+            
             
             VStack(alignment: .leading, spacing: 0) {
                 
@@ -25,6 +30,7 @@ struct AlarmStatusView: View {
                 // 중간 이상 크기일 때만 표시
                 if isMedium || isLarge {
                     BusStopDestinationSection()
+                        .environmentObject(busStopSeoulViewModel)
                 }
                 
                 if isLarge {
@@ -38,27 +44,87 @@ struct AlarmStatusView: View {
                 
             }
             .font(.pretendard(.semibold, size: 16))
+            .onAppear {
+                isViewActive = true
+                updateModalState(height: height)
+            }
+            // 뷰가 사라질 때 비활성 상태로 설정
+            .onDisappear {
+                isViewActive = false
+            }
+            // 사이즈 변경 추적
+            .background(
+                HeightObserver(height: height, isActive: $isViewActive) { newHeight in
+                    updateModalState(height: newHeight)
+                }
+            )
+        }
+    }
+    
+    // 모달 상태 업데이트 함수
+    private func updateModalState(height: CGFloat) {
+        // 이 뷰가 활성화된 상태일 때만 모달 상태 업데이트
+        guard isViewActive else { return }
+        
+        if height < 150 {
+            modalStateViewModel.modalState = .alertStopsSmall
+        } else if height >= 250 && height < 600 {
+            modalStateViewModel.modalState = .alertStopsMedium
+        } else if height >= 600 {
+            modalStateViewModel.modalState = .alertStopsLarge
         }
     }
 }
+
+// 높이 변경을 관찰하는 헬퍼 뷰
+struct HeightObserver: View {
+    let height: CGFloat
+    @Binding var isActive: Bool
+    let onChange: (CGFloat) -> Void
+    
+    var body: some View {
+        Color.clear
+            .frame(height: 0)
+            .onChange(of: height) { newHeight in
+                // 활성 상태일 때만 콜백 실행
+                if isActive {
+                    onChange(newHeight)
+                }
+            }
+    }
+}
+
 struct BusStopDestinationSection: View {
+    @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    
     var body: some View {
         VStack(spacing: 0){
             // 첫 번째 정류장
-            HStack {
-                Image("map_pin")
-                    .frame(width: 16, height: 16)
-                    .foregroundColor(.mainpurple)
-                    .padding(.leading,16)
-                
-                Text("올림픽교차로(광안역방면)")
-                    .font(.system(size: 16))
-                    .padding(.vertical, 16)
-                    .padding(.leading, 8)
-                
-                Spacer()
+            Button(action: {
+                modalStateViewModel.modalState = .alarmWait
+                sheetManager.showAlarmInfoSheet2 = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    sheetManager.showAlarmSearchSheet1 = true
+                    busStopSeoulViewModel.switchToDestinationMode()
+                }
+            }){
+                HStack {
+                    Image("map_pin")
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.mainpurple)
+                        .padding(.leading,16)
+                    
+                    Text("올림픽교차로(광안역방면)")
+                        .font(.system(size: 16))
+                        .padding(.vertical, 16)
+                        .padding(.leading, 8)
+                    
+                    Spacer()
+                }
+                .background(.gray150)
             }
-            .background(.gray150)
             
             Divider()
             
@@ -133,10 +199,10 @@ struct AlertStopsSection: View {
 
 struct BusStopInfoSection: View {
     @State var isFavorite: Bool = false
-//    @State var startStationName: String? = "시작역 없음"
-//    @State var endStationName: String? = "도착역 없음"
-//    @State var busNumber: String? = "버스번호 없음"
-     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    //    @State var startStationName: String? = "시작역 없음"
+    //    @State var endStationName: String? = "도착역 없음"
+    //    @State var busNumber: String? = "버스번호 없음"
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     
     var body: some View {
         VStack(alignment:. leading, spacing: 12){
@@ -147,14 +213,15 @@ struct BusStopInfoSection: View {
                     .padding(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
                     .background(RoundedRectangle(cornerRadius: 4).fill(.skybluec.opacity(0.2)))
                 Spacer()
-                Button(action: {
-                    isFavorite.toggle()
-                }) {
-                    Image(isFavorite ? "star_fill" : "star_empty")
-                        .font(.title2)
-                        .foregroundColor(isFavorite ? .yellow : .gray)
+                if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
+                    Button(action: {
+                        isFavorite.toggle()
+                    }) {
+                        Image(isFavorite ? "star_fill" : "star_empty")
+                            .font(.title2)
+                            .foregroundColor(isFavorite ? .yellow : .gray)
+                    }
                 }
-                
             }
             HStack(spacing: 6){
                 Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
