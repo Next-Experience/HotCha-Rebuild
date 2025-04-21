@@ -213,7 +213,7 @@ struct BusStopInfoSection: View {
                     .padding(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
                     .background(RoundedRectangle(cornerRadius: 4).fill(.skybluec.opacity(0.2)))
                 Spacer()
-                if modalStateViewModel.modalState == .alertStopsLarge {
+                if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
                     Button(action: {
                         isFavorite.toggle()
                     }) {
