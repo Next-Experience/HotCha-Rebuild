@@ -37,6 +37,8 @@ struct BusStopElement: View {
                         .font(.pretendard(.medium, size: 16))
                         .foregroundStyle(stopCase.text_color)
                     
+                    Spacer()
+                    
                     if let icon = stopCase.trailing_icon {
                         Rectangle()
                             .frame(width: 36, height: 28)
@@ -48,6 +50,7 @@ struct BusStopElement: View {
                                     .frame(width: 16, height: 16)
                                     .foregroundColor(stopCase.text_color)
                             )
+                            .padding(.trailing, 15)
                     }
                 }
                 
@@ -56,6 +59,14 @@ struct BusStopElement: View {
                     .foregroundStyle(.gray500)
             }
             .padding(EdgeInsets(top: 20, leading: 35, bottom: 20, trailing: 0))
+            Spacer()
+            if let icon = stopCase.move_icon {
+                Image("code")
+                    .padding(.trailing, 20)
+            } else {
+                Spacer()
+                    .frame(width: 40, height: 20)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: 78, alignment: .leading)
         .padding(.leading, 60)
@@ -101,6 +112,6 @@ struct BusStopPoint: View {
 }
 
 
-//#Preview {
-//    AlarmSettingView()
-//}
+#Preview {
+    BusStopElement(stopCase: .destinationStop)
+}
