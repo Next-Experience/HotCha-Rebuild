@@ -29,7 +29,11 @@ struct BusStopListView: View {
         .ignoresSafeArea()
         .background(Color.gray900)
         .onAppear {
-            busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId)
+            busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId) { success in
+                if success {
+                    print("fetch bus stations success")
+                }
+            }
         }
     }
 }
