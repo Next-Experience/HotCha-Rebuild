@@ -48,7 +48,6 @@ struct AlarmSearchScrollButtonSection: View {
                 }
                 Spacer()
                 Button(action:{
-                    busStopSeoulViewModel.storeDestinationStation()
                     modalStateViewModel.modalState = .alarmWait
                     busStopSeoulViewModel.searchText = ""
                     busStopSeoulViewModel.searchTextFieldfocused = false
