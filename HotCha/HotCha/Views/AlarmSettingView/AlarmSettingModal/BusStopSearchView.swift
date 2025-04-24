@@ -106,6 +106,7 @@ struct MainPurpleAlarmButton: View {
             Spacer()
             Button(action: {
                 if busStopSeoulViewModel.currentDestinationIndex != nil {
+                    busStopSeoulViewModel.disableAfterDestinationStation()
                     modalStateViewModel.modalState = .alertStopsMedium
                     sheetManager.showAlarmSearchSheet1 = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {

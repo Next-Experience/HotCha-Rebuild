@@ -69,6 +69,8 @@ class BusStopSeoulViewModel: ObservableObject {
         guard !busStations.isEmpty else { return }
         applyFilteringDisableStation(with: "미정차")
         applyFilteringDisableStation(with: "가상")
+        
+        defaultBusStations = busStations
     }
     
     // 미정차 정류장 필터링
@@ -105,7 +107,7 @@ class BusStopSeoulViewModel: ObservableObject {
         busStations[destIndex].arrivalStation = false
     }
     
-  
+    
     
     // 이전 필터링 항목으로 이동 (버튼)
     func moveToPreviousFilteredStation() {
@@ -254,6 +256,16 @@ class BusStopSeoulViewModel: ObservableObject {
     //    // 현재 모드 (true면 목적지 or false면 알람 선택)
     //    @Published var isSelectDestinationMode: Bool = true
     
+    // TODO: 목적지 정류장 이후 disable
+    func disableAfterDestinationStation(){
+        // 목적지 정류장 인덱스 확인
+        guard let destIndex = getDestinationStationIndex() else { return }
+        
+        // 모든 정류장 알람 상태 초기화
+        for i in (destIndex + 1)..<busStations.count {
+            busStations[i].busStopCase = .disableStop
+        }
+    }
     
     // 도착 정류장 선택 메서드
     func selectDestinationStation(destIndex: Int) {
@@ -365,11 +377,17 @@ class BusStopSeoulViewModel: ObservableObject {
     // 목적지 설정 모드로 전환 (다른 View에서 호출)
     func switchToDestinationMode() {
         isSelectDestinationMode = true
-        if let alarmIndex = getAlarmStationIndex() {
-            busStations[alarmIndex].alarmStation = false
-            busStations[alarmIndex].busStopCase = .ableStop
-            
-        }
+        //        if let alarmIndex = getAlarmStationIndex() {
+        //            busStations[alarmIndex].alarmStation = false
+        //            busStations[alarmIndex].busStopCase = .ableStop
+        busStations = defaultBusStations // 초기 리스트로 초기화
+        // 선택된 목적지 유지
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+//            if let destIndex = getDestinationStationIndex() {
+            busStations[currentDestinationIndex ?? 0].busStopCase = .destinationStop
+                busStations[currentDestinationIndex ?? 0].arrivalStation = true
+//            }
+//        }
     }
     
     // 알람 설정 모드로 전환 (다른 View에서 호출)
