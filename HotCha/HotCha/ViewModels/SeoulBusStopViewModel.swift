@@ -60,24 +60,24 @@ class BusStopSeoulViewModel: ObservableObject {
         }
     }
     
-//    // 목적지로 선택된 정류장을 목적지로 변경
-//    func selectDestinationStataion(destIndex: Int) {
-//        // 이전에 선택된 목적지가 있다면 초기화
-//        if let currentDestIndex = currentDestinationIndex {
-//            clearDestinationStation(destIndex: currentDestIndex)
-//        }
-//        
-//        // 새 목적지 설정
-//        busStations[destIndex].busStopCase = .destinationStop
-//        busStations[destIndex].arrivalStation = true
-//        print("selected destination: \(busStations[destIndex].stationNm)")
-//        
-//        // 현재 목적지 인덱스 업데이트
-//        currentDestinationIndex = destIndex
-//        
-//        // 데이터 업데이트 알림
-//        notifyStationsUpdated()
-//    }
+    //    // 목적지로 선택된 정류장을 목적지로 변경
+    //    func selectDestinationStataion(destIndex: Int) {
+    //        // 이전에 선택된 목적지가 있다면 초기화
+    //        if let currentDestIndex = currentDestinationIndex {
+    //            clearDestinationStation(destIndex: currentDestIndex)
+    //        }
+    //
+    //        // 새 목적지 설정
+    //        busStations[destIndex].busStopCase = .destinationStop
+    //        busStations[destIndex].arrivalStation = true
+    //        print("selected destination: \(busStations[destIndex].stationNm)")
+    //
+    //        // 현재 목적지 인덱스 업데이트
+    //        currentDestinationIndex = destIndex
+    //
+    //        // 데이터 업데이트 알림
+    //        notifyStationsUpdated()
+    //    }
     
     // 다른 정류장을 목적지로 선택 시 이전 목적지 상태를 ableStop으로 초기화함
     func clearDestinationStation(destIndex: Int) {
@@ -243,124 +243,136 @@ class BusStopSeoulViewModel: ObservableObject {
     
     
     //
-//    // 현재 모드 (true면 목적지 or false면 알람 선택)
-//    @Published var isSelectDestinationMode: Bool = true
+    //    // 현재 모드 (true면 목적지 or false면 알람 선택)
+    //    @Published var isSelectDestinationMode: Bool = true
     
-      
-        // 도착 정류장 선택 메서드
-        func selectDestinationStation(destIndex: Int) {
-            guard destIndex >= 0 && destIndex < busStations.count else { return }
-            
-            // 이전에 선택된 목적지가 있다면 초기화
-            if let currentDestIndex = currentDestinationIndex {
-                clearDestinationStation(destIndex: currentDestIndex)
-            }
-            
-            // 새 목적지 설정
-            busStations[destIndex].busStopCase = .destinationStop
-            busStations[destIndex].arrivalStation = true
-            print("selected destination: \(busStations[destIndex].stationNm)")
-            
-            // 현재 목적지 인덱스 업데이트
-            currentDestinationIndex = destIndex
-            
-            // 데이터 업데이트 알림
-            notifyStationsUpdated()
-            /////
-            // 모든 정류장의 도착 상태 초기화
-//            for i in 0..<busStations.count {
-//                busStations[i].arrivalStation = false
-//            }
-            
-//            // 알람 정류장이 목적지 정류장 이후에 있다면 조정
-//            if let alarmIndex = getAlarmStationIndex(), alarmIndex >= destIndex {
-//                // 알람 정류장을 목적지 이전으로 이동 (최소 2정류장 전, 없으면 가장 가까운 정류장)
-//                selectAlarmStation(alarmIndex: max(0, destIndex - 2))
-//            }
-            
-            // 필터링된 정류장 업데이트 (스크롤 위치를 위해)
-//            // 모든 정류장 필터링 상태 초기화
-//            for i in 0..<busStations.count {
-//                busStations[i].filtered = false
-//            }
-            
-//            // 선택된 정류장을 필터링 상태로 설정
-//            busStations[destIndex].filtered = true
-//            
-//            currentDestinationIndex = destIndex
-            
-          
-            // 데이터 업데이트 알림
-            notifyStationsUpdated()
-        }
-        
-        // 알람 정류장 선택 메서드
-        func selectAlarmStation(alarmIndex: Int) {
-            // 목적지 정류장 인덱스 확인
-            guard let destIndex = getDestinationStationIndex() else { return }
-            
-            // 이전에 선택된 알람 정류장이 있다면 초기화
-            if let currentAlarmIndex = currentAlarmIndex {
-                clearDestinationStation(destIndex: currentAlarmIndex)
-            }
-            
-            // 알람 정류장은 목적지 정류장 이전에만 위치 가능
-            let validIndex = min(destIndex - 1, alarmIndex)
-            
-            // 인덱스 범위 확인 (0보다 작을 수 없음)
-            let finalIndex = max(0, validIndex)
-            
-            guard finalIndex >= 0 && finalIndex < busStations.count else { return }
-            
-            // 모든 정류장 알람 상태 초기화
-            for i in 0..<busStations.count {
-                busStations[i].alarmStation = false
-            }
-            
-            // 선택된 정류장 알람 설정
-            busStations[finalIndex].alarmStation = true
-            busStations[finalIndex].busStopCase = .alarmStop
-            // 현재 알람정류장 인덱스 업데이트
-            currentAlarmIndex = finalIndex
-        }
-        
-        // 목적지 정류장 인덱스 찾기
-        func getDestinationStationIndex() -> Int? {
-            return busStations.firstIndex(where: { $0.arrivalStation })
-        }
-        
-        // 알람 정류장 인덱스 찾기
-        func getAlarmStationIndex() -> Int? {
-            return busStations.firstIndex(where: { $0.alarmStation })
-        }
     
-        // 알람 정류장 설정 버튼 (다른 View에서 호출)
-        func setAlarmTwoStationsBeforeDestination() {
-            // 목적지 정류장 확인
-            guard let destIndex = getDestinationStationIndex() else { return }
-            
-            // 목적지에서 2정류장 전의 위치 계산 (최소 0)
-            let alarmIndex = max(0, destIndex - 2)
-            
-            // 알람 정류장 설정
-            selectAlarmStation(alarmIndex: alarmIndex)
-            
-            // 드래그 모드를 알람 모드로 변경
-            isSelectDestinationMode = false
+    // 도착 정류장 선택 메서드
+    func selectDestinationStation(destIndex: Int) {
+        guard destIndex >= 0 && destIndex < busStations.count else { return }
+        
+        // 이전에 선택된 목적지가 있다면 초기화
+        if let currentDestIndex = currentDestinationIndex {
+            clearDestinationStation(destIndex: currentDestIndex)
         }
         
-        // 목적지 설정 모드로 전환 (다른 View에서 호출)
-        func switchToDestinationMode() {
-            isSelectDestinationMode = true
-            if let alarmIndex = getAlarmStationIndex() {
-                busStations[alarmIndex].alarmStation = false
-                busStations[alarmIndex].busStopCase = .ableStop
-                
-            }
+        // 새 목적지 설정
+        busStations[destIndex].busStopCase = .destinationStop
+        busStations[destIndex].arrivalStation = true
+        print("selected destination: \(busStations[destIndex].stationNm)")
+        
+        // 현재 목적지 인덱스 업데이트
+        currentDestinationIndex = destIndex
+        
+        // 데이터 업데이트 알림
+        notifyStationsUpdated()
+        /////
+        // 모든 정류장의 도착 상태 초기화
+        //            for i in 0..<busStations.count {
+        //                busStations[i].arrivalStation = false
+        //            }
+        
+        //            // 알람 정류장이 목적지 정류장 이후에 있다면 조정
+        //            if let alarmIndex = getAlarmStationIndex(), alarmIndex >= destIndex {
+        //                // 알람 정류장을 목적지 이전으로 이동 (최소 2정류장 전, 없으면 가장 가까운 정류장)
+        //                selectAlarmStation(alarmIndex: max(0, destIndex - 2))
+        //            }
+        
+        // 필터링된 정류장 업데이트 (스크롤 위치를 위해)
+        //            // 모든 정류장 필터링 상태 초기화
+        //            for i in 0..<busStations.count {
+        //                busStations[i].filtered = false
+        //            }
+        
+        //            // 선택된 정류장을 필터링 상태로 설정
+        //            busStations[destIndex].filtered = true
+        //
+        //            currentDestinationIndex = destIndex
+        
+        
+        // 데이터 업데이트 알림
+        notifyStationsUpdated()
+    }
+    
+    // 알람 정류장 선택 메서드
+    func selectAlarmStation(alarmIndex: Int) {
+        // 목적지 정류장 인덱스 확인
+        guard let destIndex = getDestinationStationIndex() else { return }
+        
+        // 이전에 선택된 알람 정류장이 있다면 초기화
+        if let currentAlarmIndex = currentAlarmIndex {
+            clearDestinationStation(destIndex: currentAlarmIndex)
         }
         
-        // 알람 설정 모드로 전환 (다른 View에서 호출)
-        func switchToAlarmMode() {
-            isSelectDestinationMode = false
+        // 알람 정류장은 목적지 정류장 이전에만 위치 가능
+        let validIndex = min(destIndex - 1, alarmIndex)
+        
+        // 인덱스 범위 확인 (0보다 작을 수 없음)
+        let finalIndex = max(0, validIndex)
+        
+        guard finalIndex >= 0 && finalIndex < busStations.count else { return }
+        
+        // 모든 정류장 알람 상태 초기화
+        for i in 0..<busStations.count {
+            busStations[i].alarmStation = false
+        }
+        
+        // 선택된 정류장 알람 설정
+        busStations[finalIndex].alarmStation = true
+        busStations[finalIndex].busStopCase = .alarmStop
+        // 현재 알람정류장 인덱스 업데이트
+        currentAlarmIndex = finalIndex
+    }
+    
+    // 목적지 정류장 인덱스 찾기
+    func getDestinationStationIndex() -> Int? {
+        return busStations.firstIndex(where: { $0.arrivalStation })
+    }
+    
+    // 알람 정류장 인덱스 찾기
+    func getAlarmStationIndex() -> Int? {
+        return busStations.firstIndex(where: { $0.alarmStation })
+    }
+    
+    // 알람 정류장 설정 버튼 (다른 View에서 호출)
+    func setAlarmTwoStationsBeforeDestination() {
+        // 목적지 정류장 확인
+        guard let destIndex = getDestinationStationIndex() else { return }
+        
+        // 목적지에서 2정류장 전의 위치 계산 (최소 0)
+        let alarmIndex = max(0, destIndex - 2)
+        
+        // 알람 정류장 설정
+        selectAlarmStation(alarmIndex: alarmIndex)
+        
+        // 드래그 모드를 알람 모드로 변경
+        isSelectDestinationMode = false
+    }
+    
+    // 목적지 설정 모드로 전환 (다른 View에서 호출)
+    func switchToDestinationMode() {
+        isSelectDestinationMode = true
+        if let alarmIndex = getAlarmStationIndex() {
+            busStations[alarmIndex].alarmStation = false
+            busStations[alarmIndex].busStopCase = .ableStop
+            
         }
     }
+    
+    // 알람 설정 모드로 전환 (다른 View에서 호출)
+    func switchToAlarmMode() {
+        isSelectDestinationMode = false
+    }
+    
+    // 남은 정류장 수 계산 함수
+    func calculateRemainingStops() -> Int {
+        guard let destinationIndex = currentDestinationIndex,
+              let alarmIndex = currentAlarmIndex else {
+            return 2 // 기본값
+        }
+        
+        // 알람 정류장과 목적지 정류장 사이의 거리 계산
+        let remainingStops = abs(destinationIndex - alarmIndex)
+        return remainingStops
+    }
+}
