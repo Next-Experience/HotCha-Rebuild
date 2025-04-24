@@ -40,22 +40,7 @@ struct MainView: View {
                     .padding(.top,12)
             }
             Spacer()
-//            VStack {
-//                Button {
-//                    let attributes = BeforeBusStopAttributes(name: "BusStop Sample")
-//                    let contentState = BeforeBusStopAttributes.ContentState()
-//                    let content = ActivityContent(state: contentState, staleDate: nil)
-//                    do {
-//                        _ = try Activity<BeforeBusStopAttributes>.request(attributes: attributes, content: content, pushType: nil)
-//                        print("LiveActivity 성공적으로 시작됨")
-//                    } catch {
-//                        print("LiveActivityManager: Error in LiveActivityManager: \(error.localizedDescription)")
-//                    }
-//                } label: {
-//                    Text("Test Live Activity")
-//                }
-//            }
-//            .padding()
+            
         }
         .padding(20)
         .frame( maxWidth: .infinity, maxHeight: .infinity)
