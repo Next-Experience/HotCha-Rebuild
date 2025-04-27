@@ -74,6 +74,10 @@ struct SearchView: View {
                                     formatBusRoute(route)
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .simultaneousGesture(TapGesture().onEnded {
+                                   // 이 부분에서 dismiss 호출
+                                    searchActivate = false
+                               })
                             }
                         }
                     }
