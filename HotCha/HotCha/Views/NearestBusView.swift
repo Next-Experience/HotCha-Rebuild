@@ -1,10 +1,3 @@
-//
-//  NearestBusView.swift
-//  HotCha
-//
-//  Created by 문재윤 on 4/24/25.
-//
-
 
 //
 //  NearestBusView.swift
