@@ -15,20 +15,26 @@ struct BusStopElement: View {
     
     var body: some View {
         HStack(spacing: 0){
-            // 정류장 이미지 표시 영역
             ZStack {
-                VStack (spacing: 0) {
-                    // 첫번째 정류장이 아니면 일반, 이면 line이 투명색
-                    BusStopLine(line_color: (busStop?.isFirstStop != true) ? stopCase.line_color: .clear)
-                        .padding(0)
-                    
-                    // 마지막 정류장이 아니면 일반, 이면 line이 투명색
-                    BusStopLine(line_color: (busStop?.isLastStop != true) ? stopCase.line_color: .clear)
-                        .padding(0)
-                    
+                // 정류장 이미지 표시 영역
+                ZStack {
+                    VStack (spacing: 0) {
+                        // 첫번째 정류장이 아니면 일반, 이면 line이 투명색
+                        BusStopLine(line_color: (busStop?.isFirstStop != true) ? stopCase.line_color: .clear)
+                            .padding(0)
+                        
+                        // 마지막 정류장이 아니면 일반, 이면 line이 투명색
+                        BusStopLine(line_color: (busStop?.isLastStop != true) ? stopCase.line_color: .clear)
+                            .padding(0)
+                    }
+                    BusStopPoint(stopCase: stopCase, outer_circle_size: stopCase.outer_circle_size, outer_circle_color: stopCase.outer_circle_color)
+                        .frame(width: 16, height: 16)
                 }
-                BusStopPoint(stopCase: stopCase, outer_circle_size: stopCase.outer_circle_size, outer_circle_color: stopCase.outer_circle_color)
-                    .frame(width: 16, height: 16)
+                if stopCase == .currentStop {
+                    Image("current_bus")
+                        .frame(width: 40, height: 36)
+                        .offset(x: -30, y: 0)
+                }
             }
             // 정류장 텍스트 영역
             VStack(alignment:.leading, spacing: 3) {
@@ -43,19 +49,19 @@ struct BusStopElement: View {
                     
                     Spacer()
                     
-                    if let icon = stopCase.trailing_icon {
-                        Rectangle()
-                            .frame(width: 36, height: 28)
-                            .cornerRadius(13)
-                            .foregroundStyle(Color.gray900)
-                            .overlay(
-                                icon
-                                    .resizable()
-                                    .frame(width: 16, height: 16)
-                                    .foregroundColor(stopCase.text_color)
-                            )
-                            .padding(.trailing, 15)
-                    }
+                    //                    if let icon = stopCase.trailing_icon {
+                    //                        Rectangle()
+                    //                            .frame(width: 36, height: 28)
+                    //                            .cornerRadius(13)
+                    //                            .foregroundStyle(Color.gray900)
+                    //                            .overlay(
+                    //                                icon
+                    //                                    .resizable()
+                    //                                    .frame(width: 16, height: 16)
+                    //                                    .foregroundColor(stopCase.text_color)
+                    //                            )
+                    //                            .padding(.trailing, 15)
+                    //                    }
                 }
                 
                 Text(busStop?.busRouteNm ?? "노선번호 없음")
@@ -99,23 +105,31 @@ struct BusStopPoint: View {
     
     var body: some View {
         // currentStop인 경우
-        if stopCase.is_shadow != false {
-            Ellipse()
-                .frame(width: 40, height: 40)
-                .foregroundStyle(.mainpurple.opacity(0.15)) // TODO: opicity 수정 필요
-        }
+//        if stopCase.is_shadow != false {
+//            Ellipse()
+//                .frame(width: 40, height: 40)
+//                .foregroundStyle(.mainpurple.opacity(0.15)) // TODO: opicity 수정 필요
+//        }
         Ellipse()
             .frame(width: outer_circle_size, height: outer_circle_size)
             .foregroundStyle(outer_circle_color)
             .overlay(
-                Ellipse()
-                    .frame(width: inner_circle_size, height: inner_circle_size)
-                    .foregroundStyle(.gray900)
+                Group {
+                    if let icon = stopCase.leading_icon {
+                        icon
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                    } else {
+                        Ellipse()
+                            .frame(width: inner_circle_size, height: inner_circle_size)
+                            .foregroundStyle(.gray900)
+                    }
+                }
             )
     }
 }
 
 
 #Preview {
-    BusStopElement(stopCase: .destinationStop)
+    BusStopElement(stopCase: .currentStop)
 }
