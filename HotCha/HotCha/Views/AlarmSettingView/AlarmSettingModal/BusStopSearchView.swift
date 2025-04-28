@@ -11,6 +11,7 @@ struct BusStopSearchView: View {
     @State var busStopSearchText:String = ""
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
         VStack(alignment:. leading, spacing: 0){
@@ -18,7 +19,7 @@ struct BusStopSearchView: View {
                 BusStopInfoSection()
                 BusStopSearchTextField(busStopSearchText: $busStopSearchText)
                     .environmentObject(modalStateViewModel)
-                    .environmentObject(busStopSeoulViewModel)
+                    .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
                     .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
                 
             }
@@ -100,12 +101,14 @@ struct MainPurpleAlarmButton: View {
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
         HStack(alignment: .center){
             Spacer()
             Button(action: {
                 if busStopSeoulViewModel.currentDestinationIndex != nil {
+                    busLocationViewModel.startFetching() // 현재 버스위치 추적 시작
                     busStopSeoulViewModel.disableAfterDestinationStation()
                     modalStateViewModel.modalState = .alertStopsMedium
                     sheetManager.showAlarmSearchSheet1 = false

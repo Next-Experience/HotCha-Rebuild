@@ -14,7 +14,8 @@ struct AlarmSettingView: View {
     let cityCode: Int
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
     @StateObject private var modalStateViewModel = AlarmModalViewModel()
-    @StateObject private var busStopSeoulViewModel = BusStopSeoulViewModel()
+    @StateObject private var busStopSeoulViewModel =  BusStopSeoulViewModel()
+    @StateObject private var busLocationViewModel =  BusLocationViewModel()
     
     @State private var liveActivityStated = false // Live Activity 중복 실행 방지
     
@@ -22,6 +23,7 @@ struct AlarmSettingView: View {
         NavigationStack {
             BusStopListView(bus: bus, cityCode: 1)
                 .onAppear {
+                    busStopSeoulViewModel.setupBus(bus: bus)
                     sheetManager.showAlarmSearchSheet1 = true // 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
                     
                     if !liveActivityStated {
@@ -30,13 +32,14 @@ struct AlarmSettingView: View {
                     }
                 }
                 .environmentObject(sheetManager)
-                .environmentObject(busStopSeoulViewModel)
+                .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
                 .sheet(isPresented: $sheetManager.showAlarmSearchSheet1) {
                     ScrollView {
                         SettingModalView(bus: bus, cityCode: 1)
                             .environmentObject(sheetManager)
                             .environmentObject(modalStateViewModel)
                             .environmentObject(busStopSeoulViewModel)
+                            .environmentObject(busLocationViewModel)
                             .interactiveDismissDisabled(true)
                             .presentationDragIndicator(.visible)
                             .presentationDetents([.fraction(0.32)], selection: $selectedDetent)
@@ -51,6 +54,7 @@ struct AlarmSettingView: View {
                         .environmentObject(sheetManager)
                         .environmentObject(modalStateViewModel)
                         .environmentObject(busStopSeoulViewModel)
+                        .environmentObject(busLocationViewModel)
                         .interactiveDismissDisabled(true)
                         .presentationDragIndicator(.visible)
                         .presentationDetents([.fraction(0.99), .fraction(0.4), .fraction(0.1)], selection: $selectedDetent)
@@ -62,6 +66,7 @@ struct AlarmSettingView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
+                    busLocationViewModel.stopFetching()
                     dismiss()
                 }) {
                     Image(systemName: "chevron.left")
@@ -101,6 +106,7 @@ struct SettingModalView: View{
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     let bus: Bus_info_seoul // 선택된 버스 정보
     let cityCode: Int
     
@@ -113,7 +119,7 @@ struct SettingModalView: View{
                 
                 modalStateViewModel.modalState.alarmSettingMainView
                     .environmentObject(modalStateViewModel)
-                    .environmentObject(busStopSeoulViewModel)
+                    .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
             }
         }
         .edgesIgnoringSafeArea(.all)

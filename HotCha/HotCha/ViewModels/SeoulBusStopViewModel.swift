@@ -10,9 +10,11 @@
 import SwiftUI
 import Foundation
 import Combine
+import CoreLocation
 
 class BusStopSeoulViewModel: ObservableObject {
     @Published var bus: Bus_info_seoul?
+    
     @Published var busStations: [BusStop] = []
     @Published var defaultBusStations: [BusStop] = [] // 미정차 구역이 필터링 된 정류장 노선도
     @Published var searchText: String = ""
@@ -30,6 +32,10 @@ class BusStopSeoulViewModel: ObservableObject {
     // 현재 모드 (true면 목적지 or false면 알람 선택)
     @Published var isSelectDestinationMode: Bool = true
     
+    
+    func setupBus(bus: Bus_info_seoul) {
+        self.bus = bus
+    }
     
     // Route ID를 직접 인자로 받아 데이터를 가져오는 메서드
     func fetchBusStations(routeid: String, completion: @escaping (Bool) -> Void) {
@@ -147,7 +153,7 @@ class BusStopSeoulViewModel: ObservableObject {
         let filtered = filteredStations
         // 배열이 비어있거나 인덱스가 범위를 벗어나면 nil 반환
         guard !filtered.isEmpty, currentFilteredIndex >= 0, currentFilteredIndex < filtered.count else {
-            print("필터링된 배열의 범위가 잘못되었습니다.")
+            
             return nil
         }
         return filtered[currentFilteredIndex].id
@@ -377,21 +383,51 @@ class BusStopSeoulViewModel: ObservableObject {
     // 목적지 설정 모드로 전환 (다른 View에서 호출)
     func switchToDestinationMode() {
         isSelectDestinationMode = true
-        //        if let alarmIndex = getAlarmStationIndex() {
-        //            busStations[alarmIndex].alarmStation = false
-        //            busStations[alarmIndex].busStopCase = .ableStop
+        
         busStations = defaultBusStations // 초기 리스트로 초기화
         // 선택된 목적지 유지
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-//            if let destIndex = getDestinationStationIndex() {
-            busStations[currentDestinationIndex ?? 0].busStopCase = .destinationStop
-                busStations[currentDestinationIndex ?? 0].arrivalStation = true
-//            }
-//        }
+        busStations[currentDestinationIndex ?? 0].busStopCase = .destinationStop
+        busStations[currentDestinationIndex ?? 0].arrivalStation = true
+        
     }
     
-    // 알람 설정 모드로 전환 (다른 View에서 호출)
     func switchToAlarmMode() {
         isSelectDestinationMode = false
+    }
+    
+    func currentBusLocationMapping(nextStId: String) {
+        print("현재 버스 위치 매핑 - 정류장 ID: \(nextStId)")
+        
+        // 먼저 이전에 .currentStop으로 표시된 정류장의 상태를 복원
+        for i in 0..<busStations.count {
+            if busStations[i].busStopCase == .currentStop {
+                // 이전 상태로 복원 (필터링, 목적지, 알람 정류장 상태를 고려)
+                if busStations[i].arrivalStation {
+                    busStations[i].busStopCase = .destinationStop
+                } else if busStations[i].alarmStation {
+                    busStations[i].busStopCase = .alarmStop
+                } else if busStations[i].busStopCase != .disableStop {
+                    busStations[i].busStopCase = .ableStop
+                }
+            }
+        }
+        // 현재 버스 위치 정류장 찾기
+        if let index = busStations.firstIndex(where: { $0.station == nextStId }) {
+            // 정류장 상태를 현재 버스 위치로 변경
+            busStations[index].busStopCase = .currentStop
+            print("현재 버스 위치 정류장: \(busStations[index].stationNm)")
+            
+            // 알람 모드에서 현재 정류장이 알람 정류장인지 체크
+            if !isSelectDestinationMode, let alarmIndex = getAlarmStationIndex() {
+                if index == alarmIndex {
+                    // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
+                    print("🔔 알람 정류장에 도착!")
+                }
+            }
+            // UI 업데이트 알림
+            notifyStationsUpdated()
+        } else {
+            print("경고: 정류장 ID \(nextStId)를 찾을 수 없습니다.")
+        }
     }
 }
