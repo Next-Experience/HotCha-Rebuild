@@ -79,11 +79,9 @@ struct MainTextfiled: View {
                         .font(.pretendard(.semibold, size: 16))
                         .foregroundStyle(Color("mainpurple"))
                         .onTapGesture {
-                            //                            withAnimation {
-                            isTapped = true
-                            searchActivate = false
-                            isTextFieldFocused = false
-                            //                            }
+                                isTapped = true
+                                searchActivate = false
+                                isTextFieldFocused = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 withAnimation {
                                     isTapped = false

@@ -41,6 +41,16 @@ struct DraggableBusStopList: UIViewControllerRepresentable {
             
             // 필요할 때만 테이블 뷰 갱신
             uiViewController.tableView.reloadData()
+            
+            // 데이터가 있는 경우에만 필터링 처리
+            if !busStops.isEmpty, let filteredID = currentFilteredStationID, filteredID != uiViewController.lastFilteredID {
+                uiViewController.lastFilteredID = filteredID
+                
+                // 테이블 뷰 리로드와 레이아웃 완료 후에 스크롤 실행
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak uiViewController] in
+                    uiViewController?.scrollToFilteredStation(with: filteredID)
+                }
+            }
         } else if let filteredID = currentFilteredStationID, filteredID != uiViewController.lastFilteredID {
             // 필터링 ID만 변경된 경우 스크롤만 수행
             uiViewController.scrollToFilteredStation(with: filteredID)
@@ -90,7 +100,7 @@ class DraggableBusStopTableViewController: UITableViewController {
         setupFilteredStationObserver()
     }
     
-    // 필터링된 정류장 ID 변경 모니터링
+    //    // 필터링된 정류장 ID 변경 모니터링
     private func setupFilteredStationObserver() {
         guard let viewModel = viewModel else { return }
         
@@ -110,6 +120,18 @@ class DraggableBusStopTableViewController: UITableViewController {
     
     // ID로 필터링된 정류장으로 스크롤
     func scrollToFilteredStation(with id: UUID) {
+        // 테이블 뷰가 준비되었는지 확인
+        let rowCount = tableView.numberOfRows(inSection: 0)
+        guard rowCount > 0 else {
+            print("Warning: Table view has no rows yet")
+            
+            // 테이블 뷰가 준비되면 다시 시도
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.scrollToFilteredStation(with: id)
+            }
+            return
+        }
+        
         // ID에 해당하는 정류장 찾기
         if let index = busStops.firstIndex(where: { $0.id == id }) {
             let indexPath = IndexPath(row: index, section: 0)
@@ -219,17 +241,6 @@ class DraggableBusStopTableViewController: UITableViewController {
                     
                     // 현재 위치가 목적지 정류장보다 앞에 있는지 확인
                     if indexPath.row < destIndex {
-                        // 선택된 셀
-                        guard let cell = tableView.cellForRow(at: indexPath) else { return }
-                        
-                        // 배경색 스냅샷 생성 (알람은 다른 색상 사용)
-                        let highlightView = UIView(frame: cell.frame)
-                        highlightView.backgroundColor = UIColor(Color.purpleOpacity10) // 알람용 색상 조정 가능
-                        
-                        // 배경 뷰 테이블뷰에 추가
-                        tableView.insertSubview(highlightView, belowSubview: cell)
-                        backgroundView = highlightView
-                        
                         // 알람 정류장 업데이트
                         updateAlarmStation(at: indexPath.row)
                     }
@@ -238,26 +249,13 @@ class DraggableBusStopTableViewController: UITableViewController {
             }
             
         case .changed:
-            guard let backgroundView = backgroundView, let sourceIndexPath = sourceIndexPath else { return }
+            guard let sourceIndexPath = sourceIndexPath else { return }
             
             // 드래그 중인데 목적지 선택 모드로 바뀌었다면 드래그 취소
             if isSelectDestinationMode {
                 cancelDrag()
                 return
             }
-            
-            // 배경 뷰를 터치 위치에 맞게 이동
-            var frame = backgroundView.frame
-            frame.origin.y = location.y - frame.size.height / 2
-            
-            // 화면 범위 내에 유지
-            if !busStops.isEmpty {
-                let minY = tableView.rectForRow(at: IndexPath(row: 0, section: 0)).minY
-                let maxY = tableView.rectForRow(at: IndexPath(row: busStops.count - 1, section: 0)).maxY - frame.size.height
-                
-                frame.origin.y = max(minY, min(maxY, frame.origin.y))
-            }
-            backgroundView.frame = frame
             
             // 현재 위치에 해당하는 인덱스 찾기
             if let newIndexPath = tableView.indexPathForRow(at: location), newIndexPath != sourceIndexPath {
@@ -286,16 +284,8 @@ class DraggableBusStopTableViewController: UITableViewController {
     
     // 드래그 취소 및 정리
     private func cancelDrag() {
-        guard let backgroundView = backgroundView else { return }
-        
-        // 배경 뷰 제거
-        UIView.animate(withDuration: 0.2, animations: {
-            backgroundView.alpha = 0
-        }) { _ in
-            backgroundView.removeFromSuperview()
-            self.backgroundView = nil
-            self.sourceIndexPath = nil
-        }
+        // 소스 인덱스 초기화
+        sourceIndexPath = nil
     }
 }
 
@@ -369,19 +359,6 @@ class BusStopCell: UITableViewCell {
                     .background(Color.gray100.opacity(0.15))
                 busStopView
             }
-                .background(
-                    Group {
-                        if busStop.arrivalStation {
-                            Color.purpleOpacity10
-                        } else if busStop.alarmStation {
-                            Color.purpleOpacity10 // 알람용 색상 조정 가능
-                        } else if busStop.filtered {
-                            Color.clear // 필터링된 항목은 배경색 없음, 필요시 변경 가능
-                        } else {
-                            Color.clear
-                        }
-                    }
-                )
         )
         
         // 새 호스팅 컨트롤러 생성하고 설정
@@ -403,19 +380,7 @@ class BusStopCell: UITableViewCell {
             hostingView.layer.opacity = 1.0
         }
         
-        // 배경색 설정 (애니메이션 없이)
-        UIView.performWithoutAnimation {
-            if busStop.arrivalStation {
-                backgroundColor = UIColor(Color.purpleOpacity10)
-            } else if busStop.alarmStation {
-                backgroundColor = UIColor(Color.purpleOpacity10) // 알람용 색상 조정 가능
-            } else if busStop.filtered {
-                // 필터링된 항목은 기본 배경색 유지, 필요시 변경 가능
-                backgroundColor = .clear
-            } else {
-                backgroundColor = .clear
-            }
-        }
+        
     }
     
     override func prepareForReuse() {

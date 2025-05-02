@@ -12,6 +12,7 @@ struct BusStopSearchView: View {
     @State var busStopSearchText:String = ""
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
         VStack(alignment:. leading, spacing: 0){
@@ -19,7 +20,7 @@ struct BusStopSearchView: View {
                 BusStopInfoSection()
                 BusStopSearchTextField(busStopSearchText: $busStopSearchText)
                     .environmentObject(modalStateViewModel)
-                    .environmentObject(busStopSeoulViewModel)
+                    .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
                     .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
                 
             }
@@ -49,7 +50,6 @@ struct AlarmSearchScrollButtonSection: View {
                 }
                 Spacer()
                 Button(action:{
-                    busStopSeoulViewModel.storeDestinationStation()
                     modalStateViewModel.modalState = .alarmWait
                     busStopSeoulViewModel.searchText = ""
                     busStopSeoulViewModel.searchTextFieldfocused = false
@@ -102,6 +102,7 @@ struct MainPurpleAlarmButton: View {
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     // LiveActivity 중복 실행 방지
     @State private var liveActivityStarted = false
@@ -124,6 +125,8 @@ struct MainPurpleAlarmButton: View {
                     NotificationCenter.default.post(name: Notification.Name("ResetSearchText"), object: nil)
                     
                     // 모달 상태 변경
+                    busLocationViewModel.startFetching() // 현재 버스위치 추적 시작
+                    busStopSeoulViewModel.disableAfterDestinationStation()
                     modalStateViewModel.modalState = .alertStopsMedium
                     sheetManager.showAlarmSearchSheet1 = false
                     
@@ -146,6 +149,8 @@ struct MainPurpleAlarmButton: View {
                         )
                     }
                 }
+                
+                busStopSeoulViewModel.isReload = true // 알람이 시작한 상태이기 때문에, 시작한 상태로 알람에 다시 들어오면 정보를 그대로 띄워주기 위한 트리거
                 
             }, label: {
                 Text("알림 시작")

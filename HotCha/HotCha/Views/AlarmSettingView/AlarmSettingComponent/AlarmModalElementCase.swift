@@ -58,8 +58,6 @@ enum AlarmSettingModalElementCase {
         switch self {
         case .alarmWait:
             return AnyView(MainPurpleAlarmButton(isInfoFilled: false))
-        case .alarmStart:
-            return AnyView(MainPurpleAlarmButton(isInfoFilled: true))
         case .alarmSearch:
             return AnyView(AlarmSearchScrollButtonSection())
         default:

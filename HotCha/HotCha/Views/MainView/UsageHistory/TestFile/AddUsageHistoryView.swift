@@ -41,7 +41,7 @@ struct AddUsageHistoryView: View {
                     
                     DatePicker("하차 시간", selection: $getOffTimestamp, displayedComponents: [.date, .hourAndMinute])
                 }
-                
+                // TODO: 안내 종료할 때 이 버튼을 안내 종료 버튼에 붙여넣기
                 Button("저장") {
                     let newUsage = Usage_history(
                         route_id: routeID,
