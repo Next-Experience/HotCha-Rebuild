@@ -40,16 +40,17 @@ struct MainView: View {
     var body: some View {
         // 메인뷰 전체
         VStack(spacing: 12) {
-            // 알람이 활성화되었을 때는 DoAlarmView를 표시, 그렇지 않거나 앱이 시작될 때는 MainTextfiled 표시
-            if alarmActive && !searchActivate {
+            // 알람이 활성화되었을 때는 DoAlarmView를 표시
+            if alarmActive {
                 NavigationLink(
                     destination: AlarmSettingView(bus: savedBus!, cityCode: savedCityCode)
                         .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                forceCheckAlarmStatus()
-                                // searchActivate 플래그를 명시적으로 false로 설정
-                                searchActivate = false
-                            }
+                            print("AlarmSettingView 표시됨")
+                        }
+                        .onDisappear {
+                            // AlarmSettingView에서 나왔을 때 알람 상태 확인
+                            print("AlarmSettingView 종료됨, 상태 확인 호출")
+                            checkAlarmStatus()
                         },
                     isActive: $shouldNavigateToAlarmView
                 ) {
@@ -65,6 +66,10 @@ struct MainView: View {
                             shouldNavigateToAlarmView = true
                         }
                     }
+                
+                BookmarkView(isEditMode: $isEditMode, alarmActive: alarmActive)
+                    .padding(.top, 12)
+                
             } else {
                 // '버스번호를 알려주세요' 텍스트 필드
                 MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate)
@@ -75,8 +80,8 @@ struct MainView: View {
                 SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate)
             } else {
                 // 즐겨찾기 항목들
-                BookmarkView(isEditMode: $isEditMode)
-                    .padding(.top,12)
+                BookmarkView(isEditMode: $isEditMode, alarmActive: alarmActive)
+                    .padding(.top, 12)
             }
             
             Spacer()
@@ -95,19 +100,11 @@ struct MainView: View {
             if isAppStart {
                 // 알람 상태 초기화
                 resetAlarmState()
-                textfiledValue = ""
-                searchActivate = false
-                isEditMode = false
                 isAppStart = false
             } else {
                 // 앱이 시작된 후에는 알람 상태에 따라 뷰 결정
                 print("MainView onAppear: 앱 시작 아님, 알람 상태 확인")
                 forceCheckAlarmStatus()
-                
-                if !alarmActive {
-                    searchActivate = false
-                    textfiledValue = ""
-                }
             }
         }
         .onChange(of: shouldNavigateToAlarmView) { newValue in
@@ -122,21 +119,11 @@ struct MainView: View {
                 // 명시적으로 전달된 알람 상태 사용
                 print("알림에서 받은 알람 상태: \(alarmState)")
                 alarmActive = alarmState
-                
-                // 알람이 활성화된 경우 검색 상태를 false로 설정
-                if alarmState {
-                    searchActivate = false
-                }
             } else {
                 // UserDefaults에서 알람 상태 확인
                 let newState = UserDefaults.standard.bool(forKey: "alarmActive")
                 print("UserDefaults에서 가져온 알람 상태: \(newState)")
                 alarmActive = newState
-                
-                // 알람이 횔성화된 경우 검색 상태를 false로 설정
-                if newState {
-                    searchActivate = false
-                }
             }
             
             // 알람 정보 갱신
@@ -146,8 +133,6 @@ struct MainView: View {
             // 알람이 설정되었을 때 검색 텍스트 초기화
             print("ResetSearchText 알림 수신됨, 텍스트 초기화")
             textfiledValue = ""
-            searchActivate = false
-            isEditMode = false
         }
     }
     
@@ -159,7 +144,6 @@ struct MainView: View {
         
         // 상태 업데이트
         alarmActive = forcedAlarmActive
-        searchActivate = false
         
         // 알람 정보 가져오기
         alarmBusNo = UserDefaults.standard.string(forKey: "alarmBusNo") ?? ""
@@ -170,14 +154,6 @@ struct MainView: View {
         // 알람이 활성화되어 있으면 버스 정보 로드
         if forcedAlarmActive {
             loadSavedBusInfo()
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            NotificationCenter.default.post(
-                name: Notification.Name("AlarmStatusChanged"),
-                object: nil,
-                userInfo: ["alarmActive": forcedAlarmActive]
-            )
         }
     }
     

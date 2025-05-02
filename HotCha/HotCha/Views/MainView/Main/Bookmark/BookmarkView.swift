@@ -13,6 +13,7 @@ struct BookmarkView: View {
     @Environment(\.modelContext) private var modelContex
     @Query var bookmarkdata: [Bookmarkmodel]
     @Binding var isEditMode: Bool
+    var alarmActive: Bool
     
     let columns: [GridItem] = [
             GridItem(.flexible(), spacing: 15),
@@ -43,19 +44,19 @@ struct BookmarkView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     let homebookmark = bookmarkdata.filter { $0.bookmark_type == 1 }
                     if homebookmark.isEmpty {
-                        BookmarkCardEmptyView(name: "집", image: "houseicon")
+                        BookmarkCardEmptyView(name: "집", image: "houseicon", alarmActive: alarmActive)
                         } else {
                             ForEach(homebookmark) { bookmark in
-                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark)
+                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive)
                             }
                         }
                     
                     let workplacebookmark = bookmarkdata.filter { $0.bookmark_type == 2 }
                     if workplacebookmark.isEmpty {
-                        BookmarkCardEmptyView(name: "회사", image: "buildingicon")
+                        BookmarkCardEmptyView(name: "회사", image: "buildingicon", alarmActive: alarmActive)
                         } else {
                             ForEach(workplacebookmark) { bookmark in
-                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark)
+                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive)
                             }
                         }
                     }
@@ -63,11 +64,11 @@ struct BookmarkView: View {
                 // 직접 추가하는 즐겨찾기
                 let bookmarks = bookmarkdata.filter { $0.bookmark_type == 0 }
                 LazyVGrid(columns: columns, spacing: 16) { ForEach(bookmarks) { bookmark in
-                    BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark)
+                    BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive)
                 }
                     if bookmarks.count < 4 {
                         if !isEditMode {
-                            BookmarkPlusView()
+                            BookmarkPlusView(alarmActive: alarmActive)
                         }
                         }
                 }
