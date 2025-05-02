@@ -10,6 +10,7 @@ import SwiftUI
 struct AlarmStatusView: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     // Status 뷰에서만 backgound에서 크기를 인식해서 모달 상태를 변경하도록 함
     @State private var isViewActive = false
     
@@ -39,6 +40,7 @@ struct AlarmStatusView: View {
                 Spacer()
                 Divider()
                 AlertStopsSection()
+                    .environmentObject(busLocationViewModel)
                 
                 
                 
@@ -189,15 +191,29 @@ struct AlertSettingSection: View {
 
 
 struct AlertStopsSection: View {
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         HStack(alignment: .bottom){
             Text("6정거장 전")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()
-            Text("알림 종료")
-                .foregroundStyle(.mainpurple)
-                .font(.pretendard(.medium, size: 16))
+            Button(action: {
+                busLocationViewModel.stopFetching()
+                dismiss()
+            }){
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.gray150)
+                    .frame(width: 92, height: 36)
+                    .overlay(
+                        Text("안내 종료")
+                            .foregroundStyle(.mainpurple)
+                            .font(.pretendard(.medium, size: 16))
+                    )
+            }
+            
         }
         .padding(EdgeInsets(top: 21, leading: 20, bottom: 48, trailing: 20))
     }
