@@ -413,8 +413,18 @@ class BusStopSeoulViewModel: ObservableObject {
         }
         // 현재 버스 위치 정류장 찾기
         if let index = busStations.firstIndex(where: { $0.station == nextStId }) {
-            // 정류장 상태를 현재 버스 위치로 변경
-            busStations[index].busStopCase = .currentStop
+            if busStations[index].busStopCase.contains(.alarmStop) {
+                // 알람 정류장과 현재 정류장 위치가 같으면 OptionSet으로 두 상태를 함께 나타냄
+                busStations[index].busStopCase = .bothCurrentBusWithAlarm
+            } else if (busStations[index].busStopCase.contains(.alarmStop)) {
+                // 알람 정류장과 현재 정류장 위치가 같으면 OptionSet으로 두 상태를 함께 나타냄
+                busStations[index].busStopCase = .bothCurrentBusWithDest
+            }
+                else {
+                // 정류장 상태를 현재 버스 위치로 변경
+                busStations[index].busStopCase = .currentStop
+            }
+            
             print("현재 버스 위치 정류장: \(busStations[index].stationNm)")
             
             // 알람 모드에서 현재 정류장이 알람 정류장인지 체크

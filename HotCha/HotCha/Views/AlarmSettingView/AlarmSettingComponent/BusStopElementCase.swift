@@ -18,6 +18,7 @@ struct BusStopElementCase: OptionSet, Hashable {
     static let filteredStop    = BusStopElementCase(rawValue: 1 << 5)
     
     static let bothCurrentBusWithAlarm: BusStopElementCase = [.currentStop, .alarmStop]
+    static let bothCurrentBusWithDest: BusStopElementCase = [.currentStop, .destinationStop]
 }
 
 extension BusStopElementCase {
@@ -50,7 +51,10 @@ extension BusStopElementCase {
     }
     
     var outer_circle_color: Color {
-        if contains(.disableStop) {
+        if contains(.currentStop) && contains(.alarmStop) || contains(.currentStop) && contains(.destinationStop) {
+            return .gray150
+        }
+        else if contains(.disableStop) {
             return .gray400
         } else if contains(.currentStop) {
             return .mainpurple
@@ -67,14 +71,10 @@ extension BusStopElementCase {
         }
     }
     
-    var is_shadow: Bool {
-        contains(.currentStop)
-    }
-    
     var leading_icon: Image? {
         if contains(.destinationStop) {
             return Image("map_pin")
-        } else if contains(.alarmStop) {
+        } else if contains(.alarmStop) || (contains(.currentStop) && contains(.alarmStop)){
             return Image("bell")
         } else {
             return nil

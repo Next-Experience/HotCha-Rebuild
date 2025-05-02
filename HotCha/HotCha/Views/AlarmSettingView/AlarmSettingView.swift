@@ -119,13 +119,15 @@ struct SettingModalView: View{
                 
                 modalStateViewModel.modalState.alarmSettingMainView
                     .environmentObject(modalStateViewModel)
-                    .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
+                    .environmentObject(busStopSeoulViewModel)
+                    .environmentObject(busLocationViewModel)
             }
         }
         .edgesIgnoringSafeArea(.all)
         .onAppear {
             modalStateViewModel.bus = bus
             modalStateViewModel.cityCode = cityCode
+            print("버스 정보다 \(bus)")
         }
     }
 }

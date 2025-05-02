@@ -30,11 +30,17 @@ struct BusStopElement: View {
                     BusStopPoint(stopCase: stopCase, outer_circle_size: stopCase.outer_circle_size, outer_circle_color: stopCase.outer_circle_color)
                         .frame(width: 16, height: 16)
                 }
-                if stopCase == .currentStop {
-                    Image("current_bus")
-                        .frame(width: 40, height: 36)
-                        .offset(x: -30, y: 0)
-                }
+                .overlay(
+                    Group {
+                        if stopCase.contains(.currentStop) {
+                            Image("current_bus")
+                                .resizable()
+                                .frame(width: 40, height: 36)
+                                .offset(x: -47) // Point 왼쪽에 고정
+                        }
+                    },
+                    alignment: .leading
+                )
             }
             // 정류장 텍스트 영역
             VStack(alignment:.leading, spacing: 3) {
@@ -131,5 +137,5 @@ struct BusStopPoint: View {
 
 
 #Preview {
-    BusStopElement(stopCase: .currentStop)
+    BusStopElement(stopCase: [.currentStop, .destinationStop])
 }

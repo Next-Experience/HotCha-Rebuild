@@ -55,7 +55,7 @@ struct BusStopListView: View {
         }
         
         // 다음 정류장 ID가 변경된 경우에만 UI 업데이트 (중복 업데이트 방지)
-        if nearestBus.nextStId != previousBusStId {
+//        if nearestBus.nextStId != previousBusStId {
             // 이전 ID 저장
             previousBusStId = nearestBus.nextStId
             
@@ -66,6 +66,6 @@ struct BusStopListView: View {
                     busStopSeoulViewModel.currentBusLocationMapping(nextStId: nearestBus.nextStId)
                 }
             }
-        }
+//        }
     }
 }
