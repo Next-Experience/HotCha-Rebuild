@@ -27,6 +27,7 @@ class BusStopSeoulViewModel: ObservableObject {
     // 현재 선택된 목적지의 인덱스를 저장할 변수 추가, 이전에 선택된 것을 초기화 하기위해 필요
     @Published var currentDestinationIndex: Int? = nil
     @Published var currentAlarmIndex: Int? = nil // 이전에 선택된 알람의 상태를 초기화 하기 위해 필요
+    @Published var currentBusStopIndex: Int? = nil // 현재 정류장 인덱스 몇 정류장 차이인지 구하기 위해
     @Published var searchTextFieldfocused: Bool = false // textField가 정류장 선택을 누르면 초기화 되도록 하기위함
     
     // 현재 모드 (true면 목적지 or false면 알람 선택)
@@ -428,6 +429,8 @@ class BusStopSeoulViewModel: ObservableObject {
                 busStations[index].busStopCase = .currentStop
             }
             
+            currentBusStopIndex = index // 현재 정류장 인덱스 매핑
+            
             print("현재 버스 위치 정류장: \(busStations[index].stationNm)")
             
             // 알람 모드에서 현재 정류장이 알람 정류장인지 체크
@@ -452,6 +455,16 @@ class BusStopSeoulViewModel: ObservableObject {
         // 종료뷰를 위해 시트 모두 닫음
         sheetManager.showAlarmSearchSheet1 = false
         sheetManager.showAlarmInfoSheet2 = false
+    }
+    
+    // 목적지와 현재 정류장 수의 차이를 계산
+    func distanceToDestinationStop() -> Int? {
+        var distanceStopNum: Int? = 0
+        
+        if let destIndex = getDestinationStationIndex(), let currIndex = currentBusStopIndex {
+            distanceStopNum = destIndex - currIndex
+        }
+        return distanceStopNum
     }
 }
 

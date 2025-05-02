@@ -41,9 +41,7 @@ struct AlarmStatusView: View {
                 Divider()
                 AlertStopsSection()
                     .environmentObject(busLocationViewModel)
-                
-                
-                
+                    .environmentObject(busStopSeoulViewModel)
             }
             .font(.pretendard(.semibold, size: 16))
             .onAppear {
@@ -192,11 +190,12 @@ struct AlertSettingSection: View {
 
 struct AlertStopsSection: View {
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         HStack(alignment: .bottom){
-            Text("6정거장 전")
+            Text("\(busStopSeoulViewModel.distanceToDestinationStop() ?? 0)정거장 전")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()
