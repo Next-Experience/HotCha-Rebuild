@@ -32,6 +32,7 @@ struct AlarmStatusView: View {
                 if isMedium || isLarge {
                     BusStopDestinationSection()
                         .environmentObject(busStopSeoulViewModel)
+                        .environmentObject(busLocationViewModel)
                 }
                 
                 if isLarge {
@@ -98,6 +99,7 @@ struct BusStopDestinationSection: View {
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
         VStack(spacing: 0){
@@ -108,6 +110,7 @@ struct BusStopDestinationSection: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     sheetManager.showAlarmSearchSheet1 = true
                     busStopSeoulViewModel.switchToDestinationMode()
+                    busLocationViewModel.stopFetching()
                 }
             }){
                 HStack {
@@ -195,7 +198,12 @@ struct AlertStopsSection: View {
     
     var body: some View {
         HStack(alignment: .bottom){
-            Text("\(busStopSeoulViewModel.distanceToDestinationStop() ?? 0)정거장 전")
+            if let distanceToDestinationStop = busStopSeoulViewModel.distanceToDestinationStop() {
+                Text("\(abs(distanceToDestinationStop))")
+                    .font(.pretendard(.bold, size: 24))
+                    .foregroundStyle(.gray900)
+            }
+            Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()

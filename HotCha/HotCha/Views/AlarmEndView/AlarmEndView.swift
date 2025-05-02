@@ -11,6 +11,7 @@ struct AlarmEndView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
         
@@ -20,16 +21,19 @@ struct AlarmEndView: View {
                     Text("목적지로부터")
                         .font(.pretendard(.semibold, size: 16))
                         .foregroundStyle(Color("gray300"))
-                    Text("00")
-                        .font(.pretendard(.semibold, size: 16))
-                        .foregroundStyle(Color("mainpurple"))
-                    Text("정거장 전")
+                    if let distanceToDestinationStop = busStopSeoulViewModel.distanceToDestinationStop() {
+                        Text(String(format: "%02d", abs(distanceToDestinationStop)))
+                            .font(.pretendard(.semibold, size: 16))
+                            .foregroundStyle(Color("mainpurple"))
+                    }
+                        
+                    Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
                         .font(.pretendard(.semibold, size: 16))
                         .foregroundStyle(Color("gray300"))
                 }
                 .padding(.bottom, 12)
                 
-                Text("해운대도시철도역")
+                Text("\(busStopSeoulViewModel.busStations[busStopSeoulViewModel.getDestinationStationIndex() ?? 0].stationNm)")
                     .font(.pretendard(.bold, size: 24))
                     .foregroundStyle(Color("gray50"))
                     .padding(.bottom, 30)
@@ -64,6 +68,7 @@ struct AlarmEndView: View {
                 .background(Capsule().fill(Color("gray400").opacity(0.4)))
                 .onTapGesture {
                     dismiss()
+                    busLocationViewModel.stopFetching()
                 }
             }
             .padding(.bottom, 37)
