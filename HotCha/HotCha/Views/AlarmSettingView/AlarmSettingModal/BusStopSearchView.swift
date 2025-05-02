@@ -106,6 +106,8 @@ struct MainPurpleAlarmButton: View {
     
     // LiveActivity 중복 실행 방지
     @State private var liveActivityStarted = false
+    // 현재 진행중인 알람이 있는지 여부
+    @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
     
     var body: some View {
         HStack(alignment: .center){
@@ -125,9 +127,11 @@ struct MainPurpleAlarmButton: View {
                     NotificationCenter.default.post(name: Notification.Name("ResetSearchText"), object: nil)
                     
                     // 모달 상태 변경
-                    busLocationViewModel.startFetching() // 현재 버스위치 추적 시작
                     busStopSeoulViewModel.disableAfterDestinationStation()
                     modalStateViewModel.modalState = .alertStopsMedium
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        busLocationViewModel.startFetching() // 현재 버스위치 추적 시작
+                    }
                     sheetManager.showAlarmSearchSheet1 = false
                     
                     // 강제로 알람 활성화 상태 설정
@@ -151,6 +155,9 @@ struct MainPurpleAlarmButton: View {
                 }
                 
                 busStopSeoulViewModel.isReload = true // 알람이 시작한 상태이기 때문에, 시작한 상태로 알람에 다시 들어오면 정보를 그대로 띄워주기 위한 트리거
+                
+                // TODO: 앱스토리지에 알람 진행중인 상태 저장
+                isAlarmInProgress = true
                 
             }, label: {
                 Text("알림 시작")
@@ -178,7 +185,7 @@ struct MainPurpleAlarmButton: View {
             busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].stationNm : bus.edStationNm
         
         // 남은 정류장 수 계산
-        let remainingStops = busStopSeoulViewModel.distanceToDestinationStop() ?? 0
+        let remainingStops =  0
         
         // UserDefaults에 정보 저장
         UserDefaults.standard.set(bus.busRouteAbrv, forKey: "alarmBusNo")
@@ -210,7 +217,7 @@ struct MainPurpleAlarmButton: View {
             busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentAlarmIndex!].stationNm : bus.stStationNm
         
         // 남은 정류장 수 계산
-        let remainingStops = busStopSeoulViewModel.distanceToDestinationStop() ?? 0
+        let remainingStops = 0
         
         let contentState = BeforeBusStopAttributes.ContentState(
             busNumber: bus.busRouteAbrv,

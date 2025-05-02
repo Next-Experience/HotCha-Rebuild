@@ -447,6 +447,8 @@ class BusStopSeoulViewModel: ObservableObject {
             
             print("현재 버스 위치 정류장: \(busStations[index].stationNm)")
             
+            let distance = distanceToDestinationStop()
+            
             // 알람 모드에서 현재 정류장이 알람 정류장인지 체크
             if !isSelectDestinationMode, let alarmIndex = getAlarmStationIndex() {
                 if index == alarmIndex {
@@ -462,6 +464,7 @@ class BusStopSeoulViewModel: ObservableObject {
                     )
                     // 알람종료뷰로 이동하기 위한 트리거
                     navigateToAlarmEndView = true
+                    print("navigateToAlarmEndView \(navigateToAlarmEndView)")
                 }
             }
             // UI 업데이트 알림
@@ -478,11 +481,18 @@ class BusStopSeoulViewModel: ObservableObject {
     }
     
     // 목적지와 현재 정류장 수의 차이를 계산
-    func distanceToDestinationStop() -> Int? {
-        var distanceStopNum: Int? = 0
+    func distanceToDestinationStop() -> Int?{
+        var distanceStopNum: Int = 0
+        // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
+        @AppStorage("remainingStops") var remainingStops: String = "불러오는 중"
         
         if let destIndex = getDestinationStationIndex(), let currIndex = currentBusStopIndex {
             distanceStopNum = destIndex - currIndex
+            if distanceStopNum >= 0 {
+                remainingStops = "\(abs(distanceStopNum))정거장 전"
+            } else {
+                remainingStops = "\(abs(distanceStopNum))정거장 후"
+            }
         }
         return distanceStopNum
     }

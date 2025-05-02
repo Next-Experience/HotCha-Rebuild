@@ -25,7 +25,7 @@ struct AlarmEndView: View {
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(Color("mainpurple"))
                     }
-                        
+                    
                     Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
                         .font(.pretendard(.semibold, size: 16))
                         .foregroundStyle(Color("gray300"))

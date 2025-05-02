@@ -196,21 +196,25 @@ struct AlertStopsSection: View {
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @Environment(\.dismiss) var dismiss
+    // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
+    @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
     
     var body: some View {
         HStack(alignment: .bottom){
-            if let distanceToDestinationStop = busStopSeoulViewModel.distanceToDestinationStop() {
-                Text("\(abs(distanceToDestinationStop))")
-                    .font(.pretendard(.bold, size: 24))
-                    .foregroundStyle(.gray900)
-            }
-            Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
+//            if let distanceToDestinationStop = busStopSeoulViewModel.distanceToDestinationStop() {
+//                Text("\(abs(distanceToDestinationStop))")
+//                    .font(.pretendard(.bold, size: 24))
+//                    .foregroundStyle(.gray900)
+//            }
+//            Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
+            Text(remainingStops)
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()
             Button(action: {
                 busLocationViewModel.stopFetching()
                 dismiss()
+                remainingStops = "불러오는 중..."
             }){
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.gray150)
@@ -221,7 +225,6 @@ struct AlertStopsSection: View {
                             .font(.pretendard(.medium, size: 16))
                     )
             }
-            
         }
         .padding(EdgeInsets(top: 21, leading: 20, bottom: 48, trailing: 20))
     }

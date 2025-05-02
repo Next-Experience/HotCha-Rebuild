@@ -31,6 +31,11 @@ struct MainView: View {
     //swift data에 저장유무
     @AppStorage("Bus_info_seoul_True") var Bus_info_seoul_True: Bool = false
     
+    // 현재 진행중인 알람이 있는지 여부
+    @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
+    // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
+    @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
+
     // 앱 시작 여부 플래그
     @State private var isAppStart = true
     
