@@ -42,14 +42,17 @@ struct MainTextfiled: View {
                 .background(isTapped ? Color("gray200") : Color("gray150"))
                 .cornerRadius(8)
                 .onTapGesture {
-//                    withAnimation(.easeIn(duration: 1)) {
+                    searchActivate = false
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                         isTapped = true
                         isEditMode = false
                         searchActivate = true
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation {
-                            isTapped = false
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation {
+                                isTapped = false
+                            }
                         }
                     }
                 }
@@ -94,6 +97,6 @@ struct MainTextfiled: View {
             
             
         }
-
+        
     }
 }

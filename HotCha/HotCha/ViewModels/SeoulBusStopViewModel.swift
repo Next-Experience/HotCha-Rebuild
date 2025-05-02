@@ -105,8 +105,7 @@ class BusStopSeoulViewModel: ObservableObject {
         busStations = updatedStations
     }
     // TODO: 목적지 이후 정류징 disable
-    
-    
+        
     // 다른 정류장을 목적지로 선택 시 이전 목적지 상태를 ableStop으로 초기화함
     func clearDestinationStation(destIndex: Int) {
         let filtered = filteredStations
@@ -278,7 +277,7 @@ class BusStopSeoulViewModel: ObservableObject {
             busStations[i].busStopCase = .disableStop
         }
     }
-    
+  
     // 도착 정류장 선택 메서드
     func selectDestinationStation(destIndex: Int) {
         guard destIndex >= 0 && destIndex < busStations.count else { return }
@@ -485,4 +484,3 @@ class BusStopSeoulViewModel: ObservableObject {
     
     // 알람을 잠시 떠날 때 상태 저장
 }
-
