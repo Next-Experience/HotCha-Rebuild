@@ -10,6 +10,7 @@ import SwiftUI
 struct AlarmStatusView: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     // Status 뷰에서만 backgound에서 크기를 인식해서 모달 상태를 변경하도록 함
     @State private var isViewActive = false
     
@@ -31,6 +32,7 @@ struct AlarmStatusView: View {
                 if isMedium || isLarge {
                     BusStopDestinationSection()
                         .environmentObject(busStopSeoulViewModel)
+                        .environmentObject(busLocationViewModel)
                 }
                 
                 if isLarge {
@@ -39,9 +41,8 @@ struct AlarmStatusView: View {
                 Spacer()
                 Divider()
                 AlertStopsSection()
-                
-                
-                
+                    .environmentObject(busLocationViewModel)
+                    .environmentObject(busStopSeoulViewModel)
             }
             .font(.pretendard(.semibold, size: 16))
             .onAppear {
@@ -98,39 +99,11 @@ struct BusStopDestinationSection: View {
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
         VStack(spacing: 0){
-            // 첫 번째 정류장
-            Button(action: {
-                modalStateViewModel.modalState = .alarmWait
-                sheetManager.showAlarmInfoSheet2 = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    sheetManager.showAlarmSearchSheet1 = true
-                    busStopSeoulViewModel.switchToDestinationMode()
-                }
-            }){
-                HStack {
-                    Image("map_pin")
-                        .frame(width: 16, height: 16)
-                        .foregroundColor(.mainpurple)
-                        .padding(.leading,16)
-                    if let index = busStopSeoulViewModel.currentDestinationIndex {
-                        Text(busStopSeoulViewModel.busStations[index].stationNm)
-                            .font(.pretendard(.semibold, size: 16))
-                            .foregroundStyle(.gray900)
-                            .padding(.vertical, 16)
-                            .padding(.leading, 8)
-                    }
-                    
-                    Spacer()
-                }
-                .background(.gray150)
-            }
-            
-            Divider()
-            
-            // 두 번째 정류장
+            // 알람 정류장
             HStack {
                 Image(systemName: "bell")
                     .frame(width: 16, height: 16)
@@ -146,11 +119,43 @@ struct BusStopDestinationSection: View {
                 }
                 
                 Spacer()
-                
-                Image(systemName: "chevron.up.chevron.down")
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(.gray300)
-                    .padding(.trailing, 16)
+            }
+            .background(.gray150)
+            
+            Divider()
+            // 도착 정류장
+            HStack {
+                Image("map_pin")
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(.mainpurple)
+                    .padding(.leading,16)
+                if let index = busStopSeoulViewModel.currentDestinationIndex {
+                    Text(busStopSeoulViewModel.busStations[index].stationNm)
+                        .font(.pretendard(.semibold, size: 16))
+                        .foregroundStyle(.gray900)
+                        .padding(.vertical, 16)
+                        .padding(.leading, 8)
+                }
+                Spacer()
+                Button(action: {
+                    modalStateViewModel.modalState = .alarmWait
+                    sheetManager.showAlarmInfoSheet2 = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        sheetManager.showAlarmSearchSheet1 = true
+                        busStopSeoulViewModel.switchToDestinationMode()
+                        busLocationViewModel.stopFetching()
+                    }
+                }){
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(.gray200)
+                        .frame(width: 37, height: 22)
+                        .overlay(
+                            Text("수정")
+                                .font(.pretendard(.semibold, size: 14))
+                                .foregroundStyle(.gray600)
+                        )
+                        .padding(.trailing, 16)
+                }
             }
             .background(.gray150)
         }
@@ -158,7 +163,6 @@ struct BusStopDestinationSection: View {
         .padding(.bottom, 24)
         .padding(.horizontal, 20)
     }
-    
 }
 
 struct AlertSettingSection: View {
@@ -189,15 +193,35 @@ struct AlertSettingSection: View {
 
 
 struct AlertStopsSection: View {
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         HStack(alignment: .bottom){
-            Text("6정거장 전")
+            if let distanceToDestinationStop = busStopSeoulViewModel.distanceToDestinationStop() {
+                Text("\(abs(distanceToDestinationStop))")
+                    .font(.pretendard(.bold, size: 24))
+                    .foregroundStyle(.gray900)
+            }
+            Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()
-            Text("알림 종료")
-                .foregroundStyle(.mainpurple)
-                .font(.pretendard(.medium, size: 16))
+            Button(action: {
+                busLocationViewModel.stopFetching()
+                dismiss()
+            }){
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.gray150)
+                    .frame(width: 92, height: 36)
+                    .overlay(
+                        Text("안내 종료")
+                            .foregroundStyle(.mainpurple)
+                            .font(.pretendard(.medium, size: 16))
+                    )
+            }
+            
         }
         .padding(EdgeInsets(top: 21, leading: 20, bottom: 48, trailing: 20))
     }

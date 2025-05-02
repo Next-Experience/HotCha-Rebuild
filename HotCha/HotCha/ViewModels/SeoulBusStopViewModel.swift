@@ -10,9 +10,11 @@
 import SwiftUI
 import Foundation
 import Combine
+import CoreLocation
 
 class BusStopSeoulViewModel: ObservableObject {
     @Published var bus: Bus_info_seoul?
+    
     @Published var busStations: [BusStop] = []
     @Published var defaultBusStations: [BusStop] = [] // 미정차 구역이 필터링 된 정류장 노선도
     @Published var searchText: String = ""
@@ -25,11 +27,21 @@ class BusStopSeoulViewModel: ObservableObject {
     // 현재 선택된 목적지의 인덱스를 저장할 변수 추가, 이전에 선택된 것을 초기화 하기위해 필요
     @Published var currentDestinationIndex: Int? = nil
     @Published var currentAlarmIndex: Int? = nil // 이전에 선택된 알람의 상태를 초기화 하기 위해 필요
+    @Published var currentBusStopIndex: Int? = nil // 현재 정류장 인덱스 몇 정류장 차이인지 구하기 위해
     @Published var searchTextFieldfocused: Bool = false // textField가 정류장 선택을 누르면 초기화 되도록 하기위함
     
     // 현재 모드 (true면 목적지 or false면 알람 선택)
     @Published var isSelectDestinationMode: Bool = true
+    // 알람 종료뷰로 이동하기위한 트리거
+    @Published var navigateToAlarmEndView = false
+    // 알람을 시작하고 뷰를 떠났다가 다시 현재 상태 그대로 돌아와야할때 사용하는 트리거 ex) 알람종료뷰에서 돌아올때, 메인 뷰에서 돌아올 때
+    @Published var isReload = false
     
+    
+    
+    func setupBus(bus: Bus_info_seoul) {
+        self.bus = bus
+    }
     
     // Route ID를 직접 인자로 받아 데이터를 가져오는 메서드
     func fetchBusStations(routeid: String, completion: @escaping (Bool) -> Void) {
@@ -147,7 +159,7 @@ class BusStopSeoulViewModel: ObservableObject {
         let filtered = filteredStations
         // 배열이 비어있거나 인덱스가 범위를 벗어나면 nil 반환
         guard !filtered.isEmpty, currentFilteredIndex >= 0, currentFilteredIndex < filtered.count else {
-            print("필터링된 배열의 범위가 잘못되었습니다.")
+            
             return nil
         }
         return filtered[currentFilteredIndex].id
@@ -377,21 +389,100 @@ class BusStopSeoulViewModel: ObservableObject {
     // 목적지 설정 모드로 전환 (다른 View에서 호출)
     func switchToDestinationMode() {
         isSelectDestinationMode = true
-        //        if let alarmIndex = getAlarmStationIndex() {
-        //            busStations[alarmIndex].alarmStation = false
-        //            busStations[alarmIndex].busStopCase = .ableStop
+        
         busStations = defaultBusStations // 초기 리스트로 초기화
         // 선택된 목적지 유지
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-//            if let destIndex = getDestinationStationIndex() {
-            busStations[currentDestinationIndex ?? 0].busStopCase = .destinationStop
-                busStations[currentDestinationIndex ?? 0].arrivalStation = true
-//            }
-//        }
+        busStations[currentDestinationIndex ?? 0].busStopCase = .destinationStop
+        busStations[currentDestinationIndex ?? 0].arrivalStation = true
+        // 알람정류장 초기화
+        busStations[currentAlarmIndex ?? 0].busStopCase = .ableStop
+        busStations[currentAlarmIndex ?? 0].alarmStation = false
+        currentAlarmIndex = nil
+        
+        // 현재 정류장 초기화
+        if let currBusStopIndex = currentBusStopIndex {
+            busStations[currBusStopIndex].busStopCase = .ableStop
+            currentBusStopIndex = nil
+        }
+        isReload = false
     }
     
-    // 알람 설정 모드로 전환 (다른 View에서 호출)
     func switchToAlarmMode() {
         isSelectDestinationMode = false
     }
+    
+    func currentBusLocationMapping(nextStId: String) {
+        print("현재 버스 위치 매핑 - 정류장 ID: \(nextStId)")
+        
+        // 먼저 이전에 .currentStop으로 표시된 정류장의 상태를 복원
+        for i in 0..<busStations.count {
+            if busStations[i].busStopCase == .currentStop {
+                // 이전 상태로 복원 (필터링, 목적지, 알람 정류장 상태를 고려)
+                if busStations[i].arrivalStation {
+                    busStations[i].busStopCase = .destinationStop
+                } else if busStations[i].alarmStation {
+                    busStations[i].busStopCase = .alarmStop
+                } else if busStations[i].busStopCase != .disableStop {
+                    busStations[i].busStopCase = .ableStop
+                }
+            }
+        }
+        // 현재 버스 위치 정류장 찾기
+        if let index = busStations.firstIndex(where: { $0.station == nextStId }) {
+            if busStations[index].busStopCase.contains(.alarmStop) {
+                // 알람 정류장과 현재 정류장 위치가 같으면 OptionSet으로 두 상태를 함께 나타냄
+                busStations[index].busStopCase = .bothCurrentBusWithAlarm
+            } else if (busStations[index].busStopCase.contains(.destinationStop)) {
+                // 알람 정류장과 현재 정류장 위치가 같으면 OptionSet으로 두 상태를 함께 나타냄
+                busStations[index].busStopCase = .bothCurrentBusWithDest
+            } else {
+                // 정류장 상태를 현재 버스 위치로 변경
+                busStations[index].busStopCase = .currentStop
+            }
+            
+            currentBusStopIndex = index // 현재 정류장 인덱스 매핑
+            
+            print("현재 버스 위치 정류장: \(busStations[index].stationNm)")
+            
+            // 알람 모드에서 현재 정류장이 알람 정류장인지 체크
+            if !isSelectDestinationMode, let alarmIndex = getAlarmStationIndex() {
+                if index == alarmIndex {
+                    // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
+                    print("🔔 알람 정류장에 도착!")
+                    // TODO: 알람 울리기
+                    
+                    // 알람종료뷰로 이동하기 위한 트리거
+                    navigateToAlarmEndView = true
+                }
+            }
+            // UI 업데이트 알림
+            notifyStationsUpdated()
+        } else {
+            print("경고: 정류장 ID \(nextStId)를 찾을 수 없습니다.")
+        }
+    }
+    
+    func closeAllSheets(using sheetManager: AlarmSettingModalSheetManager) {
+        // 종료뷰를 위해 시트 모두 닫음
+        sheetManager.showAlarmSearchSheet1 = false
+        sheetManager.showAlarmInfoSheet2 = false
+    }
+    
+    // 목적지와 현재 정류장 수의 차이를 계산
+    func distanceToDestinationStop() -> Int? {
+        var distanceStopNum: Int? = 0
+        
+        if let destIndex = getDestinationStationIndex(), let currIndex = currentBusStopIndex {
+            distanceStopNum = destIndex - currIndex
+        }
+        return distanceStopNum
+    }
+    
+    // 알람을 아에 종료 할 때 초기화
+    func leaveAlarm(){
+        
+    }
+    
+    // 알람을 잠시 떠날 때 상태 저장
 }
+

@@ -57,7 +57,7 @@ class BusLocationViewModel: ObservableObject {
             self?.fetchOnce()
         }
     }
-
+ 
     func stopFetching() {
         timer?.invalidate()
         timer = nil
@@ -109,7 +109,7 @@ class BusLocationViewModel: ObservableObject {
     }
 
     private func sendBusPosition(_ bus: BusPosition) {
-        print("선택된 버스: \(bus.vehId), 위치: (\(bus.gpsY), \(bus.gpsX))")
+        print("선택된 버스: \(bus.vehId), 정류장 id: \(bus.nextStId) 위치: (\(bus.gpsY), \(bus.gpsX))")
     }
 
     func nearestBus(from location: CLLocation) -> BusPosition? {
