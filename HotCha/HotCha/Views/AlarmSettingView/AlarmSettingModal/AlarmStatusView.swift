@@ -166,8 +166,8 @@ struct BusStopDestinationSection: View {
 }
 
 struct AlertSettingSection: View {
-    @AppStorage("soundToggle") private var soundToggle: Bool = true
-    @AppStorage("vibrationToggle") private var vibrationToggle: Bool = true
+    @AppStorage("soundToggle") var soundToggle: Bool = true
+    @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15){

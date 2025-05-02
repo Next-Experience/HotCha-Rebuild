@@ -14,7 +14,6 @@ struct AlarmEndView: View {
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
-        
         ZStack {
             VStack(spacing: 0) {
                 HStack{
@@ -47,6 +46,14 @@ struct AlarmEndView: View {
                 .frame(width: 150)
                 .background(Capsule().fill(Color("mainpurple")))
                 .onTapGesture {
+                    startAlarmToggle(
+                        isOn: false,
+                        title: "",
+                        body: "",
+                        useSound: false,
+                        useVibration: false
+                    )
+                    
                     dismiss()
                     sheetManager.showAlarmInfoSheet2 = true
                 }
@@ -55,9 +62,7 @@ struct AlarmEndView: View {
             .background(Circle().fill(Color("mainpurple").opacity(0.3)))
             
             VStack {
-            
             Spacer()
-            
                 HStack {
                     Text("안내 종료")
                         .font(.pretendard(.semibold, size: 18))
@@ -67,6 +72,13 @@ struct AlarmEndView: View {
                 .frame(width: 150)
                 .background(Capsule().fill(Color("gray400").opacity(0.4)))
                 .onTapGesture {
+                    startAlarmToggle(
+                        isOn: false,
+                        title: "",
+                        body: "",
+                        useSound: false,
+                        useVibration: false
+                    )
                     dismiss()
                     busLocationViewModel.stopFetching()
                 }
@@ -77,8 +89,6 @@ struct AlarmEndView: View {
         .background(Circle().fill(Color("mainpurple").opacity(0.3)))
         .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
     }
-        
-    
 }
 
 #Preview {

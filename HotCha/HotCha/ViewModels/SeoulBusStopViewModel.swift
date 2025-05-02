@@ -37,7 +37,7 @@ class BusStopSeoulViewModel: ObservableObject {
     // 알람을 시작하고 뷰를 떠났다가 다시 현재 상태 그대로 돌아와야할때 사용하는 트리거 ex) 알람종료뷰에서 돌아올때, 메인 뷰에서 돌아올 때
     @Published var isReload = false
     
-    
+   
     
     func setupBus(bus: Bus_info_seoul) {
         self.bus = bus
@@ -105,7 +105,8 @@ class BusStopSeoulViewModel: ObservableObject {
         busStations = updatedStations
     }
     // TODO: 목적지 이후 정류징 disable
-        
+    
+    
     // 다른 정류장을 목적지로 선택 시 이전 목적지 상태를 ableStop으로 초기화함
     func clearDestinationStation(destIndex: Int) {
         let filtered = filteredStations
@@ -277,7 +278,7 @@ class BusStopSeoulViewModel: ObservableObject {
             busStations[i].busStopCase = .disableStop
         }
     }
-  
+    
     // 도착 정류장 선택 메서드
     func selectDestinationStation(destIndex: Int) {
         guard destIndex >= 0 && destIndex < busStations.count else { return }
@@ -411,6 +412,9 @@ class BusStopSeoulViewModel: ObservableObject {
     }
     
     func currentBusLocationMapping(nextStId: String) {
+        @AppStorage("soundToggle") var soundToggle: Bool = true
+        @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
+        
         print("현재 버스 위치 매핑 - 정류장 ID: \(nextStId)")
         
         // 먼저 이전에 .currentStop으로 표시된 정류장의 상태를 복원
@@ -449,7 +453,13 @@ class BusStopSeoulViewModel: ObservableObject {
                     // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
                     print("🔔 알람 정류장에 도착!")
                     // TODO: 알람 울리기
-                    
+                    startAlarmToggle(
+                        isOn: true,
+                        title: "핫챠! 내릴 준비를 해주세요",
+                        body: "도착까지 \(String(describing: distanceToDestinationStop()))정거장 남았어요!",
+                        useSound: soundToggle,
+                        useVibration: vibrationToggle
+                    )
                     // 알람종료뷰로 이동하기 위한 트리거
                     navigateToAlarmEndView = true
                 }
@@ -484,3 +494,4 @@ class BusStopSeoulViewModel: ObservableObject {
     
     // 알람을 잠시 떠날 때 상태 저장
 }
+

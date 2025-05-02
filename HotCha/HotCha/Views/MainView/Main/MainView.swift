@@ -66,10 +66,6 @@ struct MainView: View {
                             shouldNavigateToAlarmView = true
                         }
                     }
-                
-                BookmarkView(isEditMode: $isEditMode, alarmActive: alarmActive)
-                    .padding(.top, 12)
-                
             } else {
                 // '버스번호를 알려주세요' 텍스트 필드
                 MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate)

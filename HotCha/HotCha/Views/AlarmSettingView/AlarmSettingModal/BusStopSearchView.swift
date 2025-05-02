@@ -178,7 +178,7 @@ struct MainPurpleAlarmButton: View {
             busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].stationNm : bus.edStationNm
         
         // 남은 정류장 수 계산
-        let remainingStops = busStopSeoulViewModel.calculateRemainingStops()
+        let remainingStops = busStopSeoulViewModel.distanceToDestinationStop() ?? 0
         
         // UserDefaults에 정보 저장
         UserDefaults.standard.set(bus.busRouteAbrv, forKey: "alarmBusNo")
@@ -210,7 +210,7 @@ struct MainPurpleAlarmButton: View {
             busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentAlarmIndex!].stationNm : bus.stStationNm
         
         // 남은 정류장 수 계산
-        let remainingStops = busStopSeoulViewModel.calculateRemainingStops()
+        let remainingStops = busStopSeoulViewModel.distanceToDestinationStop() ?? 0
         
         let contentState = BeforeBusStopAttributes.ContentState(
             busNumber: bus.busRouteAbrv,
