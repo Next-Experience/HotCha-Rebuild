@@ -31,6 +31,10 @@ class BusStopSeoulViewModel: ObservableObject {
     
     // 현재 모드 (true면 목적지 or false면 알람 선택)
     @Published var isSelectDestinationMode: Bool = true
+    // 알람 종료뷰로 이동하기위한 트리거
+    @Published var navigateToAlarmEndView = false
+    
+    
     
     
     func setupBus(bus: Bus_info_seoul) {
@@ -416,11 +420,10 @@ class BusStopSeoulViewModel: ObservableObject {
             if busStations[index].busStopCase.contains(.alarmStop) {
                 // 알람 정류장과 현재 정류장 위치가 같으면 OptionSet으로 두 상태를 함께 나타냄
                 busStations[index].busStopCase = .bothCurrentBusWithAlarm
-            } else if (busStations[index].busStopCase.contains(.alarmStop)) {
+            } else if (busStations[index].busStopCase.contains(.destinationStop)) {
                 // 알람 정류장과 현재 정류장 위치가 같으면 OptionSet으로 두 상태를 함께 나타냄
                 busStations[index].busStopCase = .bothCurrentBusWithDest
-            }
-                else {
+            } else {
                 // 정류장 상태를 현재 버스 위치로 변경
                 busStations[index].busStopCase = .currentStop
             }
@@ -432,6 +435,10 @@ class BusStopSeoulViewModel: ObservableObject {
                 if index == alarmIndex {
                     // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
                     print("🔔 알람 정류장에 도착!")
+                    // TODO: 알람 울리기
+                    
+                    // 알람종료뷰로 이동하기 위한 트리거
+                    navigateToAlarmEndView = true
                 }
             }
             // UI 업데이트 알림
@@ -440,4 +447,11 @@ class BusStopSeoulViewModel: ObservableObject {
             print("경고: 정류장 ID \(nextStId)를 찾을 수 없습니다.")
         }
     }
+    
+    func closeAllSheets(using sheetManager: AlarmSettingModalSheetManager) {
+        // 종료뷰를 위해 시트 모두 닫음
+        sheetManager.showAlarmSearchSheet1 = false
+        sheetManager.showAlarmInfoSheet2 = false
+    }
 }
+

@@ -30,9 +30,11 @@ struct AlarmSettingView: View {
                         startLiveActivity()
                         liveActivityStated = true
                     }
+                    
                 }
                 .environmentObject(sheetManager)
-                .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
+                .environmentObject(busStopSeoulViewModel)
+                .environmentObject(busLocationViewModel)
                 .sheet(isPresented: $sheetManager.showAlarmSearchSheet1) {
                     ScrollView {
                         SettingModalView(bus: bus, cityCode: 1)
@@ -62,6 +64,20 @@ struct AlarmSettingView: View {
                         .presentationCornerRadius(20)
                 }
         }
+        // 알람 종료뷰로 이동
+        .navigationDestination(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
+            AlarmEndView()
+                .environmentObject(sheetManager)
+        }
+        .onChange(of: busStopSeoulViewModel.navigateToAlarmEndView) { newValue in
+            if newValue {
+                // 알람 종료 뷰로 이동하면 시트 모두 닫기
+                busStopSeoulViewModel.closeAllSheets(using: sheetManager)
+            }
+        }
+//        .fullScreenCover(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
+//            AlarmEndView()
+//        }
         .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {

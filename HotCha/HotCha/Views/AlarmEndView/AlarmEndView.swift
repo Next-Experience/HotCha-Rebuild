@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct AlarmEndView: View {
-    
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     
     var body: some View {
         
@@ -40,8 +42,10 @@ struct AlarmEndView: View {
                 }
                 .frame(width: 150)
                 .background(Capsule().fill(Color("mainpurple")))
-                
-                
+                .onTapGesture {
+                    dismiss()
+                    sheetManager.showAlarmInfoSheet2 = true
+                }
             }
             .frame(width: 320, height: 320)
             .background(Circle().fill(Color("mainpurple").opacity(0.3)))
@@ -56,20 +60,20 @@ struct AlarmEndView: View {
                         .padding(13)
                         .foregroundStyle(Color("gray300"))
                 }
-                
                 .frame(width: 150)
                 .background(Capsule().fill(Color("gray400").opacity(0.4)))
+                .onTapGesture {
+                    dismiss()
+                }
             }
             .padding(.bottom, 37)
-          
-            
-            
-            
-            
         }
         .frame(width: 520, height: 520)
         .background(Circle().fill(Color("mainpurple").opacity(0.3)))
+        .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
     }
+        
+    
 }
 
 #Preview {
