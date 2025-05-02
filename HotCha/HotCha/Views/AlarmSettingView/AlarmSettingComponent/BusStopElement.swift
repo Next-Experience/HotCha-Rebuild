@@ -54,20 +54,6 @@ struct BusStopElement: View {
                         .foregroundStyle(stopCase.text_color)
                     
                     Spacer()
-                    
-                    //                    if let icon = stopCase.trailing_icon {
-                    //                        Rectangle()
-                    //                            .frame(width: 36, height: 28)
-                    //                            .cornerRadius(13)
-                    //                            .foregroundStyle(Color.gray900)
-                    //                            .overlay(
-                    //                                icon
-                    //                                    .resizable()
-                    //                                    .frame(width: 16, height: 16)
-                    //                                    .foregroundColor(stopCase.text_color)
-                    //                            )
-                    //                            .padding(.trailing, 15)
-                    //                    }
                 }
                 
                 Text(busStop?.busRouteNm ?? "노선번호 없음")
@@ -110,12 +96,6 @@ struct BusStopPoint: View {
     var outer_circle_color: Color // 큰 원 색상
     
     var body: some View {
-        // currentStop인 경우
-//        if stopCase.is_shadow != false {
-//            Ellipse()
-//                .frame(width: 40, height: 40)
-//                .foregroundStyle(.mainpurple.opacity(0.15)) // TODO: opicity 수정 필요
-//        }
         Ellipse()
             .frame(width: outer_circle_size, height: outer_circle_size)
             .foregroundStyle(outer_circle_color)

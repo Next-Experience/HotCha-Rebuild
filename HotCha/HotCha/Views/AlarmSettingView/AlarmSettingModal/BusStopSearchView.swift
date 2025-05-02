@@ -119,6 +119,8 @@ struct MainPurpleAlarmButton: View {
                     }
                 }
                 
+                busStopSeoulViewModel.isReload = true // 알람이 시작한 상태이기 때문에, 시작한 상태로 알람에 다시 들어오면 정보를 그대로 띄워주기 위한 트리거
+                
             }, label: {
                 Text("알림 시작")
                     .font(.pretendard(.semibold, size: 20))

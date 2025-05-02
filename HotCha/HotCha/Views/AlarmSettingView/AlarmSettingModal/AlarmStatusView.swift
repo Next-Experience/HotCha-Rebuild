@@ -103,37 +103,7 @@ struct BusStopDestinationSection: View {
     
     var body: some View {
         VStack(spacing: 0){
-            // 첫 번째 정류장
-            Button(action: {
-                modalStateViewModel.modalState = .alarmWait
-                sheetManager.showAlarmInfoSheet2 = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    sheetManager.showAlarmSearchSheet1 = true
-                    busStopSeoulViewModel.switchToDestinationMode()
-                    busLocationViewModel.stopFetching()
-                }
-            }){
-                HStack {
-                    Image("map_pin")
-                        .frame(width: 16, height: 16)
-                        .foregroundColor(.mainpurple)
-                        .padding(.leading,16)
-                    if let index = busStopSeoulViewModel.currentDestinationIndex {
-                        Text(busStopSeoulViewModel.busStations[index].stationNm)
-                            .font(.pretendard(.semibold, size: 16))
-                            .foregroundStyle(.gray900)
-                            .padding(.vertical, 16)
-                            .padding(.leading, 8)
-                    }
-                    
-                    Spacer()
-                }
-                .background(.gray150)
-            }
-            
-            Divider()
-            
-            // 두 번째 정류장
+            // 알람 정류장
             HStack {
                 Image(systemName: "bell")
                     .frame(width: 16, height: 16)
@@ -149,11 +119,43 @@ struct BusStopDestinationSection: View {
                 }
                 
                 Spacer()
-                
-                Image(systemName: "chevron.up.chevron.down")
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(.gray300)
-                    .padding(.trailing, 16)
+            }
+            .background(.gray150)
+            
+            Divider()
+            // 도착 정류장
+            HStack {
+                Image("map_pin")
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(.mainpurple)
+                    .padding(.leading,16)
+                if let index = busStopSeoulViewModel.currentDestinationIndex {
+                    Text(busStopSeoulViewModel.busStations[index].stationNm)
+                        .font(.pretendard(.semibold, size: 16))
+                        .foregroundStyle(.gray900)
+                        .padding(.vertical, 16)
+                        .padding(.leading, 8)
+                }
+                Spacer()
+                Button(action: {
+                    modalStateViewModel.modalState = .alarmWait
+                    sheetManager.showAlarmInfoSheet2 = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        sheetManager.showAlarmSearchSheet1 = true
+                        busStopSeoulViewModel.switchToDestinationMode()
+                        busLocationViewModel.stopFetching()
+                    }
+                }){
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(.gray200)
+                        .frame(width: 37, height: 22)
+                        .overlay(
+                            Text("수정")
+                                .font(.pretendard(.semibold, size: 14))
+                                .foregroundStyle(.gray600)
+                        )
+                        .padding(.trailing, 16)
+                }
             }
             .background(.gray150)
         }
@@ -161,7 +163,6 @@ struct BusStopDestinationSection: View {
         .padding(.bottom, 24)
         .padding(.horizontal, 20)
     }
-    
 }
 
 struct AlertSettingSection: View {

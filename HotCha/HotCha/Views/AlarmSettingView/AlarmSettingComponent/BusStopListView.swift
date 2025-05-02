@@ -64,8 +64,16 @@ struct BusStopListView: View {
                 // BusStopSeoulViewModel의 currentBusLocationMapping 메소드 호출하여 UI 업데이트
                 if !nearestBus.nextStId.isEmpty {
                     busStopSeoulViewModel.currentBusLocationMapping(nextStId: nearestBus.nextStId)
+                    // 현재정류장과 도착정류장이 같으면
+//                    if let destBusIndex = busStopSeoulViewModel.currentDestinationIndex,
+//                       busStopSeoulViewModel.busStations.indices.contains(destBusIndex) {
+//                        if nearestBus.nextStId == busStopSeoulViewModel.busStations[destBusIndex].station {
+//                            // TODO: 알람 종료뷰 띄워주기 위한 트리거 변환
+//                            busStopSeoulViewModel.navigateToAlarmEndView = true
+//                        }
+                    }
                 }
-            }
+//            }
 //        }
     }
 }

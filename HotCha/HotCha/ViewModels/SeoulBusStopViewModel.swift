@@ -34,7 +34,8 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var isSelectDestinationMode: Bool = true
     // 알람 종료뷰로 이동하기위한 트리거
     @Published var navigateToAlarmEndView = false
-    
+    // 알람을 시작하고 뷰를 떠났다가 다시 현재 상태 그대로 돌아와야할때 사용하는 트리거 ex) 알람종료뷰에서 돌아올때, 메인 뷰에서 돌아올 때
+    @Published var isReload = false
     
     
     
@@ -393,7 +394,17 @@ class BusStopSeoulViewModel: ObservableObject {
         // 선택된 목적지 유지
         busStations[currentDestinationIndex ?? 0].busStopCase = .destinationStop
         busStations[currentDestinationIndex ?? 0].arrivalStation = true
+        // 알람정류장 초기화
+        busStations[currentAlarmIndex ?? 0].busStopCase = .ableStop
+        busStations[currentAlarmIndex ?? 0].alarmStation = false
+        currentAlarmIndex = nil
         
+        // 현재 정류장 초기화
+        if let currBusStopIndex = currentBusStopIndex {
+            busStations[currBusStopIndex].busStopCase = .ableStop
+            currentBusStopIndex = nil
+        }
+        isReload = false
     }
     
     func switchToAlarmMode() {
@@ -466,5 +477,12 @@ class BusStopSeoulViewModel: ObservableObject {
         }
         return distanceStopNum
     }
+    
+    // 알람을 아에 종료 할 때 초기화
+    func leaveAlarm(){
+        
+    }
+    
+    // 알람을 잠시 떠날 때 상태 저장
 }
 

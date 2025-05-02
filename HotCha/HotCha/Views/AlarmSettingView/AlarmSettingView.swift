@@ -23,8 +23,11 @@ struct AlarmSettingView: View {
         NavigationStack {
             BusStopListView(bus: bus, cityCode: 1)
                 .onAppear {
-                    busStopSeoulViewModel.setupBus(bus: bus)
-                    sheetManager.showAlarmSearchSheet1 = true // 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
+                    if busStopSeoulViewModel.isReload { // 이미 진행 중인 알람을 다시 로드할 때
+                        sheetManager.showAlarmInfoSheet2 = true
+                    } else {
+                        sheetManager.showAlarmSearchSheet1 = true // 처음 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
+                    }
                     
                     if !liveActivityStated {
                         startLiveActivity()
@@ -68,6 +71,8 @@ struct AlarmSettingView: View {
         .navigationDestination(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
             AlarmEndView()
                 .environmentObject(sheetManager)
+                .environmentObject(busLocationViewModel)
+                .environmentObject(busStopSeoulViewModel)
         }
         .onChange(of: busStopSeoulViewModel.navigateToAlarmEndView) { newValue in
             if newValue {
@@ -82,8 +87,8 @@ struct AlarmSettingView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    busLocationViewModel.stopFetching()
                     dismiss()
+                    busLocationViewModel.stopFetching()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
