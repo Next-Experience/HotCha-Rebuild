@@ -94,8 +94,10 @@ struct BookmarkCardCustomView: View {
                 
                 VStack(spacing: 6) {
                     HStack {
-                        BookmarkBusNoView(busNo: bookmark.bus_no, route_type: bookmark.route_type)
+//                        BookmarkBusNoView(busNo: bookmark.bus_no, route_type: bookmark.route_type)
+                        SearchBusUtil.CustomBusNoView(busNo: bookmark.bus_no, routeType: bookmark.route_type)
                         Spacer()
+                        
                     }
                     HStack {
                         Text(bookmark.destination_stop_name)

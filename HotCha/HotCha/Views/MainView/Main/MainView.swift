@@ -42,13 +42,16 @@ struct MainView: View {
     @StateObject private var viewModel = BusRouteViewModel()
     @Environment(\.modelContext) private var modelContext
     
+    @State var isBookmark: Bool = false
+    @State var type_name: String = "0"
+    
     var body: some View {
         // 메인뷰 전체
         VStack(spacing: 12) {
             // 알람이 활성화되었을 때는 DoAlarmView를 표시
             if alarmActive {
                 NavigationLink(
-                    destination: AlarmSettingView(bus: savedBus!, cityCode: savedCityCode)
+                    destination: AlarmSettingView(bus: savedBus!, cityCode: savedCityCode, isBookmark: $isBookmark, type_name: $type_name)
                         .onAppear {
                             print("AlarmSettingView 표시됨")
                         }
@@ -73,15 +76,15 @@ struct MainView: View {
                     }
             } else {
                 // '버스번호를 알려주세요' 텍스트 필드
-                MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate)
+                MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
             }
             
             if searchActivate {
                 // 서치뷰 전환
-                SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate)
+                SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
             } else {
                 // 즐겨찾기 항목들
-                BookmarkView(isEditMode: $isEditMode, alarmActive: alarmActive)
+                BookmarkView(isEditMode: $isEditMode, alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
                     .padding(.top, 12)
             }
             

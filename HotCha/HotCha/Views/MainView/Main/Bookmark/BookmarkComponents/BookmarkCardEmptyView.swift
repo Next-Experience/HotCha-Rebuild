@@ -15,6 +15,9 @@ struct BookmarkCardEmptyView: View {
     @State private var isTapped: Bool = false
     @State private var showingAddBookmark = false
     @State private var showingAlert = false
+    @Binding var searchActivate: Bool
+    @Binding var isBookmark: Bool
+    @Binding var type_name: String
     
     
     var body: some View {
@@ -58,14 +61,17 @@ struct BookmarkCardEmptyView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     withAnimation {
                         isTapped = false
-                        showingAddBookmark = true
+//                        showingAddBookmark = true
+                        searchActivate = true
+                        isBookmark = true
+                        type_name = name
                     }
                 }
             }
         }
-        .sheet(isPresented: $showingAddBookmark) {
-            AddBookmarkView(type_name: name)
-        }
+//        .sheet(isPresented: $showingAddBookmark) {
+//            AddBookmarkView(type_name: name)
+//        }
         .alert("새로운 알림을 시작하시겠어요?", isPresented: $showingAlert) {
             Button("그만두기", role: .cancel) {
                 // 취소 동작
@@ -73,7 +79,10 @@ struct BookmarkCardEmptyView: View {
             Button("실행하기") {
                 // 새 알림 설정 전에 먼저 북마크 추가 화면으로 이동
                 showingAlert = false
-                showingAddBookmark = true
+//                showingAddBookmark = true
+                searchActivate = true
+                isBookmark = true
+                
             }
         } message: {
             Text("알림은 한 개만 설정할 수 있어요. 새로운 알림을 시작하면 기존의 설정한 알림이 취소돼요.")

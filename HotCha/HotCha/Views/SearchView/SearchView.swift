@@ -12,6 +12,8 @@ struct SearchView: View {
     @Binding var searchActivate: Bool
     @Environment(\.modelContext) private var modelContext
     @Query var bus_info_seoul: [Bus_info_seoul]
+    @Binding var isBookmark: Bool
+    @Binding var type_name: String
     
     private func formatBusRoute(_ route: Bus_info_seoul) -> some View {
         return VStack(spacing: 0) {
@@ -70,7 +72,7 @@ struct SearchView: View {
                     ScrollView {
                         LazyVStack {
                             ForEach(filteredBusInfo) { route in
-                                NavigationLink(destination: AlarmSettingView(bus: route, cityCode: 1)) {
+                                NavigationLink(destination: AlarmSettingView(bus: route, cityCode: 1, isBookmark: $isBookmark, type_name: $type_name)) {
                                     formatBusRoute(route)
                                 }
                                 .buttonStyle(PlainButtonStyle())
