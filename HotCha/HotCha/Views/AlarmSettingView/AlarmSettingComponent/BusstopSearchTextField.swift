@@ -12,6 +12,7 @@ struct BusStopSearchTextField: View {
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @FocusState private var textFieldFocused: Bool
+    @Binding var isBookmark: Bool
     
     var body: some View {
         
@@ -75,7 +76,7 @@ struct BusStopSearchTextField: View {
             }
             .frame(height: 52)
             .background(.gray150)
-            .cornerRadius(8)
+            .clipShape(RoundedCorner(radius: 8, corners: [.topLeft, .topRight]))
         }
         // ViewModel의 검색어가 변경되면 로컬 상태도 업데이트
         .onReceive(busStopSeoulViewModel.$searchText) { viewModelText in
@@ -84,5 +85,21 @@ struct BusStopSearchTextField: View {
             }
         }
         
+    }
+}
+
+import SwiftUI
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = 0.0
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }

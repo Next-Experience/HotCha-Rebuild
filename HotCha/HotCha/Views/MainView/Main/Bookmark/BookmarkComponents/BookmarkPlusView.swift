@@ -13,6 +13,9 @@ struct BookmarkPlusView: View {
     @State private var isTapped: Bool = false
     @State private var showingAddBookmark = false
     @State private var showingAlert = false // 알림 창 표시 여부
+    @Binding var searchActivate: Bool
+    @Binding var isBookmark: Bool
+    @Binding var type_name: String
 
     var body: some View {
         VStack {
@@ -37,14 +40,17 @@ struct BookmarkPlusView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     withAnimation {
                         isTapped = false
-                        showingAddBookmark = true
+//                        showingAddBookmark = true
+                        searchActivate = true
+                        isBookmark = true
+                        type_name = "0"
                     }
                 }
             }
         }
-        .sheet(isPresented: $showingAddBookmark) {
-            AddBookmarkView(type_name: "")
-        }
+//        .sheet(isPresented: $showingAddBookmark) {
+//            AddBookmarkView(type_name: "")
+//        }
         .alert("새로운 알림을 시작하시겠어요?", isPresented: $showingAlert) {
             Button("그만두기", role: .cancel) {
                 // 취소 동작

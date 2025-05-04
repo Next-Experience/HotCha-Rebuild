@@ -15,14 +15,21 @@ struct MainTextfiled: View {
     @Binding var textfiledValue: String
     
     @Binding var searchActivate: Bool
-    
+    @Binding var isBookmark: Bool
+    @Binding var type_name: String
     var body: some View {
         
         VStack {
             HStack{
-                Text("어디서 알려드릴까요?")
-                    .font(.pretendard(.bold, size: 24))
-                    .foregroundStyle(Color("gray900"))
+                if isBookmark {
+                    Text("즐겨찾기 저장")
+                        .font(.pretendard(.bold, size: 24))
+                        .foregroundStyle(Color("gray900"))
+                } else {
+                    Text("어디서 알려드릴까요?")
+                        .font(.pretendard(.bold, size: 24))
+                        .foregroundStyle(Color("gray900"))
+                }
                 Spacer()
             }
             
@@ -48,7 +55,7 @@ struct MainTextfiled: View {
                         isTapped = true
                         isEditMode = false
                         searchActivate = true
-                        
+                        isBookmark = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             withAnimation {
                                 isTapped = false
@@ -82,6 +89,7 @@ struct MainTextfiled: View {
                                 isTapped = true
                                 searchActivate = false
                                 isTextFieldFocused = false
+                                isBookmark = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 withAnimation {
                                     isTapped = false

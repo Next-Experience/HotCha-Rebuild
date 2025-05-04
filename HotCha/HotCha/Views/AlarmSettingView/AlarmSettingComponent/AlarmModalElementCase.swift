@@ -37,7 +37,7 @@ enum AlarmSettingModalElementCase {
         case .alertStopsMedium, .alertStopsLarge:
             return AnyView(
                 VStack{
-                    BusStopInfoSection()
+                    BusStopInfoSection(isBookmark: .constant(false))
                     BusStopDestinationSection()
                 })
         default:

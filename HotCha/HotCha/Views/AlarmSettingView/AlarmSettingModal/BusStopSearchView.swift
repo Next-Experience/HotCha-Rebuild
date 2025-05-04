@@ -17,8 +17,8 @@ struct BusStopSearchView: View {
     var body: some View {
         VStack(alignment:. leading, spacing: 0){
             VStack(alignment:. leading, spacing: 0){
-                BusStopInfoSection()
-                BusStopSearchTextField(busStopSearchText: $busStopSearchText)
+                BusStopInfoSection(isBookmark: .constant(false))
+                BusStopSearchTextField(busStopSearchText: $busStopSearchText, isBookmark: .constant(false))
                     .environmentObject(modalStateViewModel)
                     .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
                     .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
@@ -31,6 +31,48 @@ struct BusStopSearchView: View {
         }
     }
 }
+struct BusStopSearchforBookmarkView: View {
+    @State var text: String = ""
+    @State var busStopSearchText:String = ""
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @Binding var isBookmark: Bool
+    
+    var body: some View {
+        VStack(alignment:. leading, spacing: 0){
+            VStack(alignment:. leading, spacing: 0){
+                if !isBookmark {
+                    BusStopInfoSection(isBookmark: $isBookmark)
+                    BusStopSearchTextField(busStopSearchText: $busStopSearchText, isBookmark: $isBookmark)
+                        .environmentObject(modalStateViewModel)
+                        .environmentObject(busStopSeoulViewModel)
+                        .environmentObject(busLocationViewModel)
+                        .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
+                } else {
+                    BusStopInfoSection(isBookmark: $isBookmark)
+                    BusStopSearchTextField(busStopSearchText: $busStopSearchText, isBookmark: $isBookmark)
+                        .environmentObject(modalStateViewModel)
+                        .environmentObject(busStopSeoulViewModel)
+                        .environmentObject(busLocationViewModel)
+                        .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+
+                }
+            }
+            if !isBookmark {
+                Divider()
+            } else {}
+        }
+    }
+}
+
+#Preview {
+    BusStopSearchView()
+        .environmentObject(AlarmModalViewModel())
+        .environmentObject(BusStopSeoulViewModel())
+        .environmentObject(BusLocationViewModel())
+}
+
 
 
 struct AlarmSearchScrollButtonSection: View {

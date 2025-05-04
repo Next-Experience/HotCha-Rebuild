@@ -25,7 +25,7 @@ struct AlarmStatusView: View {
             VStack(alignment: .leading, spacing: 0) {
                 
                 if isMedium || isLarge {
-                    BusStopInfoSection()
+                    BusStopInfoSection(isBookmark: .constant(false))
                 }
                 
                 // 중간 이상 크기일 때만 표시
@@ -165,6 +165,8 @@ struct BusStopDestinationSection: View {
     }
 }
 
+
+
 struct AlertSettingSection: View {
     @AppStorage("soundToggle") var soundToggle: Bool = true
     @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
@@ -237,10 +239,12 @@ struct BusStopInfoSection: View {
     //    @State var endStationName: String? = "도착역 없음"
     //    @State var busNumber: String? = "버스번호 없음"
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @Binding var isBookmark: Bool
     
     var body: some View {
-        VStack(alignment:. leading, spacing: 12){
-            HStack (alignment: .center){
+        if isBookmark {
+            VStack(alignment:. leading, spacing: 4){
+            HStack (alignment: .center) {
                 Text(modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음")
                     .font(.pretendard(.semibold, size: 20))
                     .foregroundStyle(.skybluec)
@@ -262,9 +266,37 @@ struct BusStopInfoSection: View {
             }
             .font(.pretendard(.semibold, size: 18))
             .foregroundStyle(.gray600)
-            .padding(.bottom, 4)
+//            .padding(.bottom, 4)
         }
+            .padding(EdgeInsets(top: 10, leading: 20, bottom: 16, trailing: 20))
+    } else {
+        VStack(alignment:. leading, spacing: 12){
+        HStack (alignment: .center){
+            Text(modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음")
+                .font(.pretendard(.semibold, size: 20))
+                .foregroundStyle(.skybluec)
+                .padding(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
+                .background(RoundedRectangle(cornerRadius: 4).fill(.skybluec.opacity(0.2)))
+            Spacer()
+            if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
+                Button(action: {
+                    isFavorite.toggle()
+                }) {
+                    Image(isFavorite ? "star_fill" : "star_empty")
+                }
+            }
+        }
+        HStack(spacing: 6){
+            Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
+            Text("↔")
+            Text(modalStateViewModel.bus?.edStationNm ?? "도착역 없음")
+        }
+        .font(.pretendard(.semibold, size: 18))
+        .foregroundStyle(.gray600)
+        .padding(.bottom, 4)
+    }
         .padding(EdgeInsets(top: 26, leading: 20, bottom: 16, trailing: 20))
+    }
     }
 }
 
