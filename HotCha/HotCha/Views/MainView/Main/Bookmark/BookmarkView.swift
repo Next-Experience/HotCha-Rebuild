@@ -10,6 +10,8 @@ import SwiftData
 
 
 struct BookmarkView: View {
+    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
+    @Binding var cityCode: Int
     @Environment(\.modelContext) private var modelContex
     @Query var bookmarkdata: [Bookmarkmodel]
     @Binding var isEditMode: Bool

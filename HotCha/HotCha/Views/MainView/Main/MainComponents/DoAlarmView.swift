@@ -8,20 +8,21 @@
 import SwiftUI
 
 struct DoAlarmView: View {
-    // UserDefaults에서 알람 정보 가져오기
-    @State private var busNumber: String = UserDefaults.standard.string(forKey: "alarmBusNo") ?? "500"
-    @State private var busType: String = UserDefaults.standard.string(forKey: "alarmBusType") ?? "1"
-    @State private var destinationStop: String = UserDefaults.standard.string(forKey: "alarmDestination") ?? "남대문시장앞.이회영활동터"
-    @State private var remainingStops: Int = UserDefaults.standard.integer(forKey: "alarmRemainingStops")
-    
+    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
+    @Binding var cityCode: Int
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
+
     var body: some View {
         VStack {
             HStack {
-                Text("목적지까지")
+                Text("목적지까지 \(remainingStops)")
                     .font(.pretendard(.bold, size: 24))
                     .foregroundStyle(Color("gray900"))
                 
-                Text("\(remainingStops)") // AlarmStatusView AlertStopsSection 구조체 참조
+                Text("") // AlarmStatusView AlertStopsSection 구조체 참조
                     .font(.pretendard(.bold, size: 24))
                     .foregroundStyle(Color("mainpurple"))
                 
@@ -32,10 +33,7 @@ struct DoAlarmView: View {
             }
             
             HStack {
-                SearchBusUtil.CustomBusNoView(busNo: busNumber, routeType: busType)
-                Text(destinationStop)
-                    .font(.pretendard(.semibold, size: 16))
-                    .foregroundStyle(.gray900)
+                SearchBusUtil.CustomBusNoView(busNo: bus.busRouteNm, routeType:bus.routeType)
                 Spacer()
                 
                 Image(systemName: "chevron.right")
@@ -50,24 +48,8 @@ struct DoAlarmView: View {
                         .stroke(Color.mainpurple, lineWidth: 2)
                     )
             )
-            .onAppear {
-                // 데이터 갱신
-                busNumber = UserDefaults.standard.string(forKey: "alarmBusNo") ?? "500"
-                busType = UserDefaults.standard.string(forKey: "alarmBusType") ?? "4"
-                destinationStop = UserDefaults.standard.string(forKey: "alarmDestination") ?? "남대문시장앞.이회영활동터"
-                remainingStops = UserDefaults.standard.integer(forKey: "alarmRemainingStops")
-            }
-            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("AlarmStatusChanged"))) { _ in
-                // 알람 상태가 변경되었을 때 데이터 갱신
-                busNumber = UserDefaults.standard.string(forKey: "alarmBusNo") ?? "500"
-                busType = UserDefaults.standard.string(forKey: "alarmBusType") ?? "4"
-                destinationStop = UserDefaults.standard.string(forKey: "alarmDestination") ?? "남대문시장앞.이회영활동터"
-                remainingStops = UserDefaults.standard.integer(forKey: "alarmRemainingStops")
-            }
+
         }
     }
 }
 
-#Preview {
-    DoAlarmView()
-}

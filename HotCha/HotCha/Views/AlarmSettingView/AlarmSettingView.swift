@@ -13,11 +13,11 @@ struct AlarmSettingView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var sheetManager = AlarmSettingModalSheetManager()
-    let bus: Bus_info_seoul // 선택된 버스 정보
-    let cityCode: Int
+    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
+    @Binding var cityCode: Int
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
     @StateObject private var modalStateViewModel = AlarmModalViewModel()
-    @StateObject private var busStopSeoulViewModel =  BusStopSeoulViewModel()
+    @StateObject private var busStopSeoulViewModel =  BusStopSeoulViewModel() 
     @StateObject private var busLocationViewModel =  BusLocationViewModel()
     @Binding var isBookmark: Bool
     @Binding var type_name: String
@@ -34,9 +34,6 @@ struct AlarmSettingView: View {
                         sheetManager.showAlarmSearchSheet1 = true // 처음 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
                     }
                     
-                    // 버스 정보를 UserDefaults에 저장 (알람 설정 여부와 상관없이 항상 최신 정보 저장)
-//                    UserDefaults.standard.set(bus.busRouteId, forKey: "alarmBusRouteId")
-//                    UserDefaults.standard.set(cityCode, forKey: "alarmCityCode")
                 }
                 .environmentObject(sheetManager)
                 .environmentObject(busStopSeoulViewModel)
@@ -70,6 +67,9 @@ struct AlarmSettingView: View {
                         .presentationCornerRadius(20)
                 }
         }
+        .onAppear {
+            print(bus.busRouteNm, bus.busRouteId, "아 제발 좀 떠라 왜 안뜨냐")
+        }
         // 알람 종료뷰로 이동
         .navigationDestination(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
             AlarmEndView()
@@ -90,24 +90,13 @@ struct AlarmSettingView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    // 디버깅: 알람 상태 확인 및 출력
-                    let isAlarmActive = UserDefaults.standard.bool(forKey: "alarmActive")
-                    
-                    // 알람 변경 알림 발송 (화면 닫기 전)
-                    NotificationCenter.default.post(
-                        name: Notification.Name("AlarmStatusChanged"),
-                        object: nil,
-                        userInfo: ["alarmActive": isAlarmActive]
-                    )
-                    
                     NotificationCenter.default.post(
                         name: Notification.Name("ResetSearchState"),
                         object: nil
                     )
-                    
                     // 화면 닫기
                     dismiss()
-                    busLocationViewModel.stopFetching()
+//                    busLocationViewModel.stopFetching()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)

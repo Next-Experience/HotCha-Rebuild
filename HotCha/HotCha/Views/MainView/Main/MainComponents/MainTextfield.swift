@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainTextfiled: View {
+    
     @State private var isTapped: Bool = false
     @FocusState var isTextFieldFocused: Bool
     @Binding var isEditMode: Bool

@@ -24,6 +24,7 @@ struct HotChaApp: App {
         WindowGroup {
             SplashView()
 //            SimpleDistanceTestView()
+//            SeoulBusInfoTestView()
                 .modelContainer(HotchaContainer)
         }
     }
