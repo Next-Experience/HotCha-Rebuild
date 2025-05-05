@@ -162,8 +162,7 @@ struct MainPurpleAlarmButton: View {
                         liveActivityStarted = true
                     }
                     
-                    // 알람 정보 저장
-                    saveAlarmInfo()
+
                     
                     // 검색 값 초기화 신호 보내기
                     NotificationCenter.default.post(name: Notification.Name("ResetSearchText"), object: nil)
@@ -218,32 +217,7 @@ struct MainPurpleAlarmButton: View {
         }
     }
     
-    // 알람 정보 저장
-    private func saveAlarmInfo() {
-        guard let bus = modalStateViewModel.bus else { return }
-        
-        // 선택된 버스 정류장 정보 가져오기
-        let destinationStationName = busStopSeoulViewModel.currentDestinationIndex != nil ?
-            busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].stationNm : bus.edStationNm
-        
-        // 남은 정류장 수 계산
-        let remainingStops =  0
-        
-        // UserDefaults에 정보 저장
-        UserDefaults.standard.set(bus.busRouteAbrv, forKey: "alarmBusNo")
-        UserDefaults.standard.set(bus.routeType, forKey: "alarmBusType")
-        UserDefaults.standard.set(destinationStationName, forKey: "alarmDestination")
-        UserDefaults.standard.set(remainingStops, forKey: "alarmRemainingStops")
-        
-        // 알람 버스 ID 저장 (나중에 화면 복원에 사용)
-        UserDefaults.standard.set(bus.busRouteId, forKey: "alarmBusRouteId")
-        
-        // 도시 코드 저장
-        UserDefaults.standard.set(modalStateViewModel.cityCode, forKey: "alarmCityCode")
-        
-        // 즉시 동기화
-        UserDefaults.standard.synchronize()
-    }
+
     
     // LiveActivity 시작 함수
     private func startLiveActivity() {

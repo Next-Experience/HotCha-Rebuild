@@ -125,6 +125,7 @@ struct NavigationView: View {
                    }.background(Color("gray900")) // 전채 배경색
                 .ignoresSafeArea(.all)   
                }
+        .navigationBarBackButtonHidden(true)
             // 아래쪽 여백 제거
                 
     }

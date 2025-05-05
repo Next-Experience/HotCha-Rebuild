@@ -25,39 +25,9 @@ struct BookmarkCardCustomView: View {
         }
     }
     
-    private func resetCurrentAlarm() {
-        // 기존 알람 취소
-        UserDefaults.standard.set(false, forKey: "alarmActive")
-        UserDefaults.standard.synchronize()
-        
-        // 알람 상태 변경 알림 발송
-        NotificationCenter.default.post(
-            name: Notification.Name("AlarmStatusChanged"),
-            object: nil,
-            userInfo: ["alarmActive": false]
-        )
-    }
+//
     
-    private func startNewAlarmWithBookmark(_ bookmark: Bookmarkmodel) {
-        // 북마크 정보를 사용하여 알람 설정
-        UserDefaults.standard.set(bookmark.bus_no, forKey: "alarmBusNo")
-        UserDefaults.standard.set(bookmark.route_type, forKey: "alarmBusType")
-        UserDefaults.standard.set(bookmark.destination_stop_name, forKey: "alarmDestination")
-        UserDefaults.standard.set(5, forKey: "alarmRemainingStops") // 기본값으로 5 설정
-        UserDefaults.standard.set(bookmark.route_id, forKey: "alarmBusRouteId")
-        UserDefaults.standard.set(bookmark.city_code, forKey: "alarmCityCode")
-        
-        // 알람 활성화
-        UserDefaults.standard.set(true, forKey: "alarmActive")
-        UserDefaults.standard.synchronize()
-        
-        // 알람 상태 변경 알림 발송
-        NotificationCenter.default.post(
-            name: Notification.Name("AlarmStatusChanged"),
-            object: nil,
-            userInfo: ["alarmActive": true]
-        )
-    }
+
     
     var body: some View {
         VStack {
@@ -135,8 +105,7 @@ struct BookmarkCardCustomView: View {
             }
             Button("실행하기") {
                 // 기존 알림 취소 후 새 알림 설정
-                resetCurrentAlarm()
-                startNewAlarmWithBookmark(bookmark)
+
             }
         } message: {
             Text("알림은 한 개만 설정할 수 있어요. 새로운 알림을 시작하면 기존의 설정한 알림이 취소돼요.")
