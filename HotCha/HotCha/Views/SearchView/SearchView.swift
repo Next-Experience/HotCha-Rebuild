@@ -8,17 +8,17 @@ import SwiftUI
 import SwiftData
 
 struct SearchView: View {
-    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
-    @Binding var cityCode: Int
     @Binding var textfiledValue: String
     @Binding var searchActivate: Bool
     @Environment(\.modelContext) private var modelContext
     @Query var bus_info_seoul: [Bus_info_seoul]
     @Binding var isBookmark: Bool
     @Binding var type_name: String
-    @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager
-    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @ObservedObject var modalStateViewModel: AlarmModalViewModel
+    @ObservedObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @ObservedObject var busLocationViewModel: BusLocationViewModel
+    @ObservedObject var sheetManager: AlarmSettingModalSheetManager
+
     
     private func formatBusRoute(_ route: Bus_info_seoul) -> some View {
         return VStack(spacing: 0) {
@@ -77,15 +77,13 @@ struct SearchView: View {
                     ScrollView {
                         LazyVStack {
                             ForEach(filteredBusInfo) { route in
-                                NavigationLink(destination: AlarmSettingView(bus: .constant(route), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name)) {
+                                NavigationLink(destination: AlarmSettingView(bus: route, cityCode: 1, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager)) {
                                     formatBusRoute(route)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 .simultaneousGesture(TapGesture().onEnded {
                                    // 이 부분에서 dismiss 호출
                                     searchActivate = false
-                                    bus = route
-                                    cityCode = 1
                                })
                             }
                         }

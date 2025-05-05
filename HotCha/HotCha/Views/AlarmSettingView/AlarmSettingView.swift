@@ -12,21 +12,26 @@ import SwiftData
 struct AlarmSettingView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
-    @StateObject private var sheetManager = AlarmSettingModalSheetManager()
-    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
-    @Binding var cityCode: Int
-    @State private var selectedDetent: PresentationDetent = .fraction(0.4)
-    @StateObject private var modalStateViewModel = AlarmModalViewModel()
-    @StateObject private var busStopSeoulViewModel =  BusStopSeoulViewModel() 
-    @StateObject private var busLocationViewModel =  BusLocationViewModel()
+    
+    let bus: Bus_info_seoul // 선택된 버스 정보
+    let cityCode: Int
     @Binding var isBookmark: Bool
     @Binding var type_name: String
     
+    @ObservedObject var modalStateViewModel: AlarmModalViewModel
+    @ObservedObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @ObservedObject var busLocationViewModel: BusLocationViewModel
+    @ObservedObject var sheetManager: AlarmSettingModalSheetManager
+    
+    @State private var selectedDetent: PresentationDetent = .fraction(0.4)
     @State private var liveActivityStarted = false // Live Activity 중복 실행 방지
     
     var body: some View {
         NavigationStack {
-            BusStopListView(bus: bus, cityCode: 1)
+            BusStopListView(bus: bus,
+                            cityCode: 1,
+                            busStopSeoulViewModel: busStopSeoulViewModel,
+                            busLocationViewModel: busLocationViewModel)
                 .onAppear {
                     if busStopSeoulViewModel.isReload { // 이미 진행 중인 알람을 다시 로드할 때
                         sheetManager.showAlarmInfoSheet2 = true
@@ -83,9 +88,9 @@ struct AlarmSettingView: View {
                 busStopSeoulViewModel.closeAllSheets(using: sheetManager)
             }
         }
-//        .fullScreenCover(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
-//            AlarmEndView()
-//        }
+        //        .fullScreenCover(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
+        //            AlarmEndView()
+        //        }
         .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -96,7 +101,7 @@ struct AlarmSettingView: View {
                     )
                     // 화면 닫기
                     dismiss()
-//                    busLocationViewModel.stopFetching()
+                    //                    busLocationViewModel.stopFetching()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
@@ -122,12 +127,12 @@ struct SettingModalView: View{
     @Binding var type_name: String
     
     
-//    @State private var routeID: String = ""
-////    @State private var cityCode: String = ""
-//    @State private var destinationStopID: String = ""
-//    @State private var destinationStopName: String = ""
-//    @State private var busNo: String = ""
-//    @State private var routeType: String = ""
+    //    @State private var routeID: String = ""
+    ////    @State private var cityCode: String = ""
+    //    @State private var destinationStopID: String = ""
+    //    @State private var destinationStopName: String = ""
+    //    @State private var busNo: String = ""
+    //    @State private var routeType: String = ""
     @State private var bookmarkLabel: String = ""
     @State private var bookmarktype: Int = 0
     
@@ -141,25 +146,25 @@ struct SettingModalView: View{
                 Spacer()
                 
                 if isBookmark {
-                        // 예시: 즐겨찾기 저장용 뷰
-//                        BookmarkSaveView(bus: bus)
-//                            .environmentObject(modalStateViewModel)
-//                            .environmentObject(busStopSeoulViewModel)
-//                            .environmentObject(busLocationViewModel)
+                    // 예시: 즐겨찾기 저장용 뷰
+                    //                        BookmarkSaveView(bus: bus)
+                    //                            .environmentObject(modalStateViewModel)
+                    //                            .environmentObject(busStopSeoulViewModel)
+                    //                            .environmentObject(busLocationViewModel)
                     VStack(spacing: 0){
                         BusStopSearchforBookmarkView(isBookmark: $isBookmark)
                         if type_name != "집" || type_name != "회사" {
                             HStack {
                                 HStack {
-                            TextField("", text: $bookmarkLabel, prompt:
-                                      Text("즐겨찾기 이름을 설정해보세요.")
-                                .foregroundColor(.gray300)
-                                      
-                            )
-                            .font(.pretendard(.medium, size: 16))
-                            .foregroundStyle(.gray900)
-                            .accentColor(.gray900)
-                            
+                                    TextField("", text: $bookmarkLabel, prompt:
+                                                Text("즐겨찾기 이름을 설정해보세요.")
+                                        .foregroundColor(.gray300)
+                                              
+                                    )
+                                    .font(.pretendard(.medium, size: 16))
+                                    .foregroundStyle(.gray900)
+                                    .accentColor(.gray900)
+                                    
                                 }
                                 .padding(16)
                             }
@@ -181,11 +186,11 @@ struct SettingModalView: View{
                             }
                             // 선택된 버스 정류장 정보 가져오기
                             let destinationStationName = busStopSeoulViewModel.currentDestinationIndex != nil ?
-                                busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].stationNm : bus.edStationNm
+                            busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].stationNm : bus.edStationNm
                             
                             let destinationStationid = busStopSeoulViewModel.currentDestinationIndex != nil ?
                             busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].station : bus.edStationNm
-
+                            
                             let newBookmark = Bookmarkmodel(
                                 route_id: bus.busRouteId,
                                 city_code: String(cityCode),
@@ -215,15 +220,15 @@ struct SettingModalView: View{
                         Spacer()
                     }
                     .environmentObject(modalStateViewModel)
+                    .environmentObject(busStopSeoulViewModel)
+                    .environmentObject(busLocationViewModel)
+                    
+                } else {
+                    modalStateViewModel.modalState.alarmSettingMainView
+                        .environmentObject(modalStateViewModel)
                         .environmentObject(busStopSeoulViewModel)
                         .environmentObject(busLocationViewModel)
-                    
-                    } else {
-                        modalStateViewModel.modalState.alarmSettingMainView
-                            .environmentObject(modalStateViewModel)
-                            .environmentObject(busStopSeoulViewModel)
-                            .environmentObject(busLocationViewModel)
-                    }
+                }
                 
                 
             }

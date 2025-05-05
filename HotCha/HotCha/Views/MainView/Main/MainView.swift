@@ -55,11 +55,12 @@ struct MainView: View {
 
     // 앱 시작 여부 플래그
     @State private var isAppStart = true
-    @StateObject private var sheetManager = AlarmSettingModalSheetManager()
     
     @StateObject private var viewModel = BusRouteViewModel()
     @Environment(\.modelContext) private var modelContext
-//    @StateObject private var modalStateViewModel = AlarmModalViewModel()
+
+    @StateObject private var sheetManager = AlarmSettingModalSheetManager()
+    @StateObject private var modalStateViewModel = AlarmModalViewModel()
     @StateObject private var busStopSeoulViewModel =  BusStopSeoulViewModel()
     @StateObject private var busLocationViewModel =  BusLocationViewModel()
     
@@ -88,18 +89,13 @@ struct MainView: View {
 //                ) {
 //                    EmptyView()
 //                }
-            NavigationLink("되라", destination: AlarmSettingView(bus: $bus, cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name))
-//                .environmentObject(sheetManager)
-//                .environmentObject(modalStateViewModel)
-//                .environmentObject(busStopSeoulViewModel)
-//                .environmentObject(busLocationViewModel)
+            NavigationLink("되라", destination: AlarmSettingView(bus: bus, cityCode: 1, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager))
             if bus.busRouteId != "0" {
                 DoAlarmView(bus: $bus, cityCode: $cityCode)
                     .padding(.bottom, 12)
                     .onTapGesture {
                         
                     }
-
             } else {
                 EmptyView()
             }
@@ -110,7 +106,7 @@ struct MainView: View {
             
             if searchActivate {
                 // 서치뷰 전환
-                SearchView(bus: $bus, cityCode: $cityCode,textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
+                SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager)
             } else {
                 // 즐겨찾기 항목들
                 BookmarkView(bus: $bus, cityCode: $cityCode,isEditMode: $isEditMode, alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
@@ -128,16 +124,8 @@ struct MainView: View {
                 saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
                 Bus_info_seoul_True = true
             }
-            
         }
-
-
-
     }
-    
-
-
-    
 }
 
 struct Main_Previews: PreviewProvider {
