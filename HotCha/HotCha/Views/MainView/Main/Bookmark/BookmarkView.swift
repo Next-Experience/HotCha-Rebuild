@@ -20,6 +20,7 @@ struct BookmarkView: View {
     @Binding var searchActivate: Bool
     @Binding var isBookmark: Bool
     @Binding var type_name: String
+    
     let columns: [GridItem] = [
             GridItem(.flexible(), spacing: 15),
             GridItem(.flexible(), spacing: 15)
@@ -29,7 +30,8 @@ struct BookmarkView: View {
         VStack {
             // 상단 설명과 편집 버튼
             HStack{
-                Text("즐겨찾기 알림 (2/6)")
+                let totalBookmarkCount = bookmarkdata.count
+                Text("즐겨찾기 알림 (\(totalBookmarkCount)/6)")
                     .font(.pretendard(.semibold, size: 16))
                     .foregroundStyle(Color("gray900"))
                 Spacer()
