@@ -109,7 +109,7 @@ struct AlarmSettingView: View {
     }
 }
 
-struct SettingModalView: View{
+struct SettingModalView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
@@ -148,7 +148,27 @@ struct SettingModalView: View{
 //                            .environmentObject(busLocationViewModel)
                     VStack(spacing: 0){
                         BusStopSearchforBookmarkView(isBookmark: $isBookmark)
-                        if type_name != "집" || type_name != "회사" {
+                        
+                        if type_name == "집" || type_name == "회사" {
+                            HStack {
+                                HStack {
+                                    HStack{
+                                        Text(type_name)
+                                            .foregroundColor(.gray300)
+                                        Spacer()
+                                    }
+                            .font(.pretendard(.medium, size: 16))
+                            .foregroundStyle(.gray900)
+                            .accentColor(.gray900)
+                                    
+                                }
+                                .padding(16)
+                            }
+                            .frame(height: 52)
+                            .background(.gray150)
+                            .clipShape(RoundedCorner(radius: 8, corners: [.bottomLeft, .bottomRight]))
+                            .padding(.horizontal,20)
+                        } else {
                             HStack {
                                 HStack {
                             TextField("", text: $bookmarkLabel, prompt:

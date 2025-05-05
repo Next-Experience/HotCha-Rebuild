@@ -65,6 +65,7 @@ struct BookmarkCardEmptyView: View {
                         searchActivate = true
                         isBookmark = true
                         type_name = name
+                        print(name)
                     }
                 }
             }
