@@ -109,16 +109,16 @@ struct BusStopDestinationSection: View {
                     .frame(width: 16, height: 16)
                     .foregroundColor(.mainpurple)
                     .padding(.leading, 16)
-                
                 if let index = busStopSeoulViewModel.currentAlarmIndex {
-                    Text(busStopSeoulViewModel.busStations[index].stationNm)
-                        .font(.pretendard(.semibold, size: 16))
-                        .foregroundStyle(.gray900)
-                        .padding(.vertical, 16)
-                        .padding(.leading, 8)
-                }
-                
-                Spacer()
+                                    Text(busStopSeoulViewModel.busStations[index].stationNm)
+                                        .font(.pretendard(.semibold, size: 16))
+                                        .foregroundStyle(.gray900)
+                                        .padding(.vertical, 16)
+                                        .padding(.leading, 8)
+                                }
+                                
+                                Spacer()
+
             }
             .background(.gray150)
             

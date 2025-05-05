@@ -70,38 +70,34 @@ struct MainView: View {
     var body: some View {
         // 메인뷰 전체
         VStack(spacing: 12) {
-            // 알람이 활성화되었을 때는 DoAlarmView를 표시
 
-//                NavigationLink(
-//                    destination: AlarmSettingView(bus: $bus, cityCode: $cityCode, isBookmark: $isBookmark, type_name: $type_name)
-//                        .environmentObject(modalStateViewModel)
-//                        .environmentObject(busStopSeoulViewModel)
-//                        .environmentObject(busLocationViewModel)
-////                        .onAppear {
-////                            print("AlarmSettingView 표시됨")
-////                        }
-////                        .onDisappear {
-////                            // AlarmSettingView에서 나왔을 때 알람 상태 확인
-////                            print("AlarmSettingView 종료됨, 상태 확인 호출")
-////                            checkAlarmStatus()
-////                        },
-////                    isActive: $shouldNavigateToAlarmView
-//                ) {
-//                    EmptyView()
-//                }
-            NavigationLink("되라", destination: AlarmSettingView(bus: bus, cityCode: 1, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager))
-            if bus.busRouteId != "0" {
-                DoAlarmView(bus: $bus, cityCode: $cityCode)
-                    .padding(.bottom, 12)
-                    .onTapGesture {
-                        
-                    }
+            if modalStateViewModel.bus != nil {
+                NavigationLink(destination: AlarmSettingView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager)) {
+                    DoAlarmView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1))
+                        .padding(.bottom, 12)
+                        .environmentObject(busStopSeoulViewModel)
+                               .environmentObject(modalStateViewModel)
+                               .environmentObject(busLocationViewModel)
+                }
             } else {
-                EmptyView()
+                
+         // '버스번호를 알려주세요' 텍스트 필드
+         MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
+         .onAppear {
+             print(bus.busRouteId, bus.busRouteNm)
+         }
+
             }
-                       
-                // '버스번호를 알려주세요' 텍스트 필드
-                MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
+//            if let index = busStopSeoulViewModel.currentDestinationIndex {
+//                Text(busStopSeoulViewModel.busStations[index].stationNm)
+//                    .font(.pretendard(.semibold, size: 16))
+//                    .foregroundStyle(.gray900)
+//                    .padding(.vertical, 16)
+//                    .padding(.leading, 8)
+//            }
+//                           
+
+
             
             
             if searchActivate {

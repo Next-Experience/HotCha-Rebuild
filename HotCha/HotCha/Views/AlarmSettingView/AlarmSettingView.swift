@@ -13,8 +13,8 @@ struct AlarmSettingView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
     
-    let bus: Bus_info_seoul // 선택된 버스 정보
-    let cityCode: Int
+    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
+    @Binding var cityCode: Int
     @Binding var isBookmark: Bool
     @Binding var type_name: String
     
