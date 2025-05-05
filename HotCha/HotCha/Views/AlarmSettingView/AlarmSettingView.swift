@@ -25,20 +25,38 @@ struct AlarmSettingView: View {
     
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
     @State private var liveActivityStarted = false // Live Activity 중복 실행 방지
+    // 시트 구분을 위한 ID 추가
+    @State private var sheetId = UUID()
     
     var body: some View {
-        NavigationStack {
-            BusStopListView(bus: bus,
-                            cityCode: 1,
-                            busStopSeoulViewModel: busStopSeoulViewModel,
-                            busLocationViewModel: busLocationViewModel)
+        ZStack {
+            NavigationStack {
+                BusStopListView(bus: bus,
+                                cityCode: 1,
+                                busStopSeoulViewModel: busStopSeoulViewModel,
+                                busLocationViewModel: busLocationViewModel)
+                // 알람 종료뷰로 이동
+                .overlay {
+                    if busStopSeoulViewModel.navigateToAlarmEndView {
+                        // 어두운 배경
+                        Rectangle()
+                            .fill(Color.black.opacity(0.8))
+                            .ignoresSafeArea()
+                        
+                        // AlarmEndView
+                        AlarmEndView()
+                            .environmentObject(sheetManager)
+                            .environmentObject(busLocationViewModel)
+                            .environmentObject(busStopSeoulViewModel)
+                            .transition(.opacity) // 부드러운 전환 효과
+                    }
+                }
                 .onAppear {
                     if busStopSeoulViewModel.isReload { // 이미 진행 중인 알람을 다시 로드할 때
                         sheetManager.showAlarmInfoSheet2 = true
                     } else {
                         sheetManager.showAlarmSearchSheet1 = true // 처음 뷰가 나타날 때 자동으로 showAlarmSearchSheet1 sheet 열기
                     }
-                    
                 }
                 .environmentObject(sheetManager)
                 .environmentObject(busStopSeoulViewModel)
@@ -67,50 +85,44 @@ struct AlarmSettingView: View {
                         .environmentObject(busLocationViewModel)
                         .interactiveDismissDisabled(true)
                         .presentationDragIndicator(.visible)
-                        .presentationDetents([.fraction(0.99), .fraction(0.4), .fraction(0.1)], selection: $selectedDetent)
+                        .presentationDetents([.fraction(0.4), .fraction(0.1), .fraction(0.99)], selection: $selectedDetent)
                         .presentationBackgroundInteraction(.enabled)
                         .presentationCornerRadius(20)
                 }
-        }
-        .onAppear {
-            print(bus.busRouteNm, bus.busRouteId, "아 제발 좀 떠라 왜 안뜨냐")
-        }
-        // 알람 종료뷰로 이동
-        .navigationDestination(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
-            AlarmEndView()
-                .environmentObject(sheetManager)
-                .environmentObject(busLocationViewModel)
-                .environmentObject(busStopSeoulViewModel)
-        }
-        .onChange(of: busStopSeoulViewModel.navigateToAlarmEndView) { newValue in
-            if newValue {
-                // 알람 종료 뷰로 이동하면 시트 모두 닫기
-                busStopSeoulViewModel.closeAllSheets(using: sheetManager)
             }
-        }
-        //        .fullScreenCover(isPresented: $busStopSeoulViewModel.navigateToAlarmEndView) {
-        //            AlarmEndView()
-        //        }
-        .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    NotificationCenter.default.post(
-                        name: Notification.Name("ResetSearchState"),
-                        object: nil
-                    )
-                    // 화면 닫기
-                    dismiss()
-                    //                    busLocationViewModel.stopFetching()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(.white)
+            .onAppear {
+                print(bus.busRouteNm, bus.busRouteId, "아 제발 좀 떠라 왜 안뜨냐")
+            }
+            .onChange(of: busStopSeoulViewModel.navigateToAlarmEndView) { newValue in
+                if newValue == true{
+                    // 알람 종료 뷰로 이동하면 시트 모두 닫기
+                    busStopSeoulViewModel.closeAllSheets(using: sheetManager)
+                } else {
+                    selectedDetent = .fraction(0.4)
+                }
+                
+            }
+            .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        NotificationCenter.default.post(
+                            name: Notification.Name("ResetSearchState"),
+                            object: nil
+                        )
+                        // 화면 닫기
+                        dismiss()
+                        //                    busLocationViewModel.stopFetching()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                    }
                 }
             }
+            .toolbarBackground(.gray900, for: .navigationBar) // 배경색 설정
+            .toolbarBackground(.visible, for: .navigationBar)   // 항상 보이게
         }
-        .toolbarBackground(.gray900, for: .navigationBar) // 배경색 설정
-        .toolbarBackground(.visible, for: .navigationBar)   // 항상 보이게
     }
 }
 
@@ -162,9 +174,9 @@ struct SettingModalView: View {
                                             .foregroundColor(.gray300)
                                         Spacer()
                                     }
-                            .font(.pretendard(.medium, size: 16))
-                            .foregroundStyle(.gray900)
-                            .accentColor(.gray900)
+                                    .font(.pretendard(.medium, size: 16))
+                                    .foregroundStyle(.gray900)
+                                    .accentColor(.gray900)
                                     
                                 }
                                 .padding(16)
