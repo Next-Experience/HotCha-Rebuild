@@ -11,6 +11,7 @@ class AlarmModalViewModel: ObservableObject {
     @Published var modalState: AlarmSettingModalElementCase = .alarmWait
     @Published var bus: Bus_info_seoul?
     @Published var cityCode: Int?
+    
 }
 
 

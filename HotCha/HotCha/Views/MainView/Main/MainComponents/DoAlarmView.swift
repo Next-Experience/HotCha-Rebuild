@@ -26,14 +26,21 @@ struct DoAlarmView: View {
                     .font(.pretendard(.bold, size: 24))
                     .foregroundStyle(Color("mainpurple"))
                 
-                Text("정거장 남았어요")
-                    .font(.pretendard(.bold, size: 24))
-                    .foregroundStyle(Color("gray900"))
+//                Text("정거장 남았어요")
+//                    .font(.pretendard(.bold, size: 24))
+//                    .foregroundStyle(Color("gray900"))
                 Spacer()
             }
             
             HStack {
                 SearchBusUtil.CustomBusNoView(busNo: bus.busRouteNm, routeType:bus.routeType)
+                if let index = busStopSeoulViewModel.currentDestinationIndex {
+                    Text(busStopSeoulViewModel.busStations[index].stationNm)
+                        .font(.pretendard(.semibold, size: 16))
+                        .foregroundStyle(.gray900)
+                        .padding(.leading, 8)
+                }
+                
                 Spacer()
                 
                 Image(systemName: "chevron.right")

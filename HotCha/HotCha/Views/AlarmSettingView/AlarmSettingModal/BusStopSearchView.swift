@@ -142,6 +142,9 @@ struct MainPurpleAlarmButton: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
+//    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
+//    @Binding var cityCode: Int
+    
     // LiveActivity 중복 실행 방지
     @State private var liveActivityStarted = false
     // 현재 진행중인 알람이 있는지 여부
