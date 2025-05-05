@@ -9,6 +9,8 @@ import SwiftUI
 
 struct AlarmEndView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
@@ -82,9 +84,30 @@ struct AlarmEndView: View {
                             useSound: false,
                             useVibration: false
                         )
+                        
+                        let currentTime = Date()
+                        
                         busStopSeoulViewModel.navigateToAlarmEndView = false
                         dismiss()
                         busLocationViewModel.stopFetching()
+                        
+                        // 이용기록 저장
+                        if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
+                            let newUsage = Usage_history(
+                                route_id: busStopSeoulViewModel.bus?.busRouteId ?? "",
+                                city_code: "1",
+                                destination_stop_id: String(busStopSeoulViewModel.busStations[currentBusIndex].stationNo),
+                                destination_stop_name: busStopSeoulViewModel.busStations[currentBusIndex].stationNm,
+                                bus_no: busStopSeoulViewModel.bus?.busRouteNm ?? "",
+                                route_type: busStopSeoulViewModel.bus?.routeType ?? "",
+                                get_off_timestamp: currentTime,
+                                operator_name: busStopSeoulViewModel.bus?.corpNm ?? "정보 없음",
+                                operator_no: "전번 없음", // TODO: 운수사 전번 넣기
+                                vehicle_no: "차량 번호 없음" //TODO: vehicle_no 차량번호 넣기
+                            )
+                            print("newUsage: \(newUsage)")
+                            modelContext.insert(newUsage)
+                        }
                     }
                 }
                 .padding(.bottom, 37)
