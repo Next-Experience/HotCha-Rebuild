@@ -11,8 +11,8 @@ import CoreLocation
 struct BusStopListView: View {
     let bus: Bus_info_seoul // 선택된 버스 정보
     let cityCode: Int
-    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @ObservedObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @ObservedObject var busLocationViewModel: BusLocationViewModel
     // 이전 nextStId 값을 저장하는 state 변수
     @State private var previousBusStId: String = ""
     
@@ -33,9 +33,9 @@ struct BusStopListView: View {
         .ignoresSafeArea()
         .background(Color.gray900)
         .onAppear {
-            busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId) { success in
-                if success {
-                    print("fetch bus stations success")
+           if busStopSeoulViewModel.busStations.isEmpty {
+                busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId) { success in
+                    print("fetch bus stations 성공")
                 }
             }
             // 현재 버스 위치
