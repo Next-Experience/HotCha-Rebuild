@@ -14,6 +14,7 @@ struct BusStopSearchTextField: View {
     @FocusState private var textFieldFocused: Bool
     @Binding var isBookmark: Bool
     
+    
     var body: some View {
         
         VStack {

@@ -38,6 +38,7 @@ struct BusStopSearchforBookmarkView: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @Binding var isBookmark: Bool
+
     
     var body: some View {
         VStack(alignment:. leading, spacing: 0){
@@ -66,12 +67,7 @@ struct BusStopSearchforBookmarkView: View {
     }
 }
 
-#Preview {
-    BusStopSearchView()
-        .environmentObject(AlarmModalViewModel())
-        .environmentObject(BusStopSeoulViewModel())
-        .environmentObject(BusLocationViewModel())
-}
+     
 
 
 
