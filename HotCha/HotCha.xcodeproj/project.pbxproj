@@ -6,22 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		D9E37F932DA955EF009A5719 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E37F922DA955EF009A5719 /* WidgetKit.framework */; };
-		D9E37F952DA955EF009A5719 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E37F942DA955EF009A5719 /* SwiftUI.framework */; };
-		D9E37FA62DA955F0009A5719 /* BeforeBusStopExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D9E37F902DA955EF009A5719 /* BeforeBusStopExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-/* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		D9E37FA42DA955F0009A5719 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9DD91FA12D522CB600789318 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D9E37F8F2DA955EF009A5719;
-			remoteInfo = BeforeBusStopExtension;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXCopyFilesBuildPhase section */
 		D9E37FAC2DA955F0009A5719 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -29,7 +13,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				D9E37FA62DA955F0009A5719 /* BeforeBusStopExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -38,7 +21,6 @@
 
 /* Begin PBXFileReference section */
 		9DD91FA92D522CB600789318 /* HotCha.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotCha.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D9E37F902DA955EF009A5719 /* BeforeBusStopExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeforeBusStopExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9E37F922DA955EF009A5719 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		D9E37F942DA955EF009A5719 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -51,28 +33,6 @@
 			);
 			target = 9DD91FA82D522CB600789318 /* HotCha */;
 		};
-		D955ED672DAFDE9200922A08 /* Exceptions for "BeforeBusStop" folder in "HotCha" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				BeforeBusStopLiveActivity.swift,
-			);
-			target = 9DD91FA82D522CB600789318 /* HotCha */;
-		};
-		D9E37FAB2DA955F0009A5719 /* Exceptions for "BeforeBusStop" folder in "BeforeBusStopExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = D9E37F8F2DA955EF009A5719 /* BeforeBusStopExtension */;
-		};
-		D9E37FB12DA96C2D009A5719 /* Exceptions for "HotCha" folder in "BeforeBusStopExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Resources/Assets.xcassets,
-				Utils/Font/PretendardWeight.swift,
-			);
-			target = D9E37F8F2DA955EF009A5719 /* BeforeBusStopExtension */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,18 +40,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				9DD91FEB2D5235A600789318 /* Exceptions for "HotCha" folder in "HotCha" target */,
-				D9E37FB12DA96C2D009A5719 /* Exceptions for "HotCha" folder in "BeforeBusStopExtension" target */,
 			);
 			path = HotCha;
-			sourceTree = "<group>";
-		};
-		D9E37F962DA955EF009A5719 /* BeforeBusStop */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				D955ED672DAFDE9200922A08 /* Exceptions for "BeforeBusStop" folder in "HotCha" target */,
-				D9E37FAB2DA955F0009A5719 /* Exceptions for "BeforeBusStop" folder in "BeforeBusStopExtension" target */,
-			);
-			path = BeforeBusStop;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -104,15 +54,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D9E37F8D2DA955EF009A5719 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D9E37F952DA955EF009A5719 /* SwiftUI.framework in Frameworks */,
-				D9E37F932DA955EF009A5719 /* WidgetKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -120,7 +61,6 @@
 			isa = PBXGroup;
 			children = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
-				D9E37F962DA955EF009A5719 /* BeforeBusStop */,
 				D9E37F912DA955EF009A5719 /* Frameworks */,
 				9DD91FAA2D522CB600789318 /* Products */,
 			);
@@ -130,7 +70,6 @@
 			isa = PBXGroup;
 			children = (
 				9DD91FA92D522CB600789318 /* HotCha.app */,
-				D9E37F902DA955EF009A5719 /* BeforeBusStopExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -159,7 +98,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				D9E37FA52DA955F0009A5719 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
@@ -170,28 +108,6 @@
 			productName = HotCha;
 			productReference = 9DD91FA92D522CB600789318 /* HotCha.app */;
 			productType = "com.apple.product-type.application";
-		};
-		D9E37F8F2DA955EF009A5719 /* BeforeBusStopExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D9E37FA72DA955F0009A5719 /* Build configuration list for PBXNativeTarget "BeforeBusStopExtension" */;
-			buildPhases = (
-				D9E37F8C2DA955EF009A5719 /* Sources */,
-				D9E37F8D2DA955EF009A5719 /* Frameworks */,
-				D9E37F8E2DA955EF009A5719 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				D9E37F962DA955EF009A5719 /* BeforeBusStop */,
-			);
-			name = BeforeBusStopExtension;
-			packageProductDependencies = (
-			);
-			productName = BeforeBusStopExtension;
-			productReference = D9E37F902DA955EF009A5719 /* BeforeBusStopExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -205,9 +121,6 @@
 				TargetAttributes = {
 					9DD91FA82D522CB600789318 = {
 						CreatedOnToolsVersion = 16.1;
-					};
-					D9E37F8F2DA955EF009A5719 = {
-						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -226,20 +139,12 @@
 			projectRoot = "";
 			targets = (
 				9DD91FA82D522CB600789318 /* HotCha */,
-				D9E37F8F2DA955EF009A5719 /* BeforeBusStopExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9DD91FA72D522CB600789318 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D9E37F8E2DA955EF009A5719 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -256,22 +161,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D9E37F8C2DA955EF009A5719 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		D9E37FA52DA955F0009A5719 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D9E37F8F2DA955EF009A5719 /* BeforeBusStopExtension */;
-			targetProxy = D9E37FA42DA955F0009A5719 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9D5CC5482D5CCB2B00FEE5F7 /* Release copy */ = {
@@ -555,90 +445,6 @@
 			};
 			name = Release;
 		};
-		D9E37FA82DA955F0009A5719 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UW9295Z57Q;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BeforeBusStop/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = BeforeBusStop;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = SSan.HotCha.BeforeBusStop;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		D9E37FA92DA955F0009A5719 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UW9295Z57Q;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BeforeBusStop/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = BeforeBusStop;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = SSan.HotCha.BeforeBusStop;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		D9E37FAA2DA955F0009A5719 /* Release copy */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UW9295Z57Q;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BeforeBusStop/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = BeforeBusStop;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = SSan.HotCha.BeforeBusStop;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = "Release copy";
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -658,16 +464,6 @@
 				9DD91FB82D522CB700789318 /* Debug */,
 				9DD91FB92D522CB700789318 /* Release */,
 				9D5CC5492D5CCB2B00FEE5F7 /* Release copy */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D9E37FA72DA955F0009A5719 /* Build configuration list for PBXNativeTarget "BeforeBusStopExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D9E37FA82DA955F0009A5719 /* Debug */,
-				D9E37FA92DA955F0009A5719 /* Release */,
-				D9E37FAA2DA955F0009A5719 /* Release copy */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

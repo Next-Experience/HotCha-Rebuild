@@ -145,8 +145,7 @@ struct MainPurpleAlarmButton: View {
 //    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
 //    @Binding var cityCode: Int
     
-    // LiveActivity 중복 실행 방지
-    @State private var liveActivityStarted = false
+  
     // 현재 진행중인 알람이 있는지 여부
     @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
     
@@ -155,13 +154,6 @@ struct MainPurpleAlarmButton: View {
             Spacer()
             Button(action: {
                 if busStopSeoulViewModel.currentDestinationIndex != nil {
-                    // LiveActivity 시작
-                    if !liveActivityStarted {
-                        startLiveActivity()
-                        liveActivityStarted = true
-                    }
-                    
-
                     
                     // 검색 값 초기화 신호 보내기
                     NotificationCenter.default.post(name: Notification.Name("ResetSearchText"), object: nil)
@@ -218,38 +210,5 @@ struct MainPurpleAlarmButton: View {
     
 
     
-    // LiveActivity 시작 함수
-    private func startLiveActivity() {
-        guard let bus = modalStateViewModel.bus else { return }
-        
-        let attributes = BeforeBusStopAttributes(name: bus.busRouteNm)
-        
-        // 선택된 버스 정류장 정보 가져오기
-        let destinationStationName = busStopSeoulViewModel.currentDestinationIndex != nil ?
-            busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].stationNm : bus.edStationNm
-        
-        let alarmStationName = busStopSeoulViewModel.currentAlarmIndex != nil ?
-            busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentAlarmIndex!].stationNm : bus.stStationNm
-        
-        // 남은 정류장 수 계산
-        let remainingStops = 0
-        
-        let contentState = BeforeBusStopAttributes.ContentState(
-            busNumber: bus.busRouteAbrv,
-            busRouteType: bus.routeType,
-            busStopName: alarmStationName,
-            remainingStops: remainingStops,
-            currentStopName: alarmStationName,
-            destinationStopName: destinationStationName
-        )
-        
-        let content = ActivityContent(state: contentState, staleDate: nil)
-        
-        do {
-            _ = try Activity<BeforeBusStopAttributes>.request(attributes: attributes, content: content, pushType: nil)
-            print("Live Activity 성공적으로 시작 : \(bus.busRouteNm)")
-        } catch {
-            print("Live Activity 시작 실패 : \(error.localizedDescription)")
-        }
-    }
+
 }
