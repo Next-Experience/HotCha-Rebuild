@@ -101,6 +101,11 @@ struct AlarmSettingView: View {
                     selectedDetent = .fraction(0.4)
                 }
                 
+            }.onChange(of: busStopSeoulViewModel.closeAll) { newValue in
+                if newValue == true{
+                    // 알람 종료 뷰로 이동하면 시트 모두 닫기
+                    dismiss()
+                }
             }
             .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
             .toolbar {

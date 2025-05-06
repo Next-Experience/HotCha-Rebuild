@@ -217,6 +217,7 @@ struct AlertStopsSection: View {
                 busLocationViewModel.stopFetching()
                 dismiss()
                 remainingStops = "불러오는 중..."
+                busStopSeoulViewModel.closeAll = true
             }){
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.gray150)

@@ -36,6 +36,7 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var navigateToAlarmEndView = false
     // 알람을 시작하고 뷰를 떠났다가 다시 현재 상태 그대로 돌아와야할때 사용하는 트리거 ex) 알람종료뷰에서 돌아올때, 메인 뷰에서 돌아올 때
     @Published var isReload = false
+    @Published var closeAll = false
     
    
     
