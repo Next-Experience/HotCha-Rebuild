@@ -129,7 +129,7 @@ func fetchBusStations(routeId: String, completion: @escaping ([BusStop], String?
         parser.delegate = busSeoulStationParserDelegate
         
         if parser.parse() {
-            print("✅ XML 파싱 성공")
+            print("✅ XML 파싱 성공ㅋㅋㅋㅋㅋㅋㅋㅋ")
             completion(busSeoulStationParserDelegate.parsedStations, nil)  // 파싱된 버스 데이터를 반환
         } else {
             print("❌ XML 파싱 실패")

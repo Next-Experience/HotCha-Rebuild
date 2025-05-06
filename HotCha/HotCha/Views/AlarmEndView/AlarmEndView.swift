@@ -14,7 +14,10 @@ struct AlarmEndView: View {
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+
+    @ObservedObject private var vm = NearestBusViewModel()
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+
     
     var body: some View {
         ZStack {

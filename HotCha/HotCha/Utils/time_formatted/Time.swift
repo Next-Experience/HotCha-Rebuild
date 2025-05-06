@@ -8,6 +8,6 @@ import Foundation
 
 func formattedTime(from date: Date) -> String {
     let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"  // 24시간제 시:분 형식
+    formatter.dateFormat = "HH:mm:ss"  // 24시간제 시:분 형식
     return formatter.string(from: date)
 }

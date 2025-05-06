@@ -6,6 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9D86EE9F2DC9F907003E6FED /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E37F922DA955EF009A5719 /* WidgetKit.framework */; };
+		9D86EEA02DC9F907003E6FED /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E37F942DA955EF009A5719 /* SwiftUI.framework */; };
+		9D86EEAD2DC9F908003E6FED /* HotchaLiveExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9D86EE9E2DC9F907003E6FED /* HotchaLiveExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9D86EEAB2DC9F908003E6FED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9DD91FA12D522CB600789318 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9D86EE9D2DC9F907003E6FED;
+			remoteInfo = HotchaLiveExtension;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		D9E37FAC2DA955F0009A5719 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -13,6 +29,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				9D86EEAD2DC9F908003E6FED /* HotchaLiveExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -20,12 +37,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9D86EE9E2DC9F907003E6FED /* HotchaLiveExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HotchaLiveExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DD91FA92D522CB600789318 /* HotCha.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotCha.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9E37F922DA955EF009A5719 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		D9E37F942DA955EF009A5719 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		9D86EEB22DC9F908003E6FED /* Exceptions for "HotchaLive" folder in "HotchaLiveExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9D86EE9D2DC9F907003E6FED /* HotchaLiveExtension */;
+		};
 		9DD91FEB2D5235A600789318 /* Exceptions for "HotCha" folder in "HotCha" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -36,6 +61,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		9D86EEA12DC9F907003E6FED /* HotchaLive */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9D86EEB22DC9F908003E6FED /* Exceptions for "HotchaLive" folder in "HotchaLiveExtension" target */,
+			);
+			path = HotchaLive;
+			sourceTree = "<group>";
+		};
 		9DD91FAB2D522CB600789318 /* HotCha */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -47,6 +80,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		9D86EE9B2DC9F907003E6FED /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D86EEA02DC9F907003E6FED /* SwiftUI.framework in Frameworks */,
+				9D86EE9F2DC9F907003E6FED /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9DD91FA62D522CB600789318 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -61,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
+				9D86EEA12DC9F907003E6FED /* HotchaLive */,
 				D9E37F912DA955EF009A5719 /* Frameworks */,
 				9DD91FAA2D522CB600789318 /* Products */,
 			);
@@ -70,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				9DD91FA92D522CB600789318 /* HotCha.app */,
+				9D86EE9E2DC9F907003E6FED /* HotchaLiveExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -86,6 +130,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9D86EE9D2DC9F907003E6FED /* HotchaLiveExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9D86EEAE2DC9F908003E6FED /* Build configuration list for PBXNativeTarget "HotchaLiveExtension" */;
+			buildPhases = (
+				9D86EE9A2DC9F907003E6FED /* Sources */,
+				9D86EE9B2DC9F907003E6FED /* Frameworks */,
+				9D86EE9C2DC9F907003E6FED /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				9D86EEA12DC9F907003E6FED /* HotchaLive */,
+			);
+			name = HotchaLiveExtension;
+			packageProductDependencies = (
+			);
+			productName = HotchaLiveExtension;
+			productReference = 9D86EE9E2DC9F907003E6FED /* HotchaLiveExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		9DD91FA82D522CB600789318 /* HotCha */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9DD91FB72D522CB700789318 /* Build configuration list for PBXNativeTarget "HotCha" */;
@@ -98,6 +164,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				9D86EEAC2DC9F908003E6FED /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
@@ -116,9 +183,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
+					9D86EE9D2DC9F907003E6FED = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					9DD91FA82D522CB600789318 = {
 						CreatedOnToolsVersion = 16.1;
 					};
@@ -139,11 +209,19 @@
 			projectRoot = "";
 			targets = (
 				9DD91FA82D522CB600789318 /* HotCha */,
+				9D86EE9D2DC9F907003E6FED /* HotchaLiveExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		9D86EE9C2DC9F907003E6FED /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9DD91FA72D522CB600789318 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,6 +232,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		9D86EE9A2DC9F907003E6FED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9DD91FA52D522CB600789318 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -162,6 +247,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9D86EEAC2DC9F908003E6FED /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9D86EE9D2DC9F907003E6FED /* HotchaLiveExtension */;
+			targetProxy = 9D86EEAB2DC9F908003E6FED /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9D5CC5482D5CCB2B00FEE5F7 /* Release copy */ = {
@@ -249,6 +342,90 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = SSan.HotCha;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Release copy";
+		};
+		9D86EEAF2DC9F908003E6FED /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HotchaLive/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = SSan.HotCha.HotchaLive;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9D86EEB02DC9F908003E6FED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HotchaLive/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = SSan.HotCha.HotchaLive;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9D86EEB12DC9F908003E6FED /* Release copy */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HotchaLive/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = SSan.HotCha.HotchaLive;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -448,6 +625,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		9D86EEAE2DC9F908003E6FED /* Build configuration list for PBXNativeTarget "HotchaLiveExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D86EEAF2DC9F908003E6FED /* Debug */,
+				9D86EEB02DC9F908003E6FED /* Release */,
+				9D86EEB12DC9F908003E6FED /* Release copy */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		9DD91FA42D522CB600789318 /* Build configuration list for PBXProject "HotCha" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

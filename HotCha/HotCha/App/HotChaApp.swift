@@ -25,6 +25,7 @@ struct HotChaApp: App {
             SplashView()
 //            SimpleDistanceTestView()
 //            SeoulBusInfoTestView()
+//            NearestBus3View()
                 .modelContainer(HotchaContainer)
         }
     }

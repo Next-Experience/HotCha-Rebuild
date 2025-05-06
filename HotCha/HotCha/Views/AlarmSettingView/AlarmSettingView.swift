@@ -24,9 +24,11 @@ struct AlarmSettingView: View {
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
     
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
-    @State private var liveActivityStarted = false // Live Activity 중복 실행 방지
+
+
     // 시트 구분을 위한 ID 추가
     @State private var sheetId = UUID()
+
     
     var body: some View {
         ZStack {
