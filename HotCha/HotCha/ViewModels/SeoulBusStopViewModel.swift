@@ -269,7 +269,7 @@ class BusStopSeoulViewModel: ObservableObject {
     //    // 현재 모드 (true면 목적지 or false면 알람 선택)
     //    @Published var isSelectDestinationMode: Bool = true
     
-    // TODO: 목적지 정류장 이후 disable
+    // 목적지 정류장 이후 disable
     func disableAfterDestinationStation(){
         // 목적지 정류장 인덱스 확인
         guard let destIndex = getDestinationStationIndex() else { return }
@@ -420,11 +420,11 @@ class BusStopSeoulViewModel: ObservableObject {
         
         // 먼저 이전에 .currentStop으로 표시된 정류장의 상태를 복원
         for i in 0..<busStations.count {
-            if busStations[i].busStopCase == .currentStop {
+            if busStations[i].busStopCase.contains(.currentStop) {
                 // 이전 상태로 복원 (필터링, 목적지, 알람 정류장 상태를 고려)
-                if busStations[i].arrivalStation {
+                if busStations[i].arrivalStation || busStations[i].busStopCase.contains(.destinationStop){
                     busStations[i].busStopCase = .destinationStop
-                } else if busStations[i].alarmStation {
+                } else if busStations[i].alarmStation || busStations[i].busStopCase.contains(.alarmStop) {
                     busStations[i].busStopCase = .alarmStop
                 } else if busStations[i].busStopCase != .disableStop {
                     busStations[i].busStopCase = .ableStop
