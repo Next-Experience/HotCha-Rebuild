@@ -43,6 +43,7 @@ struct AlarmStatusView: View {
                 AlertStopsSection()
                     .environmentObject(busLocationViewModel)
                     .environmentObject(busStopSeoulViewModel)
+                    .environmentObject(modalStateViewModel)
             }
             .font(.pretendard(.semibold, size: 16))
             .onAppear {
@@ -198,8 +199,13 @@ struct AlertSettingSection: View {
 struct AlertStopsSection: View {
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+
     @ObservedObject private var vm = NearestBusViewModel()
+
+    @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
     // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
     @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
   
@@ -222,8 +228,13 @@ struct AlertStopsSection: View {
                 print(vm.isCalculating)
                 busLocationViewModel.stopFetching()
                 dismiss()
-                remainingStops = "불러오는 중..."
-                
+
+                // 초기 알람 설정 상태로 초기화
+                modalStateViewModel.modalState = .alarmWait
+                busStopSeoulViewModel.returnToRootView = true
+                // 이용기록 저장 및 데이터 초기화
+                busStopSeoulViewModel.leaveAlarm(modelContext: modelContext)
+
             }){
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.gray150)

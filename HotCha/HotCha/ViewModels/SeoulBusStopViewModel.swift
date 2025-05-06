@@ -11,6 +11,7 @@ import SwiftUI
 import Foundation
 import Combine
 import CoreLocation
+import SwiftData
 
 class BusStopSeoulViewModel: ObservableObject {
     @Published var bus: Bus_info_seoul?
@@ -18,9 +19,9 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var busStations: [BusStop] = []
     @Published var defaultBusStations: [BusStop] = [] // 미정차 구역이 필터링 된 정류장 노선도
     @Published var searchText: String = ""
-    @Published var isLoading: Bool = false
+    @Published var isLoading: Bool = false // 현재 버스가 로딩되고 있는지 확인하는 변수
     @Published var errorMessage: String?
-    @Published var stationsUpdated: Bool = false // 데이터 업데이트 알림용 플래그
+    //    @Published var stationsUpdated: Bool = false // 데이터 업데이트 알림용 플래그
     @Published var currentFilteredIndex: Int = 0 // 필터링 인덱스 스크롤을 위한
     @Published var isLastFilteredIndex: Bool = true // 마지막 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
     @Published var isFirstFilteredIndex: Bool = true // 첫번째 필터링 인덱스 버튼 색상을 위한, 인덱스 없는 경우도 true
@@ -36,8 +37,9 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var navigateToAlarmEndView = false
     // 알람을 시작하고 뷰를 떠났다가 다시 현재 상태 그대로 돌아와야할때 사용하는 트리거 ex) 알람종료뷰에서 돌아올때, 메인 뷰에서 돌아올 때
     @Published var isReload = false
+    @Published var returnToRootView = false // 안내 종료 시 sheet가 닫히고 View도 dismiss되도록 하기위한 용도
     
-   
+    
     
     func setupBus(bus: Bus_info_seoul) {
         self.bus = bus
@@ -66,9 +68,6 @@ class BusStopSeoulViewModel: ObservableObject {
                     if !(self?.searchText.isEmpty ?? true) {
                         self?.applyFiltering(with: self?.searchText ?? "")
                     }
-                    
-                    // 데이터 업데이트 알림
-                    self?.notifyStationsUpdated()
                 }
             }
         }
@@ -204,9 +203,6 @@ class BusStopSeoulViewModel: ObservableObject {
             currentFilteredIndex = 0
             isLastFilteredIndex = false
         }
-        
-        // 데이터 변경 알림
-        notifyStationsUpdated()
     }
     
     // 필터링 초기화 시 인덱스도 초기화
@@ -229,14 +225,6 @@ class BusStopSeoulViewModel: ObservableObject {
         currentFilteredIndex = 0
         isFirstFilteredIndex = true
         isLastFilteredIndex = true
-        // 데이터 변경 알림
-        notifyStationsUpdated()
-    }
-    
-    // 데이터 업데이트 알림
-    private func notifyStationsUpdated() {
-        // Bool 토글로 변경 감지
-        stationsUpdated.toggle()
     }
     
     // 처음 정류장과 마지막 정류장을 구분
@@ -268,7 +256,7 @@ class BusStopSeoulViewModel: ObservableObject {
     //    // 현재 모드 (true면 목적지 or false면 알람 선택)
     //    @Published var isSelectDestinationMode: Bool = true
     
-    // TODO: 목적지 정류장 이후 disable
+    // 목적지 정류장 이후 disable
     func disableAfterDestinationStation(){
         // 목적지 정류장 인덱스 확인
         guard let destIndex = getDestinationStationIndex() else { return }
@@ -297,35 +285,6 @@ class BusStopSeoulViewModel: ObservableObject {
         
         // 현재 목적지 인덱스 업데이트
         currentDestinationIndex = destIndex
-        
-        // 데이터 업데이트 알림
-        notifyStationsUpdated()
-        /////
-        // 모든 정류장의 도착 상태 초기화
-        //            for i in 0..<busStations.count {
-        //                busStations[i].arrivalStation = false
-        //            }
-        
-        //            // 알람 정류장이 목적지 정류장 이후에 있다면 조정
-        //            if let alarmIndex = getAlarmStationIndex(), alarmIndex >= destIndex {
-        //                // 알람 정류장을 목적지 이전으로 이동 (최소 2정류장 전, 없으면 가장 가까운 정류장)
-        //                selectAlarmStation(alarmIndex: max(0, destIndex - 2))
-        //            }
-        
-        // 필터링된 정류장 업데이트 (스크롤 위치를 위해)
-        //            // 모든 정류장 필터링 상태 초기화
-        //            for i in 0..<busStations.count {
-        //                busStations[i].filtered = false
-        //            }
-        
-        //            // 선택된 정류장을 필터링 상태로 설정
-        //            busStations[destIndex].filtered = true
-        //
-        //            currentDestinationIndex = destIndex
-        
-        
-        // 데이터 업데이트 알림
-        notifyStationsUpdated()
     }
     
     // 알람 정류장 선택 메서드
@@ -419,11 +378,11 @@ class BusStopSeoulViewModel: ObservableObject {
         
         // 먼저 이전에 .currentStop으로 표시된 정류장의 상태를 복원
         for i in 0..<busStations.count {
-            if busStations[i].busStopCase == .currentStop {
+            if busStations[i].busStopCase.contains(.currentStop) {
                 // 이전 상태로 복원 (필터링, 목적지, 알람 정류장 상태를 고려)
-                if busStations[i].arrivalStation {
+                if busStations[i].arrivalStation || busStations[i].busStopCase.contains(.destinationStop){
                     busStations[i].busStopCase = .destinationStop
-                } else if busStations[i].alarmStation {
+                } else if busStations[i].alarmStation || busStations[i].busStopCase.contains(.alarmStop) {
                     busStations[i].busStopCase = .alarmStop
                 } else if busStations[i].busStopCase != .disableStop {
                     busStations[i].busStopCase = .ableStop
@@ -467,8 +426,6 @@ class BusStopSeoulViewModel: ObservableObject {
                     print("navigateToAlarmEndView \(navigateToAlarmEndView)")
                 }
             }
-            // UI 업데이트 알림
-            notifyStationsUpdated()
         } else {
             print("경고: 정류장 ID \(nextStId)를 찾을 수 없습니다.")
         }
@@ -496,10 +453,65 @@ class BusStopSeoulViewModel: ObservableObject {
         }
         return distanceStopNum
     }
+
+    // 알람을 시작하지 않고 떠날 때 선택된 데이터 clear
+    func clearSelectedData(){
+        bus = nil
+        busStations = []
+        defaultBusStations = []
+        searchText = ""
+        currentDestinationIndex = nil
+    }
     
-    // 알람을 아에 종료 할 때 초기화
-    func leaveAlarm(){
+    // 알람을 아에 종료 할 때 이용기록 저장 및 데이터 초기화
+    func leaveAlarm(modelContext: ModelContext){
+        @Environment(\.modelContext) var modelContext
+        // 현재 진행중인 알람이 있는지 여부
+        @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
+        // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
+        @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
         
+        let currentTime = Date()
+        
+        // 이용기록 저장
+        if let currentBusIndex = getDestinationStationIndex() {
+            let newUsage = Usage_history(
+                route_id: bus?.busRouteId ?? "",
+                city_code: "1",
+                destination_stop_id: String(busStations[currentBusIndex].stationNo),
+                destination_stop_name: busStations[currentBusIndex].stationNm,
+                bus_no: bus?.busRouteNm ?? "",
+                route_type: bus?.routeType ?? "",
+                get_off_timestamp: currentTime,
+                operator_name: bus?.corpNm ?? "정보 없음",
+                operator_no: "번호 없음", // TODO: 운수사 전번 넣기
+                vehicle_no: "차량 번호 없음" //TODO: vehicle_no 차량번호 넣기
+            )
+            print("newUsage: \(newUsage)")
+            modelContext.insert(newUsage)
+        }
+        
+        // 데이터 초기화
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.bus = nil
+            self.busStations = []
+            self.defaultBusStations = []
+            self.searchText = ""
+//            self.isLoading = false
+            //        currentFilteredIndex = 0
+            //        isLastFilteredIndex = false
+            self.currentDestinationIndex = nil
+            self.currentAlarmIndex = nil
+            self.currentBusStopIndex = nil
+            self.searchTextFieldfocused = false
+            self.isSelectDestinationMode = true
+            self.navigateToAlarmEndView = false
+            self.isReload = false
+            self.returnToRootView = false
+            
+            isAlarmInProgress = false
+            remainingStops = "불러오는 중..."
+        }
     }
     
     // 알람을 잠시 떠날 때 상태 저장
