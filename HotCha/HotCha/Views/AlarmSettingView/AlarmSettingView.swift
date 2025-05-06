@@ -48,6 +48,7 @@ struct AlarmSettingView: View {
                             .environmentObject(sheetManager)
                             .environmentObject(busLocationViewModel)
                             .environmentObject(busStopSeoulViewModel)
+                            .environmentObject(modalStateViewModel)
                             .transition(.opacity) // 부드러운 전환 효과
                     }
                 }
@@ -101,9 +102,9 @@ struct AlarmSettingView: View {
                     selectedDetent = .fraction(0.4)
                 }
                 
-            }.onChange(of: busStopSeoulViewModel.closeAll) { newValue in
-                if newValue == true{
-                    // 알람 종료 뷰로 이동하면 시트 모두 닫기
+            }.onChange(of: busStopSeoulViewModel.returnToRootView) { newValue in
+                if newValue{
+                    // 안내 종료 시 뷰 닫기
                     dismiss()
                 }
             }
@@ -115,6 +116,9 @@ struct AlarmSettingView: View {
                             name: Notification.Name("ResetSearchState"),
                             object: nil
                         )
+                        if !busStopSeoulViewModel.isReload {
+                            busStopSeoulViewModel.clearSelectedData()
+                        }
                         // 화면 닫기
                         dismiss()
                         //                    busLocationViewModel.stopFetching()
