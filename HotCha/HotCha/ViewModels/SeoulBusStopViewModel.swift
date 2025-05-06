@@ -289,6 +289,8 @@ class BusStopSeoulViewModel: ObservableObject {
     
     // 알람 정류장 선택 메서드
     func selectAlarmStation(alarmIndex: Int) {
+        @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2
+        
         // disable 정류장이 아니면
         guard busStations[alarmIndex].busStopCase != .disableStop else { return }
         
@@ -318,6 +320,11 @@ class BusStopSeoulViewModel: ObservableObject {
         busStations[finalIndex].busStopCase = .alarmStop
         // 현재 알람정류장 인덱스 업데이트
         currentAlarmIndex = finalIndex
+        
+        // 알람 정류장과 도착 정류장 사이의 distance 계산
+        guard let destIndex = getDestinationStationIndex() else { return }
+        alarmStopDistanceFromDestination = destIndex - finalIndex
+        print("alarmStopDistanceFromDestination: \(alarmStopDistanceFromDestination)")
     }
     
     // 목적지 정류장 인덱스 찾기
@@ -331,12 +338,13 @@ class BusStopSeoulViewModel: ObservableObject {
     }
     
     // TODO: 알람 정류장 설정 버튼 (다른 View에서 호출) 미정차 정류장 고려해서 수정
-    func setAlarmTwoStationsBeforeDestination() {
+    func setAlarmNStationsBeforeDestination() {
+        @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2 // 알람 정류장과 도착 정류장 사이의 distance
         // 목적지 정류장 확인
         guard let destIndex = getDestinationStationIndex() else { return }
         
         // 목적지에서 2정류장 전의 위치 계산 (최소 0)
-        let alarmIndex = max(0, destIndex - 2)
+        let alarmIndex = max(0, destIndex - alarmStopDistanceFromDestination)
         
         // 알람 정류장 설정
         selectAlarmStation(alarmIndex: alarmIndex)
@@ -492,7 +500,7 @@ class BusStopSeoulViewModel: ObservableObject {
         }
         
         // 데이터 초기화
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.bus = nil
             self.busStations = []
             self.defaultBusStations = []
