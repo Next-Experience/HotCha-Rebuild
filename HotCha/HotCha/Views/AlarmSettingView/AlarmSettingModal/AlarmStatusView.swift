@@ -200,7 +200,7 @@ struct AlertStopsSection: View {
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
 
-    @ObservedObject private var vm = NearestBusViewModel()
+    @StateObject private var vm = NearestBusViewModel()
 
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
 
