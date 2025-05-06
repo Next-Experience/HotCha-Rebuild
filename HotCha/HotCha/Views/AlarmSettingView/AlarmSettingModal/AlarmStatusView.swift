@@ -101,6 +101,7 @@ struct BusStopDestinationSection: View {
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
+    
     var body: some View {
         VStack(spacing: 0){
             // 알람 정류장
@@ -197,9 +198,12 @@ struct AlertSettingSection: View {
 struct AlertStopsSection: View {
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @ObservedObject private var vm = NearestBusViewModel()
     @Environment(\.dismiss) var dismiss
     // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
     @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
+  
+    
     
     var body: some View {
         HStack(alignment: .bottom){
@@ -214,9 +218,12 @@ struct AlertStopsSection: View {
                 .foregroundStyle(.gray900)
             Spacer()
             Button(action: {
+                vm.stop()
+                print(vm.isCalculating)
                 busLocationViewModel.stopFetching()
                 dismiss()
                 remainingStops = "불러오는 중..."
+                
             }){
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.gray150)
@@ -226,6 +233,19 @@ struct AlertStopsSection: View {
                             .foregroundStyle(.mainpurple)
                             .font(.pretendard(.medium, size: 16))
                     )
+            }
+            .onAppear {
+                
+                if let index = busStopSeoulViewModel.currentDestinationIndex {
+                    print("gggggg",busStopSeoulViewModel.busStations[index].station)
+                    vm.stationIdInput = busStopSeoulViewModel.busStations[index].station
+                    vm.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
+
+                    vm.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
+                             busStopSeoulViewModel.busStations[index].busRouteId,)
+                    print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
+                }
+
             }
         }
         .padding(EdgeInsets(top: 21, leading: 20, bottom: 48, trailing: 20))

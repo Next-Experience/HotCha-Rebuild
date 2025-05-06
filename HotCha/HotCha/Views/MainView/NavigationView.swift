@@ -12,6 +12,7 @@ struct NavigationView: View {
     @State private var isTouching = true
     @State var isSwipeDisabled = false
     let lastPageIndex = 2
+    @StateObject private var vm = NearestBusViewModel()
 
     
     var body: some View {

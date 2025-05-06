@@ -38,6 +38,7 @@ struct BusStopSearchforBookmarkView: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @Binding var isBookmark: Bool
+    @StateObject private var vm = NearestBusViewModel()
 
     
     var body: some View {
@@ -148,6 +149,7 @@ struct MainPurpleAlarmButton: View {
   
     // 현재 진행중인 알람이 있는지 여부
     @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
+    @StateObject private var vm = NearestBusViewModel()
     
     var body: some View {
         HStack(alignment: .center){
@@ -176,6 +178,15 @@ struct MainPurpleAlarmButton: View {
                         sheetManager.showAlarmInfoSheet2 = true
                         busStopSeoulViewModel.setAlarmTwoStationsBeforeDestination() // 도착정류장의 2 정류장 전에 알람 정류장으로 설정
                         busStopSeoulViewModel.switchToAlarmMode() // 알람 모드로 전환
+                        print("--------알림 시작 후--------")
+                        if let index = busStopSeoulViewModel.currentDestinationIndex {
+                            print("gggggg",busStopSeoulViewModel.busStations[index].station)
+                            vm.stationIdInput = busStopSeoulViewModel.busStations[index].station
+                            vm.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
+
+//                            vm.start(stationId:busStopSeoulViewModel.busStations[index].busRouteId, routeId: busStopSeoulViewModel.busStations[index].station)
+//                            print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
+                        }
                         
                         // MainView에 알람 상태 전달
                         NotificationCenter.default.post(
@@ -187,7 +198,6 @@ struct MainPurpleAlarmButton: View {
                 }
                 
                 busStopSeoulViewModel.isReload = true // 알람이 시작한 상태이기 때문에, 시작한 상태로 알람에 다시 들어오면 정보를 그대로 띄워주기 위한 트리거
-                
                 // TODO: 앱스토리지에 알람 진행중인 상태 저장
                 isAlarmInProgress = true
                 

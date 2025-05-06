@@ -24,7 +24,7 @@ struct AlarmSettingView: View {
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
     
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
-    @State private var liveActivityStarted = false // Live Activity 중복 실행 방지
+
     
     var body: some View {
         NavigationStack {
