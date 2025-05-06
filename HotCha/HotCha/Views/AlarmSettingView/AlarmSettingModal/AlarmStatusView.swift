@@ -231,6 +231,7 @@ struct AlertStopsSection: View {
 
                 // 초기 알람 설정 상태로 초기화
                 modalStateViewModel.modalState = .alarmWait
+                modalStateViewModel.bus = nil
                 busStopSeoulViewModel.returnToRootView = true
                 // 이용기록 저장 및 데이터 초기화
                 busStopSeoulViewModel.leaveAlarm(modelContext: modelContext)
@@ -253,7 +254,7 @@ struct AlertStopsSection: View {
                     vm.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
 
                     vm.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
-                             busStopSeoulViewModel.busStations[index].busRouteId,)
+                             busStopSeoulViewModel.busStations[index].busRouteId)
                     print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
                 }
 

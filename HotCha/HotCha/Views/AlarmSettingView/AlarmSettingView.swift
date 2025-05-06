@@ -120,6 +120,7 @@ struct AlarmSettingView: View {
                         )
                         if !busStopSeoulViewModel.isReload {
                             busStopSeoulViewModel.clearSelectedData()
+                            modalStateViewModel.bus = nil
                         }
                         // 화면 닫기
                         dismiss()

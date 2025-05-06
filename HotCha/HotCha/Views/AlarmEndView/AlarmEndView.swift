@@ -41,10 +41,20 @@ struct AlarmEndView: View {
                     }
                     .padding(.bottom, 12)
                     
-                    Text("\(busStopSeoulViewModel.busStations[busStopSeoulViewModel.getDestinationStationIndex() ?? 0].stationNm)")
-                        .font(.pretendard(.bold, size: 24))
-                        .foregroundStyle(Color("gray50"))
-                        .padding(.bottom, 30)
+                    if let index = busStopSeoulViewModel.getDestinationStationIndex(),
+                       index < busStopSeoulViewModel.busStations.count {
+                        Text("\(busStopSeoulViewModel.busStations[index].stationNm)")
+                            .font(.pretendard(.bold, size: 24))
+                            .foregroundStyle(Color("gray50"))
+                            .padding(.bottom, 30)
+                    } else {
+                        Text("정류장 정보 없음")
+                            .font(.pretendard(.bold, size: 24))
+                            .foregroundStyle(Color("gray50"))
+                            .padding(.bottom, 30)
+                    }
+//                    Text("\(busStopSeoulViewModel.busStations[busStopSeoulViewModel.getDestinationStationIndex() ?? 0].stationNm)")
+                        
                     
                     HStack {
                         Text("확인")
@@ -92,6 +102,7 @@ struct AlarmEndView: View {
                         busStopSeoulViewModel.leaveAlarm(modelContext: modelContext)
                         // 초기 알람 설정 상태로 초기화
                         modalStateViewModel.modalState = .alarmWait
+                        modalStateViewModel.bus = nil
 
                         dismiss()
                         busLocationViewModel.stopFetching()
