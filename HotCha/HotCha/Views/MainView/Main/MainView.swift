@@ -72,6 +72,7 @@ struct MainView: View {
         VStack(spacing: 12) {
 
             if modalStateViewModel.bus != nil {
+//            if busStopSeoulViewModel.bus != nil {
                 NavigationLink(destination: AlarmSettingView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager)) {
                     DoAlarmView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1))
                         .padding(.bottom, 12)

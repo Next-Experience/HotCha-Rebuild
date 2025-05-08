@@ -13,7 +13,8 @@ struct NavigationView: View {
     @State var isSwipeDisabled = false
     @State private var isDragging = false
     let lastPageIndex = 2
-    
+  
+    @StateObject private var vm = NearestBusViewModel()
     
     var body: some View {
         NavigationStack {
