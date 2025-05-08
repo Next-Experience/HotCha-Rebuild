@@ -246,9 +246,7 @@ struct BusStopInfoSection: View {
             VStack(alignment:. leading, spacing: 4){
             HStack (alignment: .center) {
                 SearchBusUtil.CustomBusNoView(busNo: modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음",
-                                             routeType: modalStateViewModel.bus?.routeType ?? "")
-                    .font(.pretendard(.semibold, size: 20))
-                    .padding(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
+                                              routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
                 Spacer()
                 if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
                     Button(action: {
@@ -272,9 +270,7 @@ struct BusStopInfoSection: View {
         VStack(alignment:. leading, spacing: 12){
         HStack (alignment: .center){
             SearchBusUtil.CustomBusNoView(busNo: modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음",
-                                         routeType: modalStateViewModel.bus?.routeType ?? "")
-                .font(.pretendard(.semibold, size: 20))
-                .padding(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
+                                          routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
             Spacer()
             if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
                 Button(action: {
