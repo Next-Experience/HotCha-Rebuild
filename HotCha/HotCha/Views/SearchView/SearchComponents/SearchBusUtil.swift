@@ -49,11 +49,11 @@ struct SearchBusUtil {
         }
         
         // 커스텀 버스 번호 뷰
-        static func CustomBusNoView(busNo: String, routeType: String) -> some View {
+    static func CustomBusNoView(busNo: String, routeType: String, weight: Font.PretendardWeight = .semibold, size: CGFloat = 14) -> some View {
             let color = getColorForRouteType(routeType)
             
             return Text(busNo)
-                .font(.pretendard(.semibold, size: 14))
+                .font(.pretendard(weight, size: size))
                 .foregroundStyle(color)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)

@@ -25,7 +25,7 @@ struct SearchView: View {
             // 각 버스 항목
             HStack {
                 // 버스 번호 및 타입 블록
-                SearchBusUtil.CustomBusNoView(busNo: route.busRouteAbrv, routeType: route.routeType)
+                SearchBusUtil.CustomBusNoView(busNo: route.busRouteNm, routeType: route.routeType)
                 
                 // 버스 타입 필터링
                 BusTypeLabelView(busNo: route.busRouteAbrv, routeType: route.routeType)
