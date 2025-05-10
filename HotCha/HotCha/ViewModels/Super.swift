@@ -13,6 +13,7 @@ class NearestBusViewModel: ObservableObject {
     @Published var remainingStops: Int?
     @Published var busStops: [BusStop] = []
     @Published var isCalculating = false
+    var locationviewModel = LocationViewModel()
 
 
     private var timer: AnyCancellable?
@@ -39,6 +40,7 @@ class NearestBusViewModel: ObservableObject {
 //        fetchBusStopsIfNeeded()
 //    }
     func start(stationId: String, routeId: String) {
+        
         guard !isCalculating else {
             print("⚠️ 이미 실행 중")
             return
@@ -48,8 +50,14 @@ class NearestBusViewModel: ObservableObject {
         self.busRouteId = routeId
         self.viewModel.busRouteId = routeId
         self.viewModel.startFetching()
+        if let loc = locationviewModel.location {
+            print("위도: \(loc.coordinate.latitude)")
+            print("경도: \(loc.coordinate.longitude)")
+        }
 
         isCalculating = true
+        locationviewModel.requestPermission()
+        locationviewModel.startTrackingLocation()
 
         LiveActivityManager.shared.startLiveActivity(
             title: "핫챠",
@@ -147,7 +155,13 @@ class NearestBusViewModel: ObservableObject {
                        self.timer = nil
                        return
                    }
-
+                   LiveActivityManager.shared.updateLiveActivity(
+                       progress: 1.0,  // 진행률을 항상 1로 설정
+                       currentStop: "ee",
+                       stopsRemaining: 3,
+                       destinationStation: "dd",
+                       Updatetime: formattedTime(from: Date())
+                   )
                    self.updateRemainingStops(stationId: stationId, routeId: routeId)
                    print("루프 진행중")
                }
