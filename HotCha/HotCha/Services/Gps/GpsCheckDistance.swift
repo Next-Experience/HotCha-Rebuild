@@ -90,6 +90,7 @@ struct SimpleDistanceTestView: View {
         .onAppear {
             locationViewModel.requestPermission()
             locationViewModel.requestLocation()
+            locationViewModel.requestalwaysPermission()
         }
     }
     

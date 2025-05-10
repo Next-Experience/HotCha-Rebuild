@@ -22,6 +22,7 @@ class NearestBusViewModel: ObservableObject {
 
     var stationIdInput: String = ""// 외부에서 주입 가능
     var busRouteId: String = ""
+    @State private var isGpsAlert = false
     
 
 
@@ -58,6 +59,7 @@ class NearestBusViewModel: ObservableObject {
         isCalculating = true
         locationviewModel.requestPermission()
         locationviewModel.startTrackingLocation()
+        locationviewModel.requestalwaysPermission()
 
         LiveActivityManager.shared.startLiveActivity(
             title: "핫챠",
@@ -106,36 +108,7 @@ class NearestBusViewModel: ObservableObject {
     }
 
 
-//    private func startLoop(stationId: String, routeId: String) {
-//        func loop() {
-//            // 매번 실행될 때마다 최신 상태의 isCalculating을 확인
-//            guard self.isCalculating else {
-//                print("🛑 계산 중단됨")
-//                return
-//            }
-//            
-//            self.updateRemainingStops(stationId: stationId, routeId: routeId)
-//            
-//            // 1초 후 루프 계속 돌도록 설정
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-//                // 루프가 진행 중일 때만 다시 호출
-//                if self.isCalculating {
-//                    loop() // 재귀 호출로 루프 계속 실행
-//                } else {
-//                    print("🛑 루프 종료")
-//                }
-//            }
-//            
-//            print("루프 진행중")
-//        }
-//
-//        if self.isCalculating {
-//            loop()
-//            print("🚀 루프 시작")
-//        } else {
-//            print("루프 끝")
-//        }
-//    }
+
     func startLoop(stationId: String, routeId: String) {
            guard isCalculating else {
                print("루프 끝 (isCalculating이 false)")
@@ -155,13 +128,28 @@ class NearestBusViewModel: ObservableObject {
                        self.timer = nil
                        return
                    }
+                   let destinationStop = busStops.first { String($0.station) == stationId }
+                   let targetLocation = CLLocation(latitude: destinationStop?.gpsY ?? 10, longitude: destinationStop?.gpsY ?? 10)
+                   if !isGpsAlert {
+                       let triggered = checkProximity(currentLocation: locationviewModel.location, targetLocation: targetLocation)
+                       if triggered {
+                           isGpsAlert = true
+                       }
+                       else {
+                           print("멀었다")
+                       }
+                       print("targetLocation: \(targetLocation)xzzzzzzzzz")
+                       
+                   }
+                   
                    LiveActivityManager.shared.updateLiveActivity(
                        progress: 1.0,  // 진행률을 항상 1로 설정
-                       currentStop: "ee",
-                       stopsRemaining: 3,
-                       destinationStation: "dd",
+                       currentStop: "targetLocation: \(targetLocation)xzzzzzzzzz",
+                       stopsRemaining: 20000726,
+                       destinationStation: "\(locationviewModel.location)",
                        Updatetime: formattedTime(from: Date())
                    )
+                   
                    self.updateRemainingStops(stationId: stationId, routeId: routeId)
                    print("루프 진행중")
                }
@@ -265,3 +253,33 @@ struct NearestBus3View: View {
 }
 
 
+// 🔔 거리 계산 및 알람 트리거 함수
+func checkProximity(currentLocation: CLLocation?, targetLocation: CLLocation, threshold: Double = 500.0) -> Bool {
+    guard let current = currentLocation else { return false }
+    
+    let distance = current.distance(from: targetLocation)
+    print("현재 거리: \(Int(distance))m")
+    
+    if distance <= threshold {
+        print("🔔 알림: 목표 지점 도달!")
+        return true
+    }
+    
+    return false
+}
+
+
+//func startCheckingDistance() {
+//    Task {
+//        let result = await checkDistance(
+//            toX: targetLongitude,
+//            toY: targetLatitude,
+//            locationViewModel: locationViewModel
+//        )
+//        if result == 1 {
+//            await MainActor.run {
+//                isArrived = true
+//            }
+//        }
+//    }
+//}

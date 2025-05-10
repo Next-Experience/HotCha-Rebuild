@@ -19,12 +19,17 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.allowsBackgroundLocationUpdates = true  // ✅ 중요
+        manager.pausesLocationUpdatesAutomatically = false // 중단 방지
     }
     
     // 권한 요청
     func requestPermission() {
         manager.requestWhenInUseAuthorization()
     }
+    func requestalwaysPermission() {
+          manager.requestAlwaysAuthorization() // ✅ 백그라운드 위해 Always 권한 요청
+      }
     
     // 위치 불러오기
     func requestLocation() {
