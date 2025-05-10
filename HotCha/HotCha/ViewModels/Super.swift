@@ -27,7 +27,6 @@ class NearestBusViewModel: ObservableObject {
     @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2
     @AppStorage("soundToggle") var soundToggle: Bool = true
     @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
-    
 
 
     deinit {
@@ -63,7 +62,11 @@ class NearestBusViewModel: ObservableObject {
         isCalculating = true
         locationviewModel.requestPermission()
         locationviewModel.startTrackingLocation()
+<<<<<<< HEAD
         locationviewModel.requestAlwaysPermission()
+=======
+        locationviewModel.requestalwaysPermission()
+>>>>>>> 4a62462 (Gps 트리거 생성)
 
         LiveActivityManager.shared.startLiveActivity(
             title: "핫챠",
@@ -137,6 +140,7 @@ class NearestBusViewModel: ObservableObject {
                    let alarmDestination = busStops.first { $0.seq == alarmSeq}
                    let targetLocation = CLLocation(latitude: alarmDestination?.gpsY ?? 10, longitude: alarmDestination?.gpsX ?? 10)
                    
+
                    if !isGpsAlert {
                        let triggered = checkProximity(currentLocation: locationviewModel.location, targetLocation: targetLocation)
                        if triggered {
@@ -149,6 +153,7 @@ class NearestBusViewModel: ObservableObject {
                        
                    }
                    
+
 //                   LiveActivityManager.shared.updateLiveActivity(
 //                       progress: 1.0,  // 진행률을 항상 1로 설정
 //                       currentStop: "targetLocation: \(targetLocation)xzzzzzzzzz",
@@ -156,6 +161,15 @@ class NearestBusViewModel: ObservableObject {
 //                       destinationStation: "\(locationviewModel.location)",
 //                       Updatetime: formattedTime(from: Date())
 //                   )
+
+                   LiveActivityManager.shared.updateLiveActivity(
+                       progress: 1.0,  // 진행률을 항상 1로 설정
+                       currentStop: "targetLocation: \(targetLocation)xzzzzzzzzz",
+                       stopsRemaining: 20000726,
+                       destinationStation: "\(locationviewModel.location)",
+                       Updatetime: formattedTime(from: Date())
+                   )
+
                    
                    self.updateRemainingStops(stationId: stationId, routeId: routeId)
                    print("루프 진행중")

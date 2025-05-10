@@ -41,6 +41,7 @@ class BusLocationViewModel: ObservableObject {
     init() {
         locationVM.requestPermission()
         locationVM.requestLocation()
+        locationVM.requestalwaysPermission()
     }
 
     func startFetching() {
