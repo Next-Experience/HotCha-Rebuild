@@ -35,33 +35,6 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
     
-    // 위치 불러와졌을 때
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let currentLocation = locations.first else { return }
-        
-        // 위치 정보를 받은 후, 지오코딩을 통해 행정구역 정보를 얻음
-        geocoder.reverseGeocodeLocation(currentLocation) { [weak self] placemarks, error in
-            if let error = error {
-                print("지오코딩 실패: \(error.localizedDescription)")
-                return
-            }
-            
-            // 첫 번째 플래이스마크에서 행정구역 정보 추출
-            if let placemark = placemarks?.first {
-                self?.administrativeArea = placemark.administrativeArea
-                self?.address = placemark.subLocality ?? ""
-//             thoroughfare // 다른 주소 정보
-//             subThoroughfare // 다른 주소 정보
-            }
-            print("ㅋㅋㅋㅋㅋㅋ")
-        }
-        
-        DispatchQueue.main.async {
-            self.location = currentLocation
-        }
-        
-        manager.stopUpdatingLocation()
-    }
     
     // 위치 업데이트 실패 시 호출됨
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -73,6 +46,44 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         print("권한 상태 변경")
         DispatchQueue.main.async {
             self.authorizationStatus = manager.authorizationStatus
+        }
+    }
+    
+    // 위치 추적 시작
+    func startTrackingLocation() {
+        if CLLocationManager.locationServicesEnabled() {
+            manager.allowsBackgroundLocationUpdates = true
+            manager.pausesLocationUpdatesAutomatically = false
+            manager.startUpdatingLocation()
+        } else {
+            print("위치 서비스 비활성화됨")
+        }
+    }
+
+    // 위치 추적 종료
+    func stopTrackingLocation() {
+        manager.stopUpdatingLocation()
+    }
+
+    // 위치 업데이트 발생 시
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let currentLocation = locations.last else { return }
+
+        DispatchQueue.main.async {
+            self.location = currentLocation
+        }
+
+        geocoder.reverseGeocodeLocation(currentLocation) { [weak self] placemarks, error in
+            if let error = error {
+                print("지오코딩 실패: \(error.localizedDescription)")
+                return
+            }
+            
+            if let placemark = placemarks?.first {
+                self?.administrativeArea = placemark.administrativeArea
+                self?.address = placemark.subLocality ?? ""
+            }
+            print("위치 업데이트됨: \(currentLocation.coordinate.latitude), \(currentLocation.coordinate.longitude)")
         }
     }
 }
