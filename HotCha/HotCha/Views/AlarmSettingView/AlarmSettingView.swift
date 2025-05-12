@@ -55,6 +55,7 @@ struct AlarmSettingView: View {
                     }
                 }
                 .onAppear {
+                    busStopSeoulViewModel.bus = bus
                     if busStopSeoulViewModel.isReload { // 이미 진행 중인 알람을 다시 로드할 때
                         sheetManager.showAlarmInfoSheet2 = true
                     } else {

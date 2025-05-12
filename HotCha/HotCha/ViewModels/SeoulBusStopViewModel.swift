@@ -472,7 +472,7 @@ class BusStopSeoulViewModel: ObservableObject {
         }
         return distanceStopNum
     }
-
+    
     // 알람을 시작하지 않고 떠날 때 선택된 데이터 clear
     func clearSelectedData(){
         bus = nil
@@ -483,54 +483,34 @@ class BusStopSeoulViewModel: ObservableObject {
     }
     
     // 알람을 아에 종료 할 때 이용기록 저장 및 데이터 초기화
-    func leaveAlarm(modelContext: ModelContext){
+    func leaveAlarm(){
         @Environment(\.modelContext) var modelContext
         // 현재 진행중인 알람이 있는지 여부
         @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
         // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
         @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
         
-        let currentTime = Date()
-        
-        // 이용기록 저장
-        if let currentBusIndex = getDestinationStationIndex() {
-            let newUsage = Usage_history(
-                route_id: bus?.busRouteId ?? "",
-                city_code: "1",
-                destination_stop_id: String(busStations[currentBusIndex].stationNo),
-                destination_stop_name: busStations[currentBusIndex].stationNm,
-                bus_no: bus?.busRouteNm ?? "",
-                route_type: bus?.routeType ?? "",
-                get_off_timestamp: currentTime,
-                operator_name: bus?.corpNm ?? "정보 없음",
-                operator_no: "번호 없음", // TODO: 운수사 전번 넣기
-                vehicle_no: "차량 번호 없음" //TODO: vehicle_no 차량번호 넣기
-            )
-            print("newUsage: \(newUsage)")
-            modelContext.insert(newUsage)
-        }
         
         // 데이터 초기화
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.bus = nil
-            self.busStations = []
-            self.defaultBusStations = []
-            self.searchText = ""
-//            self.isLoading = false
-            //        currentFilteredIndex = 0
-            //        isLastFilteredIndex = false
-            self.currentDestinationIndex = nil
-            self.currentAlarmIndex = nil
-            self.currentBusStopIndex = nil
-            self.searchTextFieldfocused = false
-            self.isSelectDestinationMode = true
-            self.navigateToAlarmEndView = false
-            self.isReload = false
-            self.returnToRootView = false
-            
-            isAlarmInProgress = false
-            remainingStops = "불러오는 중..."
-        }
+        self.bus = nil
+        self.busStations = []
+        self.defaultBusStations = []
+        self.searchText = ""
+        //            self.isLoading = false
+        //        currentFilteredIndex = 0
+        //        isLastFilteredIndex = false
+        self.currentDestinationIndex = nil
+        self.currentAlarmIndex = nil
+        self.currentBusStopIndex = nil
+        self.searchTextFieldfocused = false
+        self.isSelectDestinationMode = true
+        self.navigateToAlarmEndView = false
+        self.isReload = false
+        self.returnToRootView = false
+        
+        isAlarmInProgress = false
+        remainingStops = "불러오는 중..."
+        
     }
     
     // 알람을 잠시 떠날 때 상태 저장

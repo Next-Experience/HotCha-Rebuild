@@ -229,12 +229,36 @@ struct AlertStopsSection: View {
                 busLocationViewModel.stopFetching()
                 dismiss()
 
+                // 이용기록
+                let currentTime = Date()
+                
+                if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
+                    let newUsage = Usage_history(
+                        route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
+                        city_code: "1",
+                        destination_stop_id: String(busStopSeoulViewModel.busStations[currentBusIndex].stationNo),
+                        destination_stop_name: busStopSeoulViewModel.busStations[currentBusIndex].stationNm,
+                        bus_no: busStopSeoulViewModel.bus?.busRouteNm ?? "번호 없음",
+                        route_type: busStopSeoulViewModel.bus?.routeType ?? "타입 없음",
+                        get_off_timestamp: currentTime,
+                        operator_name: busStopSeoulViewModel.bus?.corpNm ?? "정보 없음",
+                        operator_no: "정보 없음", // TODO: 운수사 전번 넣기
+                        vehicle_no: "정보 없음" //TODO: vehicle_no 차량번호 넣기
+                    )
+                    print("bus Info: \(busStopSeoulViewModel.bus)")
+                    print("newUsage: \(newUsage.route_id)   \(newUsage.destination_stop_id)  \(newUsage.destination_stop_name)  \(newUsage.route_type)  \(newUsage.bus_no)")
+                    modelContext.insert(newUsage)
+                }
+                
+                // 데이터 초기화
+                busStopSeoulViewModel.leaveAlarm()
+                
                 // 초기 알람 설정 상태로 초기화
                 modalStateViewModel.modalState = .alarmWait
                 modalStateViewModel.bus = nil
                 busStopSeoulViewModel.returnToRootView = true
-                // 이용기록 저장 및 데이터 초기화
-                busStopSeoulViewModel.leaveAlarm(modelContext: modelContext)
+                
+                
 
             }){
                 RoundedRectangle(cornerRadius: 8)
