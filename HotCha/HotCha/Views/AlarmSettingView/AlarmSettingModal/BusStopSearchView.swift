@@ -12,7 +12,6 @@ struct BusStopSearchView: View {
     @State var busStopSearchText:String = ""
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
     var body: some View {
         VStack(alignment:. leading, spacing: 0){
@@ -20,7 +19,7 @@ struct BusStopSearchView: View {
                 BusStopInfoSection(isBookmark: .constant(false))
                 BusStopSearchTextField(busStopSearchText: $busStopSearchText, isBookmark: .constant(false))
                     .environmentObject(modalStateViewModel)
-                    .environmentObject(busStopSeoulViewModel).environmentObject(busLocationViewModel)
+                    .environmentObject(busStopSeoulViewModel)
                     .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
                 
             }
@@ -36,10 +35,9 @@ struct BusStopSearchforBookmarkView: View {
     @State var busStopSearchText:String = ""
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @Binding var isBookmark: Bool
     @StateObject private var vm = NearestBusViewModel()
-
+    
     
     var body: some View {
         VStack(alignment:. leading, spacing: 0){
@@ -49,16 +47,14 @@ struct BusStopSearchforBookmarkView: View {
                     BusStopSearchTextField(busStopSearchText: $busStopSearchText, isBookmark: $isBookmark)
                         .environmentObject(modalStateViewModel)
                         .environmentObject(busStopSeoulViewModel)
-                        .environmentObject(busLocationViewModel)
                         .padding(EdgeInsets(top: 0, leading: 20, bottom: 12, trailing: 20))
                 } else {
                     BusStopInfoSection(isBookmark: $isBookmark)
                     BusStopSearchTextField(busStopSearchText: $busStopSearchText, isBookmark: $isBookmark)
                         .environmentObject(modalStateViewModel)
                         .environmentObject(busStopSeoulViewModel)
-                        .environmentObject(busLocationViewModel)
                         .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
-
+                    
                 }
             }
             if !isBookmark {
@@ -68,7 +64,7 @@ struct BusStopSearchforBookmarkView: View {
     }
 }
 
-     
+
 
 
 
@@ -141,15 +137,14 @@ struct MainPurpleAlarmButton: View {
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     
-//    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
-//    @Binding var cityCode: Int
+    //    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
+    //    @Binding var cityCode: Int
     
-  
+    
     // 현재 진행중인 알람이 있는지 여부
     @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
-    @StateObject private var vm = NearestBusViewModel()
+    @EnvironmentObject var nearestBusViewModel: NearestBusViewModel
     
     var body: some View {
         HStack(alignment: .center){
@@ -164,7 +159,7 @@ struct MainPurpleAlarmButton: View {
                     busStopSeoulViewModel.disableAfterDestinationStation()
                     modalStateViewModel.modalState = .alertStopsMedium
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        busLocationViewModel.startFetching() // 현재 버스위치 추적 시작
+                         // TODO: 현재 버스위치 추적 시작
                     }
                     sheetManager.showAlarmSearchSheet1 = false
                     
@@ -181,11 +176,11 @@ struct MainPurpleAlarmButton: View {
                         print("--------알림 시작 후--------")
                         if let index = busStopSeoulViewModel.currentDestinationIndex {
                             print("gggggg",busStopSeoulViewModel.busStations[index].station)
-                            vm.stationIdInput = busStopSeoulViewModel.busStations[index].station
-                            vm.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
-
-//                            vm.start(stationId:busStopSeoulViewModel.busStations[index].busRouteId, routeId: busStopSeoulViewModel.busStations[index].station)
-//                            print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
+                            nearestBusViewModel.stationIdInput = busStopSeoulViewModel.busStations[index].station
+                            nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
+                            
+                            //                            vm.start(stationId:busStopSeoulViewModel.busStations[index].busRouteId, routeId: busStopSeoulViewModel.busStations[index].station)
+                            //                            print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
                         }
                         
                         // MainView에 알람 상태 전달
@@ -218,7 +213,7 @@ struct MainPurpleAlarmButton: View {
         }
     }
     
-
     
-
+    
+    
 }

@@ -12,7 +12,6 @@ struct DoAlarmView: View {
     @Binding var cityCode: Int
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
 
     var body: some View {

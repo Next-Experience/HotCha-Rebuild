@@ -20,7 +20,7 @@ struct AlarmSettingView: View {
     
     @ObservedObject var modalStateViewModel: AlarmModalViewModel
     @ObservedObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @ObservedObject var busLocationViewModel: BusLocationViewModel
+    @ObservedObject var nearestBusViewModel: NearestBusViewModel
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
     
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
@@ -35,8 +35,7 @@ struct AlarmSettingView: View {
             NavigationStack {
                 BusStopListView(bus: bus,
                                 cityCode: 1,
-                                busStopSeoulViewModel: busStopSeoulViewModel,
-                                busLocationViewModel: busLocationViewModel)
+                                busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel)
                 // 알람 종료뷰로 이동
                 .overlay {
                     if busStopSeoulViewModel.navigateToAlarmEndView {
@@ -48,13 +47,14 @@ struct AlarmSettingView: View {
                         // AlarmEndView
                         AlarmEndView()
                             .environmentObject(sheetManager)
-                            .environmentObject(busLocationViewModel)
                             .environmentObject(busStopSeoulViewModel)
                             .environmentObject(modalStateViewModel)
+                            .environmentObject(nearestBusViewModel)
                             .transition(.opacity) // 부드러운 전환 효과
                     }
                 }
                 .onAppear {
+                    busStopSeoulViewModel.bus = bus
                     if busStopSeoulViewModel.isReload { // 이미 진행 중인 알람을 다시 로드할 때
                         sheetManager.showAlarmInfoSheet2 = true
                     } else {
@@ -62,15 +62,13 @@ struct AlarmSettingView: View {
                     }
                 }
                 .environmentObject(sheetManager)
-                .environmentObject(busStopSeoulViewModel)
-                .environmentObject(busLocationViewModel)
                 .sheet(isPresented: $sheetManager.showAlarmSearchSheet1) {
                     ScrollView {
                         SettingModalView(bus: bus, cityCode: 1, isBookmark: $isBookmark, type_name: $type_name)
                             .environmentObject(sheetManager)
                             .environmentObject(modalStateViewModel)
                             .environmentObject(busStopSeoulViewModel)
-                            .environmentObject(busLocationViewModel)
+                            .environmentObject(nearestBusViewModel)
                             .interactiveDismissDisabled(true)
                             .presentationDragIndicator(.visible)
                             .presentationDetents([.fraction(0.32)], selection: $selectedDetent)
@@ -85,7 +83,7 @@ struct AlarmSettingView: View {
                         .environmentObject(sheetManager)
                         .environmentObject(modalStateViewModel)
                         .environmentObject(busStopSeoulViewModel)
-                        .environmentObject(busLocationViewModel)
+                        .environmentObject(nearestBusViewModel)
                         .interactiveDismissDisabled(true)
                         .presentationDragIndicator(.visible)
                         .presentationDetents([.fraction(0.4), .fraction(0.1), .fraction(0.99)], selection: $selectedDetent)
@@ -142,7 +140,7 @@ struct SettingModalView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @EnvironmentObject var nearestBusViewModel: NearestBusViewModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
     let bus: Bus_info_seoul // 선택된 버스 정보
@@ -265,13 +263,12 @@ struct SettingModalView: View {
                     }
                     .environmentObject(modalStateViewModel)
                     .environmentObject(busStopSeoulViewModel)
-                    .environmentObject(busLocationViewModel)
                     
                 } else {
                     modalStateViewModel.modalState.alarmSettingMainView
                         .environmentObject(modalStateViewModel)
                         .environmentObject(busStopSeoulViewModel)
-                        .environmentObject(busLocationViewModel)
+                        .environmentObject(nearestBusViewModel)
                 }
                 
                 
@@ -307,5 +304,4 @@ struct SettingModalView: View {
     )
     .environmentObject(AlarmModalViewModel())
     .environmentObject(BusStopSeoulViewModel())
-    .environmentObject(BusLocationViewModel())
 }

@@ -10,7 +10,7 @@ import SwiftUI
 struct AlarmStatusView: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @EnvironmentObject var nearestBusViewModel: NearestBusViewModel
     // Status 뷰에서만 backgound에서 크기를 인식해서 모달 상태를 변경하도록 함
     @State private var isViewActive = false
     
@@ -32,7 +32,7 @@ struct AlarmStatusView: View {
                 if isMedium || isLarge {
                     BusStopDestinationSection()
                         .environmentObject(busStopSeoulViewModel)
-                        .environmentObject(busLocationViewModel)
+                        .environmentObject(nearestBusViewModel)
                 }
                 
                 if isLarge {
@@ -41,9 +41,9 @@ struct AlarmStatusView: View {
                 Spacer()
                 Divider()
                 AlertStopsSection()
-                    .environmentObject(busLocationViewModel)
                     .environmentObject(busStopSeoulViewModel)
                     .environmentObject(modalStateViewModel)
+                    .environmentObject(nearestBusViewModel)
             }
             .font(.pretendard(.semibold, size: 16))
             .onAppear {
@@ -100,7 +100,7 @@ struct BusStopDestinationSection: View {
     @EnvironmentObject var sheetManager: AlarmSettingModalSheetManager // modal sheet를 여닫음
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
+    @EnvironmentObject var nearestBusViewModel: NearestBusViewModel
     
     
     var body: some View {
@@ -140,12 +140,13 @@ struct BusStopDestinationSection: View {
                 }
                 Spacer()
                 Button(action: {
+                    busStopSeoulViewModel.currentAlarmIndex = nil
                     modalStateViewModel.modalState = .alarmWait
                     sheetManager.showAlarmInfoSheet2 = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         sheetManager.showAlarmSearchSheet1 = true
                         busStopSeoulViewModel.switchToDestinationMode()
-                        busLocationViewModel.stopFetching()
+                        nearestBusViewModel.stop()
                     }
                 }){
                     RoundedRectangle(cornerRadius: 4)
@@ -197,10 +198,9 @@ struct AlertSettingSection: View {
 
 
 struct AlertStopsSection: View {
-    @EnvironmentObject var busLocationViewModel: BusLocationViewModel
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
 
-    @StateObject private var vm = NearestBusViewModel()
+    @EnvironmentObject private var nearestBusViewModel: NearestBusViewModel
 
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
 
@@ -224,17 +224,42 @@ struct AlertStopsSection: View {
                 .foregroundStyle(.gray900)
             Spacer()
             Button(action: {
-                vm.stop()
-                print(vm.isCalculating)
-                busLocationViewModel.stopFetching()
+
+                print(nearestBusViewModel.isCalculating)
+                // 현재 정류장 위치 찾기 종료
+                nearestBusViewModel.stop()
                 dismiss()
 
+                // 이용기록
+                let currentTime = Date()
+                
+                if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
+                    let newUsage = Usage_history(
+                        route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
+                        city_code: "1",
+                        destination_stop_id: String(busStopSeoulViewModel.busStations[currentBusIndex].stationNo),
+                        destination_stop_name: busStopSeoulViewModel.busStations[currentBusIndex].stationNm,
+                        bus_no: busStopSeoulViewModel.bus?.busRouteNm ?? "번호 없음",
+                        route_type: busStopSeoulViewModel.bus?.routeType ?? "타입 없음",
+                        get_off_timestamp: currentTime,
+                        operator_name: busStopSeoulViewModel.bus?.corpNm ?? "정보 없음",
+                        operator_no: "정보 없음", // TODO: 운수사 전번 넣기
+                        vehicle_no: "정보 없음" //TODO: vehicle_no 차량번호 넣기
+                    )
+                    print("bus Info: \(busStopSeoulViewModel.bus)")
+                    print("newUsage: \(newUsage.route_id)   \(newUsage.destination_stop_id)  \(newUsage.destination_stop_name)  \(newUsage.route_type)  \(newUsage.bus_no)")
+                    modelContext.insert(newUsage)
+                }
+                
+                // 데이터 초기화
+                busStopSeoulViewModel.leaveAlarm()
+                
                 // 초기 알람 설정 상태로 초기화
                 modalStateViewModel.modalState = .alarmWait
                 modalStateViewModel.bus = nil
                 busStopSeoulViewModel.returnToRootView = true
-                // 이용기록 저장 및 데이터 초기화
-                busStopSeoulViewModel.leaveAlarm(modelContext: modelContext)
+                
+                
 
             }){
                 RoundedRectangle(cornerRadius: 8)
@@ -250,10 +275,10 @@ struct AlertStopsSection: View {
                 
                 if let index = busStopSeoulViewModel.currentDestinationIndex {
                     print("gggggg",busStopSeoulViewModel.busStations[index].station)
-                    vm.stationIdInput = busStopSeoulViewModel.busStations[index].station
-                    vm.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
+                    nearestBusViewModel.stationIdInput = busStopSeoulViewModel.busStations[index].station
+                    nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
 
-                    vm.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
+                    nearestBusViewModel.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
                              busStopSeoulViewModel.busStations[index].busRouteId)
                     print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
                 }
