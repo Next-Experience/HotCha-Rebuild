@@ -197,8 +197,10 @@ class NearestBusViewModel: ObservableObject {
             
             print(destination.seq, current.seq, "왜 이래")
             print("✅ 남은 정류장: \(remainingStops ?? -1)")
+
+
             
-            if alarmStopDistanceFromDestination == remainingStops {
+            if alarmStopDistanceFromDestination == remainingStop {
                 startAlarmToggle(
                     isOn: true,
                     title: "핫챠! 내릴 준비를 해주세요",
