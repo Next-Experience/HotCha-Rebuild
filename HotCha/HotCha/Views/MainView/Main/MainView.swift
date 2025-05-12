@@ -62,7 +62,7 @@ struct MainView: View {
     @StateObject private var sheetManager = AlarmSettingModalSheetManager()
     @StateObject private var modalStateViewModel = AlarmModalViewModel()
     @StateObject private var busStopSeoulViewModel =  BusStopSeoulViewModel()
-    @StateObject private var busLocationViewModel =  BusLocationViewModel()
+    @StateObject private var nearestBusViewModel =  NearestBusViewModel()
     
     @State var isBookmark: Bool = false
     @State var type_name: String = "0"
@@ -73,12 +73,11 @@ struct MainView: View {
 
             if modalStateViewModel.bus != nil {
 //            if busStopSeoulViewModel.bus != nil {
-                NavigationLink(destination: AlarmSettingView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager)) {
+                NavigationLink(destination: AlarmSettingView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
                     DoAlarmView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1))
-                        .padding(.bottom, 12)
                         .environmentObject(busStopSeoulViewModel)
-                               .environmentObject(modalStateViewModel)
-                               .environmentObject(busLocationViewModel)
+                        .environmentObject(modalStateViewModel)
+                        .padding(.bottom, 12)
                 }
             } else {
                 
@@ -103,7 +102,7 @@ struct MainView: View {
             
             if searchActivate {
                 // 서치뷰 전환
-                SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, busLocationViewModel: busLocationViewModel, sheetManager: sheetManager)
+                SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
             } else {
                 // 즐겨찾기 항목들
                 BookmarkView(bus: $bus, cityCode: $cityCode,isEditMode: $isEditMode, alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)

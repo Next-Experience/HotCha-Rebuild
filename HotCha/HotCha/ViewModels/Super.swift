@@ -10,11 +10,11 @@ import CoreLocation
 import Combine
 
 class NearestBusViewModel: ObservableObject {
-    @Published var remainingStops: Int?
+    @Published var remainingStop: Int?
     @Published var busStops: [BusStop] = []
     @Published var isCalculating = false
     var locationviewModel = LocationViewModel()
-
+    @Published var currBusStop: BusStop? = nil
 
     private var timer: AnyCancellable?
 //    private let busRouteId = "100100324"
@@ -173,18 +173,22 @@ class NearestBusViewModel: ObservableObject {
        }
 
     private func updateRemainingStops(stationId: String, routeId: String) {
+        @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
+
         guard let nearestBus = viewModel.nearestBus(from: viewModel.locationVM.location ?? CLLocation()) else {
+            currBusStop = nil
             print("❌ 가까운 버스 없음")
             return
         }
 
-        let currentStop = busStops.first { String($0.station) == nearestBus.nextStId }
+        currBusStop = busStops.first { String($0.station) == nearestBus.nextStId }
         let destinationStop = busStops.first { String($0.station) == stationIdInput }
 
-        if let current = currentStop, let destination = destinationStop {
-            remainingStops = destination.seq - current.seq
+        if let current = currBusStop, let destination = destinationStop {
+            remainingStop = destination.seq - current.seq
             
             print(destination.seq, current.seq, "왜 이래")
+
             print("✅ 남은 정류장: \(remainingStops ?? -1)")
             
             if alarmStopDistanceFromDestination == remainingStops {
@@ -197,16 +201,26 @@ class NearestBusViewModel: ObservableObject {
                 )
 
             }
+
             
             LiveActivityManager.shared.updateLiveActivity(
                 progress: 1.0,  // 진행률을 항상 1로 설정
                 currentStop: current.stationNm,
-                stopsRemaining: Int(remainingStops ?? 0),
+                stopsRemaining: Int(remainingStop ?? 0),
                 destinationStation: destination.stationNm,
                 Updatetime: formattedTime(from: Date())
             )
+            if remainingStop ?? 0 >= 0 {
+                remainingStops = "\(abs(remainingStop ?? -1))정거장 전"
+            } else {
+                remainingStops = "\(abs(remainingStop ?? -1))정거장 후"
+            }
+            
         } else {
-            if currentStop == nil { print("↳ 현재 정류장 정보 없음") }
+            if currBusStop == nil {
+                print("↳ 현재 정류장 정보 없음")
+                remainingStops = "불러오는 중..."
+            }
             if destinationStop == nil { print("↳ 도착 정류장 정보 없음") }
         }
     }
@@ -269,7 +283,7 @@ struct NearestBus3View: View {
                     .foregroundColor(.gray)
             }
 
-            if let stops = vm.remainingStops {
+            if let stops = vm.remainingStop {
                 Text("남은 정류장 수: \(stops)")
                     .font(.headline)
                     .padding()
