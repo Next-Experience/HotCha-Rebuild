@@ -58,10 +58,7 @@ struct SearchView: View {
                 SearchHistoryView()
             } else {
                 // 필터링된 버스 노선들
-                let filteredBusInfo = bus_info_seoul.filter { bus in
-                    bus.busRouteNm.contains(textfiledValue) ||
-                    bus.busRouteAbrv.contains(textfiledValue)
-                }
+                let filteredBusInfo = SearchBusSorting.filterBuses(buses: bus_info_seoul, searchText: textfiledValue)
                                     
                 if filteredBusInfo.isEmpty {
                     // 검색 결과가 없을 때
