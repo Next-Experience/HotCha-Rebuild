@@ -141,6 +141,14 @@ class NearestBusViewModel: ObservableObject {
                        let triggered = checkProximity(currentLocation: locationviewModel.location, targetLocation: targetLocation)
                        if triggered {
                            isGpsAlert = true
+                           startAlarmToggle(
+                                   isOn: true,
+                                   title: "핫챠! 내릴 준비를 해주세요",
+                                   body: "도착까지 \(String(alarmStopDistanceFromDestination))정거장 남았어요!",
+                                   useSound: soundToggle,
+                                   useVibration: vibrationToggle
+                               )
+
                        }
                        else {
                            print("멀었다")
@@ -191,7 +199,7 @@ class NearestBusViewModel: ObservableObject {
 
             print("✅ 남은 정류장: \(remainingStop ?? -1)")
             
-            if alarmStopDistanceFromDestination == alarmStopDistanceFromDestination {
+            if alarmStopDistanceFromDestination == remainingStop {
                 startAlarmToggle(
                     isOn: true,
                     title: "핫챠! 내릴 준비를 해주세요",
