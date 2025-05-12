@@ -25,6 +25,9 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     func requestPermission() {
         manager.requestWhenInUseAuthorization()
     }
+    func requestAlwaysPermission() {
+        manager.requestAlwaysAuthorization()
+    }
     
     // 위치 불러오기
     func requestLocation() {
