@@ -34,8 +34,7 @@ struct MyLocationView: View {
         .onAppear {
             viewModel.requestPermission()  // 앱 실행 시 권한 요청
             viewModel.requestalwaysPermission()
-            print("----")
-            viewModel.requestLocation()
+//            viewModel.requestLocation()
         }
     }
 }
