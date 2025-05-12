@@ -89,7 +89,6 @@ struct SimpleDistanceTestView: View {
         .padding()
         .onAppear {
             locationViewModel.requestPermission()
-            locationViewModel.requestLocation()
             locationViewModel.requestalwaysPermission()
         }
     }
