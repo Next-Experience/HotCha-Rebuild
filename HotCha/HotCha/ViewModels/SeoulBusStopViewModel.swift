@@ -432,7 +432,7 @@ class BusStopSeoulViewModel: ObservableObject {
                 if index == alarmIndex {
                     // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
                     print("🔔 알람 정류장에 도착!")
-//                    // TODO: 알람 울리기
+//                    // 알람 울리기
 //                    startAlarmToggle(
 //                        isOn: true,
 //                        title: "핫챠! 내릴 준비를 해주세요",
@@ -440,8 +440,13 @@ class BusStopSeoulViewModel: ObservableObject {
 //                        useSound: soundToggle,
 //                        useVibration: vibrationToggle
 //                    )
-                    // 알람종료뷰로 이동하기 위한 트리거
-                    navigateToAlarmEndView = true
+                    
+                    // 알람종료뷰로 이동하기 위한 트리거, 알람 이동중에 현재 버스 위치가 겹친 걸로 알람이 울리지 않게 하기위한 장치
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        if let alarmIndex = self.getAlarmStationIndex(), index == alarmIndex {
+                            self.navigateToAlarmEndView = true
+                        }
+                    }
                     print("navigateToAlarmEndView \(navigateToAlarmEndView)")
                 }
             }
