@@ -140,6 +140,7 @@ struct BusStopDestinationSection: View {
                 }
                 Spacer()
                 Button(action: {
+                    busStopSeoulViewModel.currentAlarmIndex = nil
                     modalStateViewModel.modalState = .alarmWait
                     sheetManager.showAlarmInfoSheet2 = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
