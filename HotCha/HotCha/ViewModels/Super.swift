@@ -62,11 +62,7 @@ class NearestBusViewModel: ObservableObject {
         isCalculating = true
         locationviewModel.requestPermission()
         locationviewModel.startTrackingLocation()
-<<<<<<< HEAD
-        locationviewModel.requestAlwaysPermission()
-=======
         locationviewModel.requestalwaysPermission()
->>>>>>> 4a62462 (Gps 트리거 생성)
 
         LiveActivityManager.shared.startLiveActivity(
             title: "핫챠",
