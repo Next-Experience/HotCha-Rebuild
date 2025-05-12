@@ -14,7 +14,7 @@ class NearestBusViewModel: ObservableObject {
     @Published var busStops: [BusStop] = []
     @Published var isCalculating = false
     var locationviewModel = LocationViewModel()
-
+    @Published var currBusStop: BusStop? = nil
 
     private var timer: AnyCancellable?
 //    private let busRouteId = "100100324"
@@ -171,18 +171,20 @@ class NearestBusViewModel: ObservableObject {
         @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
 
         guard let nearestBus = viewModel.nearestBus(from: viewModel.locationVM.location ?? CLLocation()) else {
+            currBusStop = nil
             print("❌ 가까운 버스 없음")
             return
         }
 
-        let currentStop = busStops.first { String($0.station) == nearestBus.nextStId }
+        currBusStop = busStops.first { String($0.station) == nearestBus.nextStId }
         let destinationStop = busStops.first { String($0.station) == stationIdInput }
 
-        if let current = currentStop, let destination = destinationStop {
+        if let current = currBusStop, let destination = destinationStop {
             remainingStop = destination.seq - current.seq
             
             print(destination.seq, current.seq, "왜 이래")
             print("✅ 남은 정류장: \(remainingStop ?? -1)")
+            
             LiveActivityManager.shared.updateLiveActivity(
                 progress: 1.0,  // 진행률을 항상 1로 설정
                 currentStop: current.stationNm,
@@ -197,7 +199,10 @@ class NearestBusViewModel: ObservableObject {
             }
             
         } else {
-            if currentStop == nil { print("↳ 현재 정류장 정보 없음") }
+            if currBusStop == nil {
+                print("↳ 현재 정류장 정보 없음")
+                remainingStops = "불러오는 중..."
+            }
             if destinationStop == nil { print("↳ 도착 정류장 정보 없음") }
         }
     }

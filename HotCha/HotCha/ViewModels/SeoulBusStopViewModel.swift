@@ -425,21 +425,21 @@ class BusStopSeoulViewModel: ObservableObject {
             
             print("현재 버스 위치 정류장: \(busStations[index].stationNm)")
             
-            let distance = distanceToDestinationStop()
+//            let distance = distanceToDestinationStop()
             
             // 알람 모드에서 현재 정류장이 알람 정류장인지 체크
             if !isSelectDestinationMode, let alarmIndex = getAlarmStationIndex() {
                 if index == alarmIndex {
                     // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
                     print("🔔 알람 정류장에 도착!")
-                    // TODO: 알람 울리기
-                    startAlarmToggle(
-                        isOn: true,
-                        title: "핫챠! 내릴 준비를 해주세요",
-                        body: "도착까지 \(String(describing: distanceToDestinationStop()))정거장 남았어요!",
-                        useSound: soundToggle,
-                        useVibration: vibrationToggle
-                    )
+//                    // TODO: 알람 울리기
+//                    startAlarmToggle(
+//                        isOn: true,
+//                        title: "핫챠! 내릴 준비를 해주세요",
+//                        body: "도착까지 \(String(describing: distanceToDestinationStop()))정거장 남았어요!",
+//                        useSound: soundToggle,
+//                        useVibration: vibrationToggle
+//                    )
                     // 알람종료뷰로 이동하기 위한 트리거
                     navigateToAlarmEndView = true
                     print("navigateToAlarmEndView \(navigateToAlarmEndView)")
@@ -456,23 +456,23 @@ class BusStopSeoulViewModel: ObservableObject {
         sheetManager.showAlarmInfoSheet2 = false
     }
     
-    // 목적지와 현재 정류장 수의 차이를 계산
-    func distanceToDestinationStop() -> Int?{
-        var distanceStopNum: Int = 0
-        // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
-        @AppStorage("remainingStops") var remainingStops: String = "불러오는 중"
-        
-        if let destIndex = getDestinationStationIndex(), let currIndex = currentBusStopIndex {
-            distanceStopNum = destIndex - currIndex
-            if distanceStopNum >= 0 {
-                remainingStops = "\(abs(distanceStopNum))정거장 전"
-            } else {
-                remainingStops = "\(abs(distanceStopNum))정거장 후"
-            }
-        }
-        return distanceStopNum
-    }
-    
+//    // 목적지와 현재 정류장 수의 차이를 계산
+//    func distanceToDestinationStop() -> Int?{
+//        var distanceStopNum: Int = 0
+//        // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
+//        @AppStorage("remainingStops") var remainingStops: String = "불러오는 중"
+//        
+//        if let destIndex = getDestinationStationIndex(), let currIndex = currentBusStopIndex {
+//            distanceStopNum = destIndex - currIndex
+//            if distanceStopNum >= 0 {
+//                remainingStops = "\(abs(distanceStopNum))정거장 전"
+//            } else {
+//                remainingStops = "\(abs(distanceStopNum))정거장 후"
+//            }
+//        }
+//        return distanceStopNum
+//    }
+//    
     // 알람을 시작하지 않고 떠날 때 선택된 데이터 clear
     func clearSelectedData(){
         bus = nil
