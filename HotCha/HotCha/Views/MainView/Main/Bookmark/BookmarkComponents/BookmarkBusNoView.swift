@@ -41,7 +41,7 @@ struct BookmarkBusNoView: View {
     
     var body: some View {
         VStack {
-            Text("\(route_type) \(busNo)")
+            Text("\(busTypeText(busNo: busNo,routeType: route_type)) \(busNo)")
                 .font(.pretendard(.semibold, size: 14))
                 .foregroundStyle(backgroundColor)
                 .padding(.horizontal, 6)
@@ -49,5 +49,24 @@ struct BookmarkBusNoView: View {
         }
         .background(backgroundColor.opacity(0.2))
         .cornerRadius(4)
+    }
+    
+    func busTypeText(busNo: String, routeType: String) -> String {
+        if busNo.hasPrefix("G") {
+            return "경기도 급행"
+        } else {
+            switch routeType {
+            case "1": return "서울시 공항"
+            case "2": return "마을"
+            case "3": return "간선"
+            case "4": return "지선"
+            case "5": return "순환"
+            case "6": return "광역"
+            case "7": return "인천"
+            case "8": return "경기"
+            case "9", "0": return "폐지"
+            default: return "일반"
+            }
+        }
     }
 }
