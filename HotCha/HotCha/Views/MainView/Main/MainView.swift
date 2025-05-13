@@ -120,6 +120,7 @@ struct MainView: View {
                 saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
                 Bus_info_seoul_True = true
             }
+            busStopSeoulViewModel.returnToRootView = false
         }
     }
 }
