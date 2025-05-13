@@ -18,7 +18,7 @@ struct SearchView: View {
     @ObservedObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @ObservedObject var nearestBusViewModel: NearestBusViewModel
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
-
+    @StateObject private var viewModel = BusRouteViewModel()
     
     private func formatBusRoute(_ route: Bus_info_seoul) -> some View {
         return VStack(spacing: 0) {
@@ -39,6 +39,13 @@ struct SearchView: View {
                 Text("\(route.stStationNm) ↔︎ \(route.edStationNm)")
                     .font(.pretendard(.semibold, size: 14))
                     .foregroundStyle(Color("gray900"))
+                Button(action: {
+    viewModel.fetchBusRoutes(searchStr: "")
+    saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
+}) {
+    Text("새로고침")
+}
+
                 Spacer()
             }
             .padding(.top, 10)
