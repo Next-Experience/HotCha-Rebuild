@@ -8,6 +8,8 @@
 import Foundation
 import CoreLocation
 import Combine
+import AVFoundation
+import SwiftUI
 
 class NearestBusViewModel: ObservableObject {
     @Published var remainingStop: Int?
@@ -15,322 +17,325 @@ class NearestBusViewModel: ObservableObject {
     @Published var isCalculating = false
     var locationviewModel = LocationViewModel()
     @Published var currBusStop: BusStop? = nil
-
-    private var timer: AnyCancellable?
-//    private let busRouteId = "100100324"
-    private let viewModel = BusLocationViewModel()
-
-    var stationIdInput: String = ""// 외부에서 주입 가능
+    @Published var destinationStop: BusStop? = nil
+    
+    var stationIdInput: String = "" // 도착 정류장
     var busRouteId: String = ""
-    @State private var isGpsAlert = false
+    private var cancellables = Set<AnyCancellable>()
+    private var lastSeq: Int? = nil
+    private var alarmFired = false // 알람 중복 방지
     
     @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2
     @AppStorage("soundToggle") var soundToggle: Bool = true
     @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
-
-
+    
     deinit {
         stop()
-        viewModel.stopFetching()
     }
-
-//    func start() {
-//        guard !isCalculating else {
-//            print("⚠️ 이미 실행 중")
-//            return
-//        }
-//        isCalculating = true
-//        LiveActivityManager.shared.startLiveActivity(title: "핫챠" , description: "불러오는 중", stationName: stationIdInput, initialProgress: 99, currentStop: "불러오는 중",stopsRemaining: 999, destinationStation: stationIdInput, Updatetime: formattedTime(from: Date()))
-//        fetchBusStopsIfNeeded()
-//    }
+    
     func start(stationId: String, routeId: String) {
-        
         guard !isCalculating else {
             print("⚠️ 이미 실행 중")
             return
         }
-
+        
         self.stationIdInput = stationId
         self.busRouteId = routeId
-        self.viewModel.busRouteId = routeId
-        self.viewModel.startFetching()
-        if let loc = locationviewModel.location {
-            print("위도: \(loc.coordinate.latitude)")
-            print("경도: \(loc.coordinate.longitude)")
-        }
-
-        isCalculating = true
+        self.isCalculating = true
+        self.alarmFired = false
+        self.lastSeq = nil
+        
         locationviewModel.requestPermission()
         locationviewModel.startTrackingLocation()
         locationviewModel.requestalwaysPermission()
-
-        LiveActivityManager.shared.startLiveActivity(
-            title: "핫챠",
-            description: routeId,
-            stationName: stationId,
-            initialProgress: 99,
-            currentStop: routeId,
-            stopsRemaining: 999,
-            destinationStation: stationId,
-            Updatetime: formattedTime(from: Date())
-        )
-        print("--패치 버스스탑--")
-        fetchBusStopsIfNeeded(stationId: stationId, routeId: routeId)
-        print("--패치 버스스탑완료--")
-    }
-    func stop() {
-        isCalculating = false
-        LiveActivityManager.shared.endLiveActivity()
-        timer?.cancel()
-        timer = nil
-    }
-
-    private func fetchBusStopsIfNeeded(stationId: String, routeId: String) {
-        print("🚀 fetchBusStations 시작: \(routeId)")
+        
+        print("🚀 정류장 목록 패치 시작")
         fetchBusStations(routeId: routeId) { [weak self] stops, error in
-            print("ee")
             guard let self = self else { return }
-            print("🚀 fetchBusStations 시작: \(routeId)")
+            
             if let error = error {
                 print("❌ 정류장 로딩 실패: \(error)")
                 return
             }
-            if stops.isEmpty {
-                print("🚨 stops 비어있음!")
-            }
-
+            
             self.busStops = stops
-            print("✅ 정류장 \(stops.count)개 로딩됨")
+            print("✅ 정류장 \(stops.count)개 로딩 완료")
             for i in busStops {
                 print(i.stationNm,"----")
                 print(i.station,"----")
             }
-            self.startLoop(stationId: stationId, routeId: routeId)
+            if let matchedStop = stops.first(where: { String($0.station) == stationId }) {
+                self.destinationStop = matchedStop
+                print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
+                // ⭐️ 시작 정류장 설정
+                if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
+                    self.currBusStop = start
+                    self.lastSeq = start.seq
+                    print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
+                    
+                    LiveActivityManager.shared.startLiveActivity(
+                        title: "핫챠",
+                        description: routeId,
+                        stationName: start.stationNm,
+                        initialProgress: 99,
+                        currentStop: start.stationNm,
+                        stopsRemaining: matchedStop.seq - start.seq,
+                        destinationStation: matchedStop.stationNm,
+                        Updatetime: formattedTime(from: Date())
+                    )
+                }
+            } else {
+                print("⚠️ stationId와 일치하는 정류장을 찾을 수 없습니다")
+            }
+            
+            self.subscribeToLocationUpdates()
+            
+
+
+            
         }
-        print("dho dkseod")
+        
+        
     }
+    
+    func stop() {
+        isCalculating = false
+        cancellables.removeAll()
+        locationviewModel.stopTrackingLocation()
+        LiveActivityManager.shared.endLiveActivity()
+        print("🛑 추적 중단")
+    }
+    
+    private func subscribeToLocationUpdates() {
+        locationviewModel.$location
+            .compactMap { $0 }
+            .sink { [weak self] currentLocation in
+                self?.handleLocationUpdate(currentLocation)
+            }
+            .store(in: &cancellables)
+    }
+    
 
-
-
-    func startLoop(stationId: String, routeId: String) {
-           guard isCalculating else {
-               print("루프 끝 (isCalculating이 false)")
-               return
-           }
-
-           print("🚀 루프 시작")
-           // Timer publisher 생성
-           timer = Timer
-               .publish(every: 1.0, on: .main, in: .common)
-               .autoconnect()
-               .sink { [weak self] _ in
-                   guard let self = self else { return }
-                   guard self.isCalculating else {
-                       print("🛑 계산 중단됨")
-                       self.timer?.cancel()
-                       self.timer = nil
-                       return
-                   }
-                   let destinationStop = busStops.first { String($0.station) == stationId }
-                   let alarmSeq = destinationStop?.seq ?? 1 -  alarmStopDistanceFromDestination
-                   let alarmDestination = busStops.first { $0.seq == alarmSeq}
-                   let targetLocation = CLLocation(latitude: alarmDestination?.gpsY ?? 10, longitude: alarmDestination?.gpsX ?? 10)
-                   
-
-                   if !isGpsAlert {
-                       let triggered = checkProximity(currentLocation: locationviewModel.location, targetLocation: targetLocation)
-                       if triggered {
-                           isGpsAlert = true
-                           startAlarmToggle(
-                                   isOn: true,
-                                   title: "핫챠! 내릴 준비를 해주세요",
-                                   body: "도착까지 \(String(alarmStopDistanceFromDestination))정거장 남았어요!",
-                                   useSound: soundToggle,
-                                   useVibration: vibrationToggle
-                               )
-
-                       }
-                       else {
-                           print("멀었다")
-                       }
-                       print("targetLocation: \(targetLocation)xzzzzzzzzz")
-                       
-                   }
-                   
-
-//                   LiveActivityManager.shared.updateLiveActivity(
-//                       progress: 1.0,  // 진행률을 항상 1로 설정
-//                       currentStop: "targetLocation: \(targetLocation)xzzzzzzzzz",
-//                       stopsRemaining: 20000726,
-//                       destinationStation: "\(locationviewModel.location)",
-//                       Updatetime: formattedTime(from: Date())
-//                   )
-
-                   LiveActivityManager.shared.updateLiveActivity(
-                       progress: 1.0,  // 진행률을 항상 1로 설정
-                       currentStop: "targetLocation: \(targetLocation)xzzzzzzzzz",
-                       stopsRemaining: 20000726,
-                       destinationStation: "\(locationviewModel.location)",
-                       Updatetime: formattedTime(from: Date())
-                   )
-
-                   
-                   self.updateRemainingStops(stationId: stationId, routeId: routeId)
-                   print("루프 진행중")
-               }
-       }
-
-    private func updateRemainingStops(stationId: String, routeId: String) {
-        @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
-
-        guard let nearestBus = viewModel.nearestBus(from: viewModel.locationVM.location ?? CLLocation()) else {
-            currBusStop = nil
-            print("❌ 가까운 버스 없음")
+    private func handleLocationUpdate(_ currentLocation: CLLocation) {
+        guard isCalculating else { return }
+        guard let destinationStop = destinationStop,
+              let currStop = currBusStop else {
+            print("❗️현재 정류장 또는 도착 정류장 정보 없음")
             return
         }
+        print("여기서 위치 업데이트!!!!!!----------")
+        let busStopList = BusStopList_Items(item: busStops)
+        
 
-        currBusStop = busStops.first { String($0.station) == nearestBus.nextStId }
-        let destinationStop = busStops.first { String($0.station) == stationIdInput }
+        if let result = getCurrentOrNextBusStation(
+            currentLocation: currentLocation,
+            stations: busStopList,
+            currentStop: currStop
+        ) {
 
-        if let current = currBusStop, let destination = destinationStop {
-            remainingStop = destination.seq - current.seq
-            
-            print(destination.seq, current.seq, "왜 이래")
-
-            print("✅ 남은 정류장: \(remainingStop ?? -1)")
-            
-            if alarmStopDistanceFromDestination == remainingStop {
-                startAlarmToggle(
-                    isOn: true,
-                    title: "핫챠! 내릴 준비를 해주세요",
-                    body: "도착까지 \(String(alarmStopDistanceFromDestination))정거장 남았어요!",
-                    useSound: soundToggle,
-                    useVibration: vibrationToggle
+            let (nextStationId, _) = result
+            if result.arrived == 0 {
+                self.currBusStop = result.station
+                self.lastSeq = result.station.seq
+                let remaining = destinationStop.seq - result.station.seq
+                self.remainingStop = remaining
+                print("📍 도착! 새로운 현재 정류장: \(result.station.stationNm), 남은 정류장: \(remaining)")
+                
+                LiveActivityManager.shared.updateLiveActivity(
+                    progress: 1.0,
+                    currentStop: result.station.stationNm,
+                    stopsRemaining: remaining,
+                    destinationStation: destinationStop.stationNm,
+                    Updatetime: formattedTime(from: Date())
                 )
-
-            }
-
-            
-            LiveActivityManager.shared.updateLiveActivity(
-                progress: 1.0,  // 진행률을 항상 1로 설정
-                currentStop: current.stationNm,
-                stopsRemaining: Int(remainingStop ?? 0),
-                destinationStation: destination.stationNm,
-                Updatetime: formattedTime(from: Date())
-            )
-            if remainingStop ?? 0 >= 0 {
-                remainingStops = "\(abs(remainingStop ?? -1))정거장 전"
+                if remaining == alarmStopDistanceFromDestination && !alarmFired {
+                    triggerAlarm()
+                    alarmFired = true
+                }
+                
             } else {
-                remainingStops = "\(abs(remainingStop ?? -1))정거장 후"
+                print(result.arrived, "아직 도착 안함" )
+                print("----라액------")
+                let remaining = destinationStop.seq - result.station.seq
+                self.remainingStop = remaining
+                LiveActivityManager.shared.updateLiveActivity(
+                    progress: 1.0,
+                    currentStop: currStop.stationNm,
+                    stopsRemaining: remaining,
+                    destinationStation: destinationStop.stationNm,
+                    Updatetime: formattedTime(from: Date())
+                )
             }
-            
-        } else {
-            if currBusStop == nil {
-                print("↳ 현재 정류장 정보 없음")
-                remainingStops = "불러오는 중..."
-            }
-            if destinationStop == nil { print("↳ 도착 정류장 정보 없음") }
         }
     }
-
-    func nearestBus() -> BusPosition? {
-        return viewModel.nearestBus(from: viewModel.locationVM.location ?? CLLocation())
+    
+    private func triggerAlarm() {
+        print("🚨 알람 트리거됨! 정류장 도착 임박")
+        
+        startAlarmToggle(
+            isOn: true,
+            title: "핫챠! 내릴 준비를 해주세요",
+            body: "도착까지 \(String(alarmStopDistanceFromDestination))정거장 남았어요!",
+            useSound: soundToggle,
+            useVibration: vibrationToggle
+        )
+        
+        
+    }
+    
+    // 기존 함수 재사용
+    func findStartingStation(
+        from location: CLLocation,
+        stations: BusStopList_Items,
+        destinationSeq: Int
+    ) -> BusStop? {
+        let sortedByDistance = stations.item.sorted {
+            let loc1 = CLLocation(latitude: $0.gpsY, longitude: $0.gpsX)
+            let loc2 = CLLocation(latitude: $1.gpsY, longitude: $1.gpsX)
+            return location.distance(from: loc1) < location.distance(from: loc2)
+        }
+        let closestTwo = Array(sortedByDistance.prefix(2))
+        return closestTwo.min {
+            abs($0.seq - destinationSeq) < abs($1.seq - destinationSeq)
+        }
+    }
+    
+    func getCurrentOrNextBusStation(
+        currentLocation: CLLocation,
+        stations: BusStopList_Items,
+        currentStop: BusStop
+    ) -> (station: BusStop, arrived: Int)? {
+        
+        let detectionRadius: Double = 200.0
+        let busStops = stations.item.sorted(by: { $0.seq < $1.seq })
+        
+        guard let currentIndex = busStops.firstIndex(where: { $0.station == currentStop.station }) else {
+            print("❗️현재 정류장을 리스트에서 찾을 수 없습니다")
+            return nil
+        }
+        
+        let nextIndex = currentIndex + 1
+        guard nextIndex < busStops.count else {
+            print("✅ 마지막 정류장 도착")
+            return nil
+        }
+        
+        let nextStop = busStops[nextIndex]
+        let nextLocation = CLLocation(latitude: nextStop.gpsY, longitude: nextStop.gpsX)
+        let distance = currentLocation.distance(from: nextLocation)
+        
+        print("📡 다음 정류장: \(nextStop.stationNm) 거리: \(Int(distance))m")
+        
+        if distance <= detectionRadius {
+            return (nextStop, 0) // 도착 처리
+        }
+        
+        return (nextStop, 1)
     }
 }
 
 
 import SwiftUI
 
-struct NearestBus3View: View {
-    @StateObject private var vm = NearestBusViewModel()
-
-    @State private var stationInput = "161000611"
-        @State private var routeInput = "100100324"
+struct BusTrackerView: View {
+    @StateObject var viewModel = NearestBusViewModel()
+    @State private var stationId: String = "111000053"
+    @State private var routeId: String = "100100117"
+    @AppStorage("soundToggle") var soundToggle: Bool = true
+    @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("가장 가까운 버스")
-                .font(.largeTitle)
-                .padding(.top)
-
-            TextField("정류장 ID 입력", text: $stationInput)
+        VStack(spacing: 16) {
+            // 입력 필드
+            TextField("도착 정류장 ID", text: $stationId)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+                .padding(.horizontal)
 
+            TextField("버스 노선 ID", text: $routeId)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal)
+            HStack(spacing: 8){
+                Image("word")
+                    .frame(width: 20, height: 20)
+                Toggle("소리", isOn: $soundToggle)
+                    .toggleStyle(SwitchToggleStyle(tint: Color.mainpurple))
+            }
+            HStack{
+                Image("word")
+                    .frame(width: 20, height: 20)
+                Toggle("진동", isOn: $vibrationToggle)
+                    .toggleStyle(SwitchToggleStyle(tint: .mainpurple))
+            }
+
+            // 시작 버튼
+            Button("추적 시작") {
+                viewModel.start(stationId: stationId, routeId: routeId)
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(8)
             HStack {
-                Button("시작") {
-                    vm.stationIdInput = stationInput
-                       vm.busRouteId = routeInput
-                 
-                }
-                .padding()
-                .background(Color.green.opacity(0.2))
-                .cornerRadius(10)
-
-                Button("중단") {
-                    vm.stop()
-                }
-                .padding()
-                .background(Color.red.opacity(0.2))
-                .cornerRadius(10)
+                Text("확인")
+                    .font(.pretendard(.semibold, size: 18))
+                    .padding(13)
+                    .foregroundStyle(Color("gray900"))
+            }
+            .frame(width: 150)
+            .background(Capsule().fill(Color("mainpurple")))
+            .onTapGesture {
+                startAlarmToggle(
+                    isOn: false,
+                    title: "",
+                    body: "",
+                    useSound: false,
+                    useVibration: false
+                )
+                viewModel.stop()
+             
             }
 
-            if let bus = vm.nearestBus() {
-                VStack {
-                    Text("버스 ID: \(bus.vehId)")
-                    Text(String(format: "위도: %.5f", bus.gpsY))
-                    Text(String(format: "경도: %.5f", bus.gpsX))
-                    Text("다음 정류장 ID: \(bus.nextStId)")
+            Divider()
+
+            // 리스트에 정류장과 공백 포함
+            List(viewModel.busStops, id: \.seq) { stop in
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text(stop.stationNm)
+                            .font(.headline)
+                        Text("정류장 ID: \(stop.station)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+
+                    Spacer()
+
+                    if let current = viewModel.currBusStop, current.station == stop.station {
+                        Text("🚌 도착")
+                            .foregroundColor(.blue)
+                            .font(.subheadline)
+                    } else if let current = viewModel.currBusStop,
+                              let destSeq = viewModel.destinationStop?.seq,
+                              current.seq < stop.seq && stop.seq <= destSeq {
+                        Text("⏳ 도착 전")
+                            .foregroundColor(.orange)
+                            .font(.subheadline)
+                    }
+
+                    if viewModel.destinationStop?.station == stop.station {
+                        Text("🏁 도착지")
+                            .foregroundColor(.red)
+                            .font(.subheadline)
+                    }
                 }
-                .font(.title2)
-                .padding()
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(10)
-            } else {
-                Text("가까운 버스를 찾는 중...")
-                    .foregroundColor(.gray)
+                .padding(.vertical, 4)
             }
 
-            if let stops = vm.remainingStop {
-                Text("남은 정류장 수: \(stops)")
-                    .font(.headline)
-                    .padding()
+            if viewModel.isCalculating {
+                Text("🚀 위치 추적 중...")
+                    .foregroundColor(.green)
             }
-
-            Spacer()
         }
         .padding()
     }
 }
-
-
-// 🔔 거리 계산 및 알람 트리거 함수
-func checkProximity(currentLocation: CLLocation?, targetLocation: CLLocation, threshold: Double = 500.0) -> Bool {
-    guard let current = currentLocation else { return false }
-    
-    let distance = current.distance(from: targetLocation)
-    print("현재 거리: \(Int(distance))m")
-    
-    if distance <= threshold {
-        print("🔔 알림: 목표 지점 도달!")
-        return true
-    }
-    
-    return false
-}
-
-
-//func startCheckingDistance() {
-//    Task {
-//        let result = await checkDistance(
-//            toX: targetLongitude,
-//            toY: targetLatitude,
-//            locationViewModel: locationViewModel
-//        )
-//        if result == 1 {
-//            await MainActor.run {
-//                isArrived = true
-//            }
-//        }
-//    }
-//}
