@@ -235,6 +235,7 @@ struct AlertStopsSection: View {
                 
                 if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
                     let newUsage = Usage_history(
+                        bus: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus,
                         route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
                         city_code: "1",
                         destination_stop_id: String(busStopSeoulViewModel.busStations[currentBusIndex].stationNo),

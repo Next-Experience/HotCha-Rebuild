@@ -13,6 +13,22 @@ struct AddUsageHistoryView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    @State private var bus: Bus_info_seoul = Bus_info_seoul(
+        busRouteAbrv: "알 수 없음",
+        busRouteId: "알 수 없음",
+        busRouteNm: "알 수 없음",
+        corpNm: "알 수 없음",
+        stStationNm: "출발지 미정",
+        edStationNm: "도착지 미정",
+        firstBusTm: "--:--",
+        firstLowTm: "--:--",
+        lastBusTm: "--:--",
+        lastBusYn: "N",
+        lastLowTm: "--:--",
+        length: "0",
+        routeType: "0",
+        term: "0"
+    )
     @State private var routeID: String = ""
     @State private var cityCode: String = ""
     @State private var destinationStopID: String = ""
@@ -20,11 +36,10 @@ struct AddUsageHistoryView: View {
     @State private var routeType: String = ""
     @State private var operatorName: String = ""
     @State private var vehicleNo: String = ""
-    @State private var getOffTimestamp: Date = Date()  
+    @State private var getOffTimestamp: Date = Date()
     @State private var operatorno: String = ""
     @State private var destinationStopname: String = ""
 
-    
     var body: some View {
         NavigationStack {
             Form {
@@ -44,6 +59,7 @@ struct AddUsageHistoryView: View {
                 // TODO: 안내 종료할 때 이 버튼을 안내 종료 버튼에 붙여넣기
                 Button("저장") {
                     let newUsage = Usage_history(
+                        bus: bus,
                         route_id: routeID,
                         city_code: cityCode,
                         destination_stop_id: destinationStopID, destination_stop_name: destinationStopname,

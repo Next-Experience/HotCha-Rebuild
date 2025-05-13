@@ -42,8 +42,23 @@ class BusStopSeoulViewModel: ObservableObject {
     @Published var shortcutExecute = false // 북마크 또는 이용 기록으로 실행되는 경우 데이터를 자동 빌드하기 위한 트리거
     @Published var shortcutDestinationId: String? = nil // 북마크 또는 이용 기록으로 실행되는 경우 dest_id로 도착 정류장을 넘겨받기 위함
     
-    
-    
+    // bus 데이터가 없을 경우 대신 넣어줄 데이터 선언
+    let fallbackBus = Bus_info_seoul(
+          busRouteAbrv: "알 수 없음",
+          busRouteId: "알 수 없음",
+          busRouteNm: "알 수 없음",
+          corpNm: "알 수 없음",
+          stStationNm: "출발지 미정",
+          edStationNm: "도착지 미정",
+          firstBusTm: "--:--",
+          firstLowTm: "--:--",
+          lastBusTm: "--:--",
+          lastBusYn: "N",
+          lastLowTm: "—:—",
+          length: "0",
+          routeType: "0",
+          term: "0"
+      )
     
     func setupBus(bus: Bus_info_seoul) {
         self.bus = bus
