@@ -137,7 +137,7 @@ class NearestBusViewModel: ObservableObject {
             if result.arrived == 0 {
                 self.currBusStop = result.station
                 self.lastSeq = result.station.seq
-                let remaining = destinationStop.seq - result.station.seq
+                let remaining = destinationStop.seq - currStop.seq
                 self.remainingStop = remaining
                 print("📍 도착! 새로운 현재 정류장: \(result.station.stationNm), 남은 정류장: \(remaining)")
                 
@@ -154,10 +154,12 @@ class NearestBusViewModel: ObservableObject {
                 }
                 
             } else {
-                print(result.arrived, "아직 도착 안함" )
-                print("----라액------")
-                let remaining = destinationStop.seq - result.station.seq
+                let remaining = destinationStop.seq - currStop.seq
                 self.remainingStop = remaining
+                print(result.arrived, "아직 도착 안함" )
+                print(currStop.stationNm, currStop.seq, "현재 정류장")
+                print(destinationStop.stationNm, destinationStop.seq, "도착 정류장")
+                print("----라액------")
                 LiveActivityManager.shared.updateLiveActivity(
                     progress: 1.0,
                     currentStop: currStop.stationNm,
@@ -222,9 +224,14 @@ class NearestBusViewModel: ObservableObject {
         
         let nextStop = busStops[nextIndex]
         let nextLocation = CLLocation(latitude: nextStop.gpsY, longitude: nextStop.gpsX)
+        let currentStop_Location = CLLocation(latitude: currentStop.gpsY, longitude: currentStop.gpsX)
         let distance = currentLocation.distance(from: nextLocation)
+        let distance_current = currentLocation.distance(from: currentStop_Location)
         
         print("📡 다음 정류장: \(nextStop.stationNm) 거리: \(Int(distance))m")
+        if distance_current <= 50 {
+            return (currentStop, 0) // 도착 처리
+        }
         
         if distance <= detectionRadius {
             return (nextStop, 0) // 도착 처리
