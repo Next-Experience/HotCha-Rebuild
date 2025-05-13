@@ -14,6 +14,7 @@ struct AddBookmarkView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    @State private var bus: Bus_info_seoul
     @State private var routeID: String = ""
     @State private var cityCode: String = ""
     @State private var destinationStopID: String = ""
@@ -52,6 +53,7 @@ struct AddBookmarkView: View {
                     }
 
                     let newBookmark = Bookmarkmodel(
+                        bus: bus,
                         route_id: routeID,
                         city_code: cityCode,
                         destination_stop_id: destinationStopID,
