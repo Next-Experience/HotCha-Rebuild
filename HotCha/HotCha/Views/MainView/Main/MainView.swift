@@ -71,7 +71,7 @@ struct MainView: View {
         // 메인뷰 전체
         VStack(spacing: 12) {
 
-            if modalStateViewModel.bus != nil {
+            if isAlarmInProgress != false {
 //            if busStopSeoulViewModel.bus != nil {
                 NavigationLink(destination: AlarmSettingView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
                     DoAlarmView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1))
@@ -105,7 +105,7 @@ struct MainView: View {
                 SearchView(textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
             } else {
                 // 즐겨찾기 항목들
-                BookmarkView(bus: $bus, cityCode: $cityCode,isEditMode: $isEditMode, alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
+                BookmarkView(bus: $bus, cityCode: $cityCode,isEditMode: $isEditMode, alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
                     .padding(.top, 12)
             }
             
@@ -120,6 +120,7 @@ struct MainView: View {
                 saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
                 Bus_info_seoul_True = true
             }
+            busStopSeoulViewModel.returnToRootView = false
         }
     }
 }

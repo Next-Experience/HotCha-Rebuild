@@ -24,11 +24,10 @@ struct AlarmSettingView: View {
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
     
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
-
-
+    @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false // 알람 실행 중 여부
+    
     // 시트 구분을 위한 ID 추가
     @State private var sheetId = UUID()
-
     
     var body: some View {
         ZStack {
@@ -118,6 +117,14 @@ struct AlarmSettingView: View {
                         )
                         if !busStopSeoulViewModel.isReload {
                             busStopSeoulViewModel.clearSelectedData()
+                            modalStateViewModel.bus = nil
+                        }
+                        if isBookmark {
+                            // 빌드된 데이터 초기화
+                            busStopSeoulViewModel.leaveAlarm()
+                            
+                            // 초기 알람 설정 상태로 초기화
+                            modalStateViewModel.modalState = .alarmWait
                             modalStateViewModel.bus = nil
                         }
                         // 화면 닫기
@@ -234,6 +241,7 @@ struct SettingModalView: View {
                             busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].station : bus.edStationNm
                             
                             let newBookmark = Bookmarkmodel(
+                                bus: bus,
                                 route_id: bus.busRouteId,
                                 city_code: String(cityCode),
                                 destination_stop_id: destinationStationid,
@@ -244,7 +252,18 @@ struct SettingModalView: View {
                                 bookmark_type: bookmarktype
                             )
                             modelContext.insert(newBookmark)
+                            
                             dismiss()
+                            
+                            busStopSeoulViewModel.returnToRootView = true
+                            
+                            // 빌드된 데이터 초기화
+                            busStopSeoulViewModel.leaveAlarm()
+                            
+                            // 초기 알람 설정 상태로 초기화
+                            modalStateViewModel.modalState = .alarmWait
+                            modalStateViewModel.bus = nil
+                            
                             
                         }, label: {
                             Text("즐겨찾기 저장")

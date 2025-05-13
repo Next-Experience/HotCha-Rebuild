@@ -21,11 +21,16 @@ struct BookmarkView: View {
     @Binding var isBookmark: Bool
     @Binding var type_name: String
     
+    @ObservedObject var modalStateViewModel: AlarmModalViewModel
+    @ObservedObject var busStopSeoulViewModel: BusStopSeoulViewModel
+    @ObservedObject var nearestBusViewModel: NearestBusViewModel
+    @ObservedObject var sheetManager: AlarmSettingModalSheetManager
+    
     let columns: [GridItem] = [
-            GridItem(.flexible(), spacing: 15),
-            GridItem(.flexible(), spacing: 15)
-        ]
-
+        GridItem(.flexible(), spacing: 15),
+        GridItem(.flexible(), spacing: 15)
+    ]
+    
     var body: some View {
         VStack {
             // 상단 설명과 편집 버튼
@@ -35,15 +40,15 @@ struct BookmarkView: View {
                     .font(.pretendard(.semibold, size: 16))
                     .foregroundStyle(Color("gray900"))
                 Spacer()
-
+                
                 
                 Text(isEditMode ? "완료" : "편집")
-                        .font(.pretendard(.semibold, size: 16))
-                        .foregroundStyle(isEditMode ? Color("mainpurple") : Color("gray600"))
-                        .onTapGesture {
-                            // 편집 모드 토글
-                            isEditMode.toggle()
-                        }
+                    .font(.pretendard(.semibold, size: 16))
+                    .foregroundStyle(isEditMode ? Color("mainpurple") : Color("gray600"))
+                    .onTapGesture {
+                        // 편집 모드 토글
+                        isEditMode.toggle()
+                    }
             }
             .padding(.bottom, 12)
             VStack(spacing: 16) {
@@ -52,36 +57,39 @@ struct BookmarkView: View {
                     let homebookmark = bookmarkdata.filter { $0.bookmark_type == 1 }
                     if homebookmark.isEmpty {
                         BookmarkCardEmptyView(name: "집", image: "houseicon", alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
-                        } else {
-                            ForEach(homebookmark) { bookmark in
-                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive)
-                            }
+                    } else {
+                        ForEach(homebookmark) { bookmark in
+                            BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive, isBookmark: isBookmark,
+                                                   type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
                         }
+                    }
                     
                     let workplacebookmark = bookmarkdata.filter { $0.bookmark_type == 2 }
                     if workplacebookmark.isEmpty {
                         BookmarkCardEmptyView(name: "회사", image: "buildingicon", alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
-                        } else {
-                            ForEach(workplacebookmark) { bookmark in
-                                BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive)
-                            }
+                    } else {
+                        ForEach(workplacebookmark) { bookmark in
+                            BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive, isBookmark: isBookmark,
+                                                   type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
                         }
                     }
+                }
                 
                 // 직접 추가하는 즐겨찾기
                 let bookmarks = bookmarkdata.filter { $0.bookmark_type == 0 }
                 LazyVGrid(columns: columns, spacing: 16) { ForEach(bookmarks) { bookmark in
-                    BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive)
+                    BookmarkCardCustomView(isEditMode: isEditMode, bookmark: bookmark, alarmActive: alarmActive, isBookmark: isBookmark,
+                                           type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
                 }
                     if bookmarks.count < 4 {
                         if !isEditMode {
                             BookmarkPlusView(alarmActive: alarmActive, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
                         }
-                        }
+                    }
                 }
             }
             
-
+            
         }
     }
 }
