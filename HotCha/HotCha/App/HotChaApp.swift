@@ -22,10 +22,8 @@ struct HotChaApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SplashView()
-//            SimpleDistanceTestView()
-//            SeoulBusInfoTestView()
-//            NearestBus3View()
+//            SplashView()
+            BusTrackerView()
                 .modelContainer(HotchaContainer)
         }
     }

@@ -54,6 +54,7 @@ class BusLocationViewModel: ObservableObject {
 
         isRunning = true
         fetchOnce()
+        print("버스 찾기 시작-----------------------------------------------")
         timer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
             self?.fetchOnce()
         }
@@ -71,6 +72,7 @@ class BusLocationViewModel: ObservableObject {
     private func fetchOnce() {
         fetchSeoulBusLocation(busRouteId: busRouteId) { [weak self] positions, error in
             DispatchQueue.main.async {
+                print("fetchOnce()-------------------------------")
                 if let positions = positions {
                     self?.busPositions = positions
                     self?.evaluateNearestBus()
@@ -87,18 +89,30 @@ class BusLocationViewModel: ObservableObject {
             print("현재 위치 없음")
             return
         }
-
+        
         guard let nearestBus = nearestBus(from: currentLocation) else { return }
-
+        print("가까운거 계산-------------------------------")
         if lastSelectedBusId == nearestBus.vehId {
             consecutiveSameBusCount += 1
+            print(consecutiveSameBusCount ,"--------------가까운거")
+            print(nearestBus.nextStId,"다음 정류장입니다.")
+            print(nearestBus.plainNo)
+            print("버스 위도와 경도" ,nearestBus.gpsY, nearestBus.gpsX)
+            print("현재버스의 정류장이 어디야" ,nearestBus.nextStId)
+            
         } else {
             consecutiveSameBusCount = 1
             lastSelectedBusId = nearestBus.vehId
+            print(nearestBus.plainNo)
+            print(consecutiveSameBusCount ,"--------------가까운거")
+            print("버스 위도와 경도" ,nearestBus.gpsY, nearestBus.gpsX)
         }
 
         if consecutiveSameBusCount >= 4 {
             startSendingSelectedBus(nearestBus)
+            print(nearestBus.plainNo)
+            print(consecutiveSameBusCount ,"--------------가까운거")
+            print("버스 위도와 경도" ,nearestBus.gpsY, nearestBus.gpsX)
         }
     }
 
