@@ -55,21 +55,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				ViewModels/Super1.swift,
 			);
 			target = 9DD91FA82D522CB600789318 /* HotCha */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		9D9DC4092DD244C2000B814C /* Exceptions for "HotCha" folder in "Copy Bundle Resources" phase from "HotCha" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 9DD91FA72D522CB600789318 /* Resources */;
-			membershipExceptions = (
-				ViewModels/Super1.swift,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9D86EEA12DC9F907003E6FED /* HotchaLive */ = {
@@ -84,7 +73,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				9DD91FEB2D5235A600789318 /* Exceptions for "HotCha" folder in "HotCha" target */,
-				9D9DC4092DD244C2000B814C /* Exceptions for "HotCha" folder in "Copy Bundle Resources" phase from "HotCha" target */,
 			);
 			path = HotCha;
 			sourceTree = "<group>";
@@ -333,7 +321,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = V9J26YADA8;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
@@ -367,7 +355,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V9J26YADA8;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotchaLive/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
@@ -423,7 +411,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V9J26YADA8;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotchaLive/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
@@ -571,7 +559,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = V9J26YADA8;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
@@ -607,7 +595,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = V9J26YADA8;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
