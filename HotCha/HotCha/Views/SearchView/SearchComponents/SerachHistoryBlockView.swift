@@ -13,9 +13,9 @@ struct SerachHistoryBlockView: View {
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
-              BookmarkBusNoView(busNo: history.bus_no, route_type: history.route_type)
+                SearchBusUtil.CustomBusNoView(busNo: history.bus_no, routeType: history.route_type)
               
-              Text("\(history.city_code) \(history.route_type)  버스")
+                BusTypeLabelView(busNo: history.bus_no, routeType: history.route_type)
                     .font(.pretendard(.semibold, size: 14))
                     .foregroundStyle(Color("gray300"))
                 Spacer()
