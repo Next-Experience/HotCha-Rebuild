@@ -219,7 +219,7 @@ struct AlertStopsSection: View {
 //                    .foregroundStyle(.gray900)
 //            }
 //            Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
-            Text(remainingStops)
+            Text("\(Int(nearestBusViewModel.remainingStop ?? 0)) 정류장 전")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()
