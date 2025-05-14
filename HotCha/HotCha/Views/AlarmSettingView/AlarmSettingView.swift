@@ -109,31 +109,33 @@ struct AlarmSettingView: View {
             }
             .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨기기
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        NotificationCenter.default.post(
-                            name: Notification.Name("ResetSearchState"),
-                            object: nil
-                        )
-                        if !busStopSeoulViewModel.isReload {
-                            busStopSeoulViewModel.clearSelectedData()
-                            modalStateViewModel.bus = nil
+                if busStopSeoulViewModel.isReload == false {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            NotificationCenter.default.post(
+                                name: Notification.Name("ResetSearchState"),
+                                object: nil
+                            )
+                            if !busStopSeoulViewModel.isReload {
+                                busStopSeoulViewModel.clearSelectedData()
+                                modalStateViewModel.bus = nil
+                            }
+                            if isBookmark {
+                                // 빌드된 데이터 초기화
+                                busStopSeoulViewModel.leaveAlarm()
+                                
+                                // 초기 알람 설정 상태로 초기화
+                                modalStateViewModel.modalState = .alarmWait
+                                modalStateViewModel.bus = nil
+                            }
+                            // 화면 닫기
+                            dismiss()
+                            //                    busLocationViewModel.stopFetching()
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.title2)
+                                .foregroundColor(.white)
                         }
-                        if isBookmark {
-                            // 빌드된 데이터 초기화
-                            busStopSeoulViewModel.leaveAlarm()
-                            
-                            // 초기 알람 설정 상태로 초기화
-                            modalStateViewModel.modalState = .alarmWait
-                            modalStateViewModel.bus = nil
-                        }
-                        // 화면 닫기
-                        dismiss()
-                        //                    busLocationViewModel.stopFetching()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                            .foregroundColor(.white)
                     }
                 }
             }

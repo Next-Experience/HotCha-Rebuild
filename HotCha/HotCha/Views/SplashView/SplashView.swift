@@ -10,8 +10,6 @@ import SwiftUI
 struct SplashView: View {
     @State private var isSplashActive = false
     @AppStorage("OnBoarding_True") var OnBoardingTrue: Bool = false
-    // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
-    @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
     
     var body: some View {
         if isSplashActive {
@@ -43,18 +41,17 @@ struct SplashView: View {
                 .padding(.horizontal, 30)
                 Image("splashbus")
                     .padding(.bottom, 70)
-                }
+            }
             .background(Color("gray900"))
             .onAppear {
-                remainingStops = "불러오는 중..."
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                        isSplashActive = true
+                    isSplashActive = true
                     
                 }
             }
         }
         
-       
+        
     }
 }
 

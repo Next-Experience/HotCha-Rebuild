@@ -16,7 +16,6 @@ struct AlarmEndView: View {
     
     @EnvironmentObject  var nearestBusViewModel: NearestBusViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
-    @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
     
     var body: some View {
         ZStack {
@@ -29,13 +28,13 @@ struct AlarmEndView: View {
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(Color("gray300"))
                         
-                        Text(remainingStops)
+                        Text("\(abs(Int(nearestBusViewModel.remainingStop ?? 0)))")
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(Color("mainpurple"))
                         
-//                        Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
-//                            .font(.pretendard(.semibold, size: 16))
-//                            .foregroundStyle(Color("gray300"))
+                             Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정거장 전" : "정거장 후")
+                            .font(.pretendard(.semibold, size: 16))
+                            .foregroundStyle(Color("gray300"))
                     }
                     .padding(.bottom, 12)
                     
