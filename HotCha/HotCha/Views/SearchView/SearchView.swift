@@ -40,12 +40,11 @@ struct SearchView: View {
                     .font(.pretendard(.semibold, size: 14))
                     .foregroundStyle(Color("gray900"))
                 Button(action: {
-    viewModel.fetchBusRoutes(searchStr: "")
-    saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
-}) {
-    Text("새로고침")
-}
-
+                    viewModel.fetchBusRoutes(searchStr: "")
+                    saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
+                }) {
+                    Text("새로고침")
+                }
                 Spacer()
             }
             .padding(.top, 10)
@@ -62,11 +61,11 @@ struct SearchView: View {
     var body: some View {
         VStack {
             if textfiledValue.isEmpty {
-                SearchHistoryView()
+                SearchHistoryView(modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
             } else {
                 // 필터링된 버스 노선들
                 let filteredBusInfo = SearchBusSorting.filterBuses(buses: bus_info_seoul, searchText: textfiledValue)
-                                    
+                
                 if filteredBusInfo.isEmpty {
                     // 검색 결과가 없을 때
                     VStack {
@@ -86,14 +85,17 @@ struct SearchView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 .simultaneousGesture(TapGesture().onEnded {
-                                   // 이 부분에서 dismiss 호출
+                                    // 이 부분에서 dismiss 호출
                                     searchActivate = false
-                               })
+                                })
                             }
                         }
                     }
                 }
             }
+        }
+        .onAppear {
+            busStopSeoulViewModel.returnToRootView = false
         }
         .background(Color("gray50"))
     }

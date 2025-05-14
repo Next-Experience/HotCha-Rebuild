@@ -158,9 +158,6 @@ struct MainPurpleAlarmButton: View {
                     // 모달 상태 변경
                     busStopSeoulViewModel.disableAfterDestinationStation()
                     modalStateViewModel.modalState = .alertStopsMedium
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                         // TODO: 현재 버스위치 추적 시작
-                    }
                     sheetManager.showAlarmSearchSheet1 = false
                     
                     // 강제로 알람 활성화 상태 설정
@@ -178,9 +175,6 @@ struct MainPurpleAlarmButton: View {
                             print("gggggg",busStopSeoulViewModel.busStations[index].station)
                             nearestBusViewModel.stationIdInput = busStopSeoulViewModel.busStations[index].station
                             nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
-                            
-                            //                            vm.start(stationId:busStopSeoulViewModel.busStations[index].busRouteId, routeId: busStopSeoulViewModel.busStations[index].station)
-                            //                            print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
                         }
                         
                         // MainView에 알람 상태 전달

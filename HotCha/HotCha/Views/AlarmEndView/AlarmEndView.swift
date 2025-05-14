@@ -105,7 +105,7 @@ struct AlarmEndView: View {
                                 bus: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus,
                                 route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
                                 city_code: "1",
-                                destination_stop_id: String(busStopSeoulViewModel.busStations[currentBusIndex].stationNo),
+                                destination_stop_id: busStopSeoulViewModel.busStations[currentBusIndex].station,
                                 destination_stop_name: busStopSeoulViewModel.busStations[currentBusIndex].stationNm,
                                 bus_no: busStopSeoulViewModel.bus?.busRouteNm ?? "번호 없음",
                                 route_type: busStopSeoulViewModel.bus?.routeType ?? "타입 없음",
@@ -115,6 +115,7 @@ struct AlarmEndView: View {
                                 vehicle_no: "정보 없음" //TODO: vehicle_no 차량번호 넣기
                             )
                             print("newUsage: \(newUsage)")
+                            dump(newUsage)
                             modelContext.insert(newUsage)
                         }
                         

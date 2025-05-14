@@ -367,18 +367,40 @@ class BusStopSeoulViewModel: ObservableObject {
         return busStations.firstIndex(where: { $0.alarmStation })
     }
     
+//    func setDestinationStationWithId(){
+//        // 목적지 정류장 id가 존재하면,
+//        guard let destId = shortcutDestinationId else {
+//            print("destID 존재x")
+//            return
+//        }
+//        
+//        guard let destIndex = busStations.firstIndex(where: { $0.station == destId }) else {
+//            print("busStations에서 \(destId)와 일치하는 station을 찾을 수 없음")
+//            return
+//        } // index로 변환가능하면
+//        selectDestinationStation(destIndex: destIndex) // index로 목적지 정류장 설정
+//    }
     func setDestinationStationWithId(){
-        // 목적지 정류장 id가 존재하면,
+        // shortcutDestinationId 값 확인
+        print("shortcutDestinationId: \(shortcutDestinationId ?? "nil")")
+        
         guard let destId = shortcutDestinationId else {
-            print("destID 존재x")
+            print("shortcutDestinationId가 nil")
+            return
+        }
+        //매칭되는 station 찾기
+        guard let destIndex = busStations.firstIndex(where: { $0.station == destId }) else {
+            print("busStations에서 \(destId)와 일치하는 station을 찾을 수 없습니다")
+            
+            // 디버깅, 모든 station 출력
+            for (index, station) in busStations.enumerated() {
+                print("[\(index)] station: \(station.station)")
+            }
             return
         }
         
-        guard let destIndex = busStations.firstIndex(where: { $0.station == destId }) else {
-            print("busStations에서 \(destId)와 일치하는 station을 찾을 수 없음")
-            return
-        } // index로 변환가능하면
-        selectDestinationStation(destIndex: destIndex) // index로 목적지 정류장 설정
+        selectDestinationStation(destIndex: destIndex)
+        print("설정완료 - index: \(destIndex)")
     }
     
     // TODO: 알람 정류장 설정 버튼 (다른 View에서 호출) 미정차 정류장 고려해서 수정

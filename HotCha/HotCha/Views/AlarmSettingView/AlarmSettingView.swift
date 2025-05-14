@@ -102,7 +102,7 @@ struct AlarmSettingView: View {
                 }
                 
             }.onChange(of: busStopSeoulViewModel.returnToRootView) { newValue in
-                if newValue{
+                if newValue {
                     // 안내 종료 시 뷰 닫기
                     dismiss()
                 }
@@ -137,6 +137,7 @@ struct AlarmSettingView: View {
                     }
                 }
             }
+            .interactiveDismissDisabled(true)
             .toolbarBackground(.gray900, for: .navigationBar) // 배경색 설정
             .toolbarBackground(.visible, for: .navigationBar)   // 항상 보이게
         }
@@ -255,8 +256,6 @@ struct SettingModalView: View {
                             
                             dismiss()
                             
-                            busStopSeoulViewModel.returnToRootView = true
-                            
                             // 빌드된 데이터 초기화
                             busStopSeoulViewModel.leaveAlarm()
                             
@@ -264,6 +263,7 @@ struct SettingModalView: View {
                             modalStateViewModel.modalState = .alarmWait
                             modalStateViewModel.bus = nil
                             
+                            busStopSeoulViewModel.returnToRootView = true
                             
                         }, label: {
                             Text("즐겨찾기 저장")
