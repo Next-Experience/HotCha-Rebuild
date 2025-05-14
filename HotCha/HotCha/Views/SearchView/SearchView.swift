@@ -39,12 +39,7 @@ struct SearchView: View {
                 Text("\(route.stStationNm) ↔︎ \(route.edStationNm)")
                     .font(.pretendard(.semibold, size: 14))
                     .foregroundStyle(Color("gray900"))
-                Button(action: {
-    viewModel.fetchBusRoutes(searchStr: "")
-    saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
-}) {
-    Text("새로고침")
-}
+
 
                 Spacer()
             }
@@ -74,6 +69,12 @@ struct SearchView: View {
                         Text("검색 결과가 없습니다")
                             .font(.pretendard(.medium, size: 16))
                             .foregroundStyle(Color("gray500"))
+                                        Button(action: {
+    viewModel.fetchBusRoutes(searchStr: "")
+    saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
+}) {
+    Text("새로고침")
+}
                         Spacer()
                     }
                 } else {
