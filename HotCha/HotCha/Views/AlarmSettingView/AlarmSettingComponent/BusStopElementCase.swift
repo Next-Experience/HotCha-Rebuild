@@ -18,22 +18,25 @@ struct BusStopElementCase: OptionSet, Hashable {
     static let filteredStop    = BusStopElementCase(rawValue: 1 << 5)
     
     static let bothCurrentBusWithAlarm: BusStopElementCase = [.currentStop, .alarmStop]
+    static let bothDisableBusWithAlarm: BusStopElementCase = [.disableStop, .alarmStop]
     static let bothCurrentBusWithDest: BusStopElementCase = [.currentStop, .destinationStop]
 }
 
 extension BusStopElementCase {
     var text_color: Color {
-        if contains(.disableStop) {
-            return .gray150.opacity(0.4)
-        } else if contains(.currentStop) || contains(.alarmStop) || contains(.destinationStop) || contains(.filteredStop) {
+        if contains(.currentStop) || contains(.alarmStop) || contains(.destinationStop) || contains(.filteredStop) {
             return .mainpurple
+        } else if contains(.disableStop) {
+            return .gray150.opacity(0.4)
         } else {
             return .gray100
         }
     }
     
     var line_color: Color {
-        if contains(.disableStop) {
+        if contains(.alarmStop){
+            return .gray150
+        } else if contains(.disableStop) {
             return .gray150.opacity(0.4)
         } else {
             return .gray150
@@ -51,7 +54,7 @@ extension BusStopElementCase {
     }
     
     var outer_circle_color: Color {
-        if contains(.currentStop) && contains(.alarmStop) || contains(.currentStop) && contains(.destinationStop) {
+        if contains(.currentStop) && contains(.alarmStop) || contains(.currentStop) && contains(.destinationStop) || contains(.disableStop) && contains(.alarmStop){
             return .gray150
         }
         else if contains(.disableStop) {
