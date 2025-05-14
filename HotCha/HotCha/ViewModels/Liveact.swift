@@ -19,16 +19,18 @@ import ActivityKit
 struct HotchaLiveAttributes: ActivityAttributes {
     // 공통 속성 정의 (예: 제목, 설명 등)
     public struct ContentState: Codable, Hashable {
-        var progress: Double // 진행률
-        var currentStop: String // 현재 정류장
-        var stopsRemaining: Int // 남은 정류장 수
-        var destinationStation: String
-        var Updatetime: String
+        var progress: Double       // 진행 상태 (0.0 ~ 1.0)
+        var currentStop: String    // 현재 정류장
+        var stopsRemaining: Int    // 남은 정류장 수
+        var alarmstop: String       // 알람 정류장
+        var destinationStation: String // 도착 정류장
+        var Updatetime: String // 업데이트 시간
     }
 
     // 라이브 액티비티의 일반적인 속성 (변하지 않는 값)
     var title: String // 제목
     var description: String // 설명
+    var busname: String         // 버스 이름
 }
 
 
@@ -45,10 +47,11 @@ class LiveActivityManager {
     func startLiveActivity(
         title: String,
         description: String,
-        stationName: String,
-        initialProgress: Double,
+        progress: Double,
+        busname: String,
         currentStop: String,
         stopsRemaining: Int,
+        alarmstop: String,
         destinationStation: String,
         Updatetime: String) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
@@ -58,15 +61,18 @@ class LiveActivityManager {
 
         let activityAttributes = HotchaLiveAttributes(
             title: title,
-            description: description
+            description: description,
+            busname: busname
         )
 
         let initialState = HotchaLiveAttributes.ContentState(
-            progress: initialProgress,
+            progress: progress,
             currentStop: currentStop,
             stopsRemaining: stopsRemaining,
+            alarmstop: alarmstop,
             destinationStation: destinationStation,
             Updatetime: Updatetime
+            
         )
 
         do {
@@ -82,7 +88,12 @@ class LiveActivityManager {
     }
 
     // 라이브 액티비티 상태 업데이트
-    func updateLiveActivity(progress: Double, currentStop: String, stopsRemaining: Int,destinationStation: String, Updatetime: String) {
+    func updateLiveActivity( progress: Double,
+                             currentStop: String,
+                             stopsRemaining: Int,
+                             alarmstop: String,
+                             destinationStation: String,
+                             Updatetime: String) {
         guard let activity = currentActivity else {
             print("활동이 시작되지 않았습니다.")
             return
@@ -92,6 +103,7 @@ class LiveActivityManager {
             progress: progress,
             currentStop: currentStop,
             stopsRemaining: stopsRemaining,
+            alarmstop: alarmstop,
             destinationStation: destinationStation,
             Updatetime: Updatetime
         )
