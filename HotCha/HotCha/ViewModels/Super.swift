@@ -187,7 +187,7 @@ class NearestBusViewModel: ObservableObject {
         startAlarmToggle(
             isOn: true,
             title: "핫챠! 내릴 준비를 해주세요",
-            body: "도착까지 \(String(alarmStopDistanceFromDestination))정거장 남았어요!",
+            body: "도착까지 \(String(alarmStopDistanceFromDestination))정류장 남았어요!",
             useSound: soundToggle,
             useVibration: vibrationToggle
         )

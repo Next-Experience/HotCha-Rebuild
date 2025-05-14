@@ -212,7 +212,7 @@ struct AlertStopsSection: View {
             Text("\(abs(Int(nearestBusViewModel.remainingStop ?? 0)))")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
-            Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정거장 전" : "정거장 후")
+            Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정류장 전" : "정류장 후")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()
