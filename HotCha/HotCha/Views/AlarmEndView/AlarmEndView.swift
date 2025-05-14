@@ -32,7 +32,7 @@ struct AlarmEndView: View {
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(Color("mainpurple"))
                         
-                             Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정거장 전" : "정거장 후")
+                             Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정류장 전" : "정류장 지났어요.")
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(Color("gray300"))
                     }

@@ -61,22 +61,22 @@ struct HotchaLiveLiveActivity: Widget {
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 20)
+                    .padding(.top, 30)
                     
                     HStack {
-                        Text("\(context.state.stopsRemaining)")
+                        Text("\(abs(context.state.stopsRemaining))")
                             .font(.pretendard(.semibold, size: 20))
-                            .foregroundStyle(.purplec)
+                            .foregroundStyle(context.state.stopsRemaining < 0 ? .redc :  .purplec)
                             .padding(.trailing, 4)
                         
-                        Text("정류장 전")
+                        Text(Int(context.state.stopsRemaining) >= 0 ? "정류장 전" : "정류장 지났어요.")
                             .font(.pretendard(.semibold, size: 20))
                             .foregroundStyle(.gray700)
                         
                         Spacer()
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 10)
+                    .padding(.top, 15)
                     .padding(.bottom)
                 }
                 .background(.white)
@@ -93,18 +93,23 @@ struct HotchaLiveLiveActivity: Widget {
                             .foregroundStyle(.gray800)
                             .padding(.horizontal, 4)
                         
+                        
+                        Image("bell_live")
                         Text("\(context.state.alarmstop)")
                             .font(.pretendard(.medium, size: 12))
                             .foregroundColor(.gray600)
                         
                         Spacer()
                         Text("\(context.state.Updatetime)")
+                            .font(.pretendard(.medium, size: 4))
+                            .background(.gray100)
                             
                     }
                     .padding(20)
                 }
                 .background(.gray150)
             }
+            .frame(width: .infinity, height: .infinity)
             
         } dynamicIsland: { context in
             DynamicIsland {
