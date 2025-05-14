@@ -283,6 +283,8 @@ struct AlertStopsSection: View {
     }
 }
 
+import SwiftData
+
 
 struct BusStopInfoSection: View {
     @State var isFavorite: Bool = false
@@ -290,7 +292,13 @@ struct BusStopInfoSection: View {
     //    @State var endStationName: String? = "도착역 없음"
     //    @State var busNumber: String? = "버스번호 없음"
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
+    @EnvironmentObject var ViewModel: NearestBusViewModel
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
     @Binding var isBookmark: Bool
+    @Environment(\.modelContext) private var modelContext
+    @Query var bookmarkdata: [Bookmarkmodel]
+    @State var quickBookmark: Bool = false
+    
     
     var body: some View {
         if isBookmark {
@@ -299,13 +307,13 @@ struct BusStopInfoSection: View {
                     SearchBusUtil.CustomBusNoView(busNo: modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음",
                                                   routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
                     Spacer()
-                    if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
-                        Button(action: {
-                            isFavorite.toggle()
-                        }) {
-                            Image(isFavorite ? "star_fill" : "star_empty")
-                        }
-                    }
+//                    if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
+//                        Button(action: {
+//                            isFavorite.toggle()
+//                        }) {
+//                            Image(isFavorite ? "star_fill" : "star_empty")
+//                        }
+//                    }
                 }
                 HStack(spacing: 6){
                     Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
@@ -324,10 +332,38 @@ struct BusStopInfoSection: View {
                                                   routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
                     Spacer()
                     if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
-                        Button(action: {
-                            isFavorite.toggle()
-                        }) {
-                            Image(isFavorite ? "star_fill" : "star_empty")
+                        //                        Button(action: {
+                        //                            isFavorite.toggle()
+                        //                        }) {
+                        //                            Image(isFavorite ? "star_fill" : "star_empty")
+                        //                        }
+                        
+                        if let yes = modalStateViewModel.bus {
+                        if let index = busStopSeoulViewModel.currentDestinationIndex {
+                            if isDuplicate(id: yes.busRouteId, ggid: busStopSeoulViewModel.busStations[index].station) || quickBookmark == true {
+                                Image("star_fill")
+                            } else {
+                                Image("star_empty")
+                                    .onTapGesture {
+                                        if (bookmarkdata.filter { $0.bookmark_type == 0 }.count < 4) {
+                                            let newBookmark = Bookmarkmodel(
+                                                bus: yes,
+                                                route_id: yes.busRouteId,
+                                                city_code: "1",
+                                                destination_stop_id: busStopSeoulViewModel.busStations[index].station,
+                                                destination_stop_name: busStopSeoulViewModel.busStations[index].stationNm,
+                                                bus_no: yes.busRouteNm,
+                                                route_type: yes.routeType,
+                                                bookmark_label: "빠른 추가 \(yes.busRouteNm)",
+                                                bookmark_type: 0,
+                                            )
+                                            modelContext.insert(newBookmark)
+                                            
+                                            quickBookmark = true
+                                        }
+                                    }
+                            }
+                            }
                         }
                     }
                 }
@@ -342,6 +378,12 @@ struct BusStopInfoSection: View {
             }
             .padding(EdgeInsets(top: 26, leading: 20, bottom: 16, trailing: 20))
         }
+    }
+    func isDuplicate(id: String, ggid: String) -> Bool {
+        // 같은 ID 가진 항목 필터링
+        let sameIDItems = bookmarkdata.filter { $0.route_id == id }
+        // 그 중 ggid도 같은 게 있는지 확인
+        return sameIDItems.contains { $0.destination_stop_id == ggid }
     }
 }
 

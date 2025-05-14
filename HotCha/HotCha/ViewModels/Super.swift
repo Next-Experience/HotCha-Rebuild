@@ -18,6 +18,9 @@ class NearestBusViewModel: ObservableObject {
     var locationviewModel = LocationViewModel()
     @Published var currBusStop: BusStop? = nil
     @Published var destinationStop: BusStop? = nil
+    var busStops1: [BusStop] = []
+    var currBusStop1: BusStop? = nil
+    var destinationStop1: BusStop? = nil
     
     var stationIdInput: String = "" // 도착 정류장
     var busRouteId: String = ""
@@ -58,19 +61,30 @@ class NearestBusViewModel: ObservableObject {
                 return
             }
             
-            self.busStops = stops
+            DispatchQueue.main.async {
+                self.busStops = stops
+            }
+            self.busStops1 = stops
             print("✅ 정류장 \(stops.count)개 로딩 완료")
             for i in busStops {
                 print(i.stationNm,"----")
                 print(i.station,"----")
             }
             if let matchedStop = stops.first(where: { String($0.station) == stationId }) {
-                self.destinationStop = matchedStop
+                DispatchQueue.main.async {
+                    self.destinationStop1 = matchedStop
+                }
+                
+                self.destinationStop1 = matchedStop
+                
                 if let alarmStop = stops.first(where: { $0.seq == matchedStop.seq - self.alarmStopDistanceFromDestination }) {
                     print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
                     // ⭐️ 시작 정류장 설정
                     if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
-                        self.currBusStop = start
+                        DispatchQueue.main.async {
+                            self.currBusStop = start
+                        }
+                        self.currBusStop1 = start
                         self.lastSeq = start.seq
                         print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
                         
@@ -121,8 +135,8 @@ class NearestBusViewModel: ObservableObject {
 
     private func handleLocationUpdate(_ currentLocation: CLLocation) {
         guard isCalculating else { return }
-        guard let destinationStop = destinationStop,
-              let currStop = currBusStop else {
+        guard let destinationStop1 = destinationStop1,
+              let currStop1 = currBusStop1 else {
             print("❗️현재 정류장 또는 도착 정류장 정보 없음")
             return
         }
@@ -133,23 +147,23 @@ class NearestBusViewModel: ObservableObject {
         if let result = getCurrentOrNextBusStation(
             currentLocation: currentLocation,
             stations: busStopList,
-            currentStop: currStop
+            currentStop: currStop1
         ) {
 
             let (nextStationId, _) = result
             if result.arrived == 0 {
-                self.currBusStop = result.station
+                self.currBusStop1 = result.station
                 self.lastSeq = result.station.seq
-                let remaining = destinationStop.seq - currStop.seq
+                let remaining = destinationStop1.seq - currStop1.seq
                 self.remainingStop = remaining
                 print("📍 도착! 새로운 현재 정류장: \(result.station.stationNm), 남은 정류장: \(remaining)")
-                if let alarmStop = busStops.first(where: { $0.seq == destinationStop.seq - self.alarmStopDistanceFromDestination }) {
+                if let alarmStop = busStops.first(where: { $0.seq == destinationStop1.seq - self.alarmStopDistanceFromDestination }) {
                     LiveActivityManager.shared.updateLiveActivity(
                         progress: 1.0,
                         currentStop: result.station.stationNm,
                         stopsRemaining: remaining,
                         alarmstop: alarmStop.stationNm,
-                        destinationStation: destinationStop.stationNm,
+                        destinationStation: destinationStop1.stationNm,
                         Updatetime: formattedTime(from: Date())
                         
                     )
@@ -160,19 +174,19 @@ class NearestBusViewModel: ObservableObject {
                 }
                 
             } else {
-                let remaining = destinationStop.seq - currStop.seq
+                let remaining = destinationStop1.seq - currStop1.seq
                 self.remainingStop = remaining
                 print(result.arrived, "아직 도착 안함" )
-                print(currStop.stationNm, currStop.seq, "현재 정류장")
-                print(destinationStop.stationNm, destinationStop.seq, "도착 정류장")
+                print(currStop1.stationNm, currStop1.seq, "현재 정류장")
+                print(destinationStop1.stationNm, destinationStop1.seq, "도착 정류장")
                 print("----라액------")
-                if let alarmStop = busStops.first(where: { $0.seq == destinationStop.seq - self.alarmStopDistanceFromDestination }) {
+                if let alarmStop = busStops.first(where: { $0.seq == destinationStop1.seq - self.alarmStopDistanceFromDestination }) {
                     LiveActivityManager.shared.updateLiveActivity(
                         progress: 1.0,
                         currentStop: result.station.stationNm,
                         stopsRemaining: remaining,
                         alarmstop: alarmStop.stationNm,
-                        destinationStation: destinationStop.stationNm,
+                        destinationStation: destinationStop1.stationNm,
                         Updatetime: formattedTime(from: Date())
                         
                     )
@@ -327,19 +341,19 @@ struct BusTrackerView: View {
 
                     Spacer()
 
-                    if let current = viewModel.currBusStop, current.station == stop.station {
+                    if let current = viewModel.currBusStop1, current.station == stop.station {
                         Text("🚌 도착")
                             .foregroundColor(.blue)
                             .font(.subheadline)
-                    } else if let current = viewModel.currBusStop,
-                              let destSeq = viewModel.destinationStop?.seq,
+                    } else if let current = viewModel.currBusStop1,
+                              let destSeq = viewModel.destinationStop1?.seq,
                               current.seq < stop.seq && stop.seq <= destSeq {
                         Text("⏳ 도착 전")
                             .foregroundColor(.orange)
                             .font(.subheadline)
                     }
 
-                    if viewModel.destinationStop?.station == stop.station {
+                    if viewModel.destinationStop1?.station == stop.station {
                         Text("🏁 도착지")
                             .foregroundColor(.red)
                             .font(.subheadline)
