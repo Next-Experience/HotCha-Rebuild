@@ -66,23 +66,26 @@ class NearestBusViewModel: ObservableObject {
             }
             if let matchedStop = stops.first(where: { String($0.station) == stationId }) {
                 self.destinationStop = matchedStop
-                print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
-                // ⭐️ 시작 정류장 설정
-                if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
-                    self.currBusStop = start
-                    self.lastSeq = start.seq
-                    print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
-                    
-                    LiveActivityManager.shared.startLiveActivity(
-                        title: "핫챠",
-                        description: routeId,
-                        stationName: start.stationNm,
-                        initialProgress: 99,
-                        currentStop: start.stationNm,
-                        stopsRemaining: matchedStop.seq - start.seq,
-                        destinationStation: matchedStop.stationNm,
-                        Updatetime: formattedTime(from: Date())
-                    )
+                if let alarmStop = stops.first(where: { $0.seq == matchedStop.seq - self.alarmStopDistanceFromDestination }) {
+                    print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
+                    // ⭐️ 시작 정류장 설정
+                    if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
+                        self.currBusStop = start
+                        self.lastSeq = start.seq
+                        print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
+                        
+                        LiveActivityManager.shared.startLiveActivity(
+                            title: "핫챠",
+                            description: routeId,
+                            progress: 0.9,
+                            busname: start.busRouteNm,
+                            currentStop: start.stationNm,
+                            stopsRemaining: matchedStop.seq - start.seq,
+                            alarmstop: alarmStop.stationNm,
+                            destinationStation: matchedStop.stationNm,
+                            Updatetime: formattedTime(from: Date())
+                        )
+                    }
                 }
             } else {
                 print("⚠️ stationId와 일치하는 정류장을 찾을 수 없습니다")
@@ -140,14 +143,17 @@ class NearestBusViewModel: ObservableObject {
                 let remaining = destinationStop.seq - currStop.seq
                 self.remainingStop = remaining
                 print("📍 도착! 새로운 현재 정류장: \(result.station.stationNm), 남은 정류장: \(remaining)")
-                
-                LiveActivityManager.shared.updateLiveActivity(
-                    progress: 1.0,
-                    currentStop: result.station.stationNm,
-                    stopsRemaining: remaining,
-                    destinationStation: destinationStop.stationNm,
-                    Updatetime: formattedTime(from: Date())
-                )
+                if let alarmStop = busStops.first(where: { $0.seq == destinationStop.seq - self.alarmStopDistanceFromDestination }) {
+                    LiveActivityManager.shared.updateLiveActivity(
+                        progress: 1.0,
+                        currentStop: result.station.stationNm,
+                        stopsRemaining: remaining,
+                        alarmstop: alarmStop.stationNm,
+                        destinationStation: destinationStop.stationNm,
+                        Updatetime: formattedTime(from: Date())
+                        
+                    )
+                }
                 if remaining == alarmStopDistanceFromDestination && !alarmFired {
                     triggerAlarm()
                     alarmFired = true
@@ -160,13 +166,17 @@ class NearestBusViewModel: ObservableObject {
                 print(currStop.stationNm, currStop.seq, "현재 정류장")
                 print(destinationStop.stationNm, destinationStop.seq, "도착 정류장")
                 print("----라액------")
-                LiveActivityManager.shared.updateLiveActivity(
-                    progress: 1.0,
-                    currentStop: currStop.stationNm,
-                    stopsRemaining: remaining,
-                    destinationStation: destinationStop.stationNm,
-                    Updatetime: formattedTime(from: Date())
-                )
+                if let alarmStop = busStops.first(where: { $0.seq == destinationStop.seq - self.alarmStopDistanceFromDestination }) {
+                    LiveActivityManager.shared.updateLiveActivity(
+                        progress: 1.0,
+                        currentStop: result.station.stationNm,
+                        stopsRemaining: remaining,
+                        alarmstop: alarmStop.stationNm,
+                        destinationStation: destinationStop.stationNm,
+                        Updatetime: formattedTime(from: Date())
+                        
+                    )
+                }
             }
         }
     }

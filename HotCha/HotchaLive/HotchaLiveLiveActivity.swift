@@ -14,22 +14,16 @@ struct HotchaLiveAttributes: ActivityAttributes {
             var progress: Double       // 진행 상태 (0.0 ~ 1.0)
             var currentStop: String    // 현재 정류장
             var stopsRemaining: Int    // 남은 정류장 수
-            var destinationStation: String
+            var alarmstop: String       // 알람 정류장
+            var destinationStation: String // 도착 정류장
             var Updatetime: String // 업데이트 시간
         }
 
         var title: String         // 라이브 액티비티 제목
         var description: String   // 설명
+        var busname: String         // 버스 이름
     }
-////    public struct ContentState: Codable, Hashable {
-//var progress: Double       // 진행 상태 (0.0 ~ 1.0)
-//var busname: String         // 버스 이름
-//var alarmstop: String       // 알람 정류장
-//var currentStop: String    // 현재 정류장
-//var stopsRemaining: Int    // 남은 정류장 수
-//var destinationStation: String // 도착 정류장
-//var Updatetime: String // 업데이트 시간
-//}
+
 
 struct HotchaLiveLiveActivity: Widget {
     var body: some WidgetConfiguration {
@@ -41,7 +35,7 @@ struct HotchaLiveLiveActivity: Widget {
                     HStack {
                         // 버스 번호 및 정류장 정보
                         HStack {
-                            Text("버스 번호")
+                            Text("\(context.attributes.busname)")
                                 .font(.pretendard(.semibold, size: 14))
                                 .foregroundStyle(.skybluec)
                                 .padding(.horizontal, 6)
@@ -49,7 +43,7 @@ struct HotchaLiveLiveActivity: Widget {
                                 .background(Color.skybluec.opacity(0.2))
                                 .cornerRadius(4)
                             
-                            Text("버스정류장")
+                            Text("\(context.state.destinationStation)")
                                 .font(.pretendard(.semibold, size: 14))
                                 .foregroundStyle(.gray800)
                         }
@@ -99,7 +93,7 @@ struct HotchaLiveLiveActivity: Widget {
                             .foregroundStyle(.gray800)
                             .padding(.horizontal, 4)
                         
-                        Text("\(context.state.destinationStation)")
+                        Text("\(context.state.alarmstop)")
                             .font(.pretendard(.medium, size: 12))
                             .foregroundColor(.gray600)
                         
