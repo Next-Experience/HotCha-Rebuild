@@ -16,7 +16,6 @@ struct AlarmEndView: View {
     
     @EnvironmentObject  var nearestBusViewModel: NearestBusViewModel
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
-    @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
     
     var body: some View {
         ZStack {
@@ -29,13 +28,13 @@ struct AlarmEndView: View {
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(Color("gray300"))
                         
-                        Text(remainingStops)
+                        Text("\(abs(Int(nearestBusViewModel.remainingStop ?? 0)))")
                             .font(.pretendard(.semibold, size: 16))
                             .foregroundStyle(Color("mainpurple"))
                         
-//                        Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
-//                            .font(.pretendard(.semibold, size: 16))
-//                            .foregroundStyle(Color("gray300"))
+                             Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정거장 전" : "정거장 후")
+                            .font(.pretendard(.semibold, size: 16))
+                            .foregroundStyle(Color("gray300"))
                     }
                     .padding(.bottom, 12)
                     
@@ -102,9 +101,10 @@ struct AlarmEndView: View {
                         
                         if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
                             let newUsage = Usage_history(
+                                bus: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus,
                                 route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
                                 city_code: "1",
-                                destination_stop_id: String(busStopSeoulViewModel.busStations[currentBusIndex].stationNo),
+                                destination_stop_id: busStopSeoulViewModel.busStations[currentBusIndex].station,
                                 destination_stop_name: busStopSeoulViewModel.busStations[currentBusIndex].stationNm,
                                 bus_no: busStopSeoulViewModel.bus?.busRouteNm ?? "번호 없음",
                                 route_type: busStopSeoulViewModel.bus?.routeType ?? "타입 없음",
@@ -114,6 +114,7 @@ struct AlarmEndView: View {
                                 vehicle_no: "정보 없음" //TODO: vehicle_no 차량번호 넣기
                             )
                             print("newUsage: \(newUsage)")
+                            dump(newUsage)
                             modelContext.insert(newUsage)
                         }
                         

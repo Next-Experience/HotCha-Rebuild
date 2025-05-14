@@ -71,15 +71,15 @@ struct MainView: View {
         // 메인뷰 전체
         VStack(spacing: 12) {
 
-            if isAlarmInProgress != false {
-//            if busStopSeoulViewModel.bus != nil {
-                NavigationLink(destination: AlarmSettingView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
-                    DoAlarmView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1))
-                        .environmentObject(busStopSeoulViewModel)
-                        .environmentObject(modalStateViewModel)
-                        .padding(.bottom, 12)
-                }
-            } else {
+//            if isAlarmInProgress != false {
+////            if busStopSeoulViewModel.bus != nil {
+//                NavigationLink(destination: AlarmSettingView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
+//                    DoAlarmView(bus: .constant(modalStateViewModel.bus ?? bus), cityCode: .constant(1))
+//                        .environmentObject(busStopSeoulViewModel)
+//                        .environmentObject(modalStateViewModel)
+//                        .padding(.bottom, 12)
+//                }
+//            } else {
                 
          // '버스번호를 알려주세요' 텍스트 필드
          MainTextfiled(isEditMode: $isEditMode, textfiledValue: $textfiledValue, searchActivate: $searchActivate, isBookmark: $isBookmark, type_name: $type_name)
@@ -87,7 +87,7 @@ struct MainView: View {
              print(bus.busRouteId, bus.busRouteNm)
          }
 
-            }
+//            }
 //            if let index = busStopSeoulViewModel.currentDestinationIndex {
 //                Text(busStopSeoulViewModel.busStations[index].stationNm)
 //                    .font(.pretendard(.semibold, size: 16))

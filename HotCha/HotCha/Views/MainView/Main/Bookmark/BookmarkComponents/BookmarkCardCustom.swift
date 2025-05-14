@@ -105,21 +105,18 @@ struct BookmarkCardCustomView: View {
                                     isTapped = false
                                 }
                             }
+                            isBookmark = false
                             
                             // 알람 시작
-                            print("이부분 실행돼?")
                             busStopSeoulViewModel.shortcutDestinationId = bookmark.destination_stop_id
                             busStopSeoulViewModel.isReload = true
                             modalStateViewModel.modalState = .alertStopsMedium
                             busStopSeoulViewModel.shortcutExecute = true // 알람 실행에 필요한 데이터를 로드하기 위한  트리거
                             shouldNavigate = true  // 네비게이션 트리거
-                            print("여기는 실행돼?")
-                            
-                           
                         }
                     }
                 }
-                .navigationDestination(isPresented: $shouldNavigate) {  // .constant 대신 $shouldNavigate 사용
+                .navigationDestination(isPresented: $shouldNavigate) {
                     AlarmSettingView(
                         bus: .constant(bookmark.bus),
                         cityCode: .constant(1),

@@ -36,30 +36,28 @@ struct BusStopListView: View {
                     print("fetch bus stations 성공")
                     // 북마크 또는 이용 기록으로 실행되는 경우
                     if busStopSeoulViewModel.shortcutExecute == true {
+                        print("destId: \(String(describing: busStopSeoulViewModel.shortcutDestinationId))")
                         // 도착 정류장 설정
                         busStopSeoulViewModel.setDestinationStationWithId()
                         // 알람 정류장 설정
                         busStopSeoulViewModel.setAlarmNStationsBeforeDestination()
                         // 도착 정류장 이후 disabled
                         busStopSeoulViewModel.disableAfterDestinationStation()
-                        // 현재 위치한 정류장 찾기 시작
-                        print("--------알림 시작 후--------")
-                        if let index = busStopSeoulViewModel.currentDestinationIndex {
-                            print("gggggg",busStopSeoulViewModel.busStations[index].station)
+                        // TODO: 현재 위치한 정류장 찾기 시작 (라이브액티비티 실행도)
+                        if let index = busStopSeoulViewModel.getDestinationStationIndex() {
                             nearestBusViewModel.stationIdInput = busStopSeoulViewModel.busStations[index].station
                             nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
+                            
+                            nearestBusViewModel.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
+                                                        busStopSeoulViewModel.busStations[index].busRouteId)
                         }
-                        // MainView에 알람 상태 전달
-                        NotificationCenter.default.post(
-                            name: Notification.Name("AlarmStatusChanged"),
-                            object: nil,
-                            userInfo: ["alarmActive": true]
-                        )
                     }
                 }
-                
             }
+            
         }
+        
+        
         .onReceive(nearestBusViewModel.$currBusStop) { newBusStop in
             checkNearestBusAndUpdateUI()
         }

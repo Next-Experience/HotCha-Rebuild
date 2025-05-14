@@ -112,15 +112,15 @@ struct BusStopDestinationSection: View {
                     .foregroundColor(.mainpurple)
                     .padding(.leading, 16)
                 if let index = busStopSeoulViewModel.currentAlarmIndex {
-                                    Text(busStopSeoulViewModel.busStations[index].stationNm)
-                                        .font(.pretendard(.semibold, size: 16))
-                                        .foregroundStyle(.gray900)
-                                        .padding(.vertical, 16)
-                                        .padding(.leading, 8)
-                                }
-                                
-                                Spacer()
-
+                    Text(busStopSeoulViewModel.busStations[index].stationNm)
+                        .font(.pretendard(.semibold, size: 16))
+                        .foregroundStyle(.gray900)
+                        .padding(.vertical, 16)
+                        .padding(.leading, 8)
+                }
+                
+                Spacer()
+                
             }
             .background(.gray150)
             
@@ -199,45 +199,39 @@ struct AlertSettingSection: View {
 
 struct AlertStopsSection: View {
     @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
-
+    
     @EnvironmentObject private var nearestBusViewModel: NearestBusViewModel
-
+    
     @EnvironmentObject var modalStateViewModel: AlarmModalViewModel
-
+    
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var modelContext
-    // 도착 정류장에서 남은 버스 정류장 distance를 담은 변수
-    @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
-  
-    
     
     var body: some View {
         HStack(alignment: .bottom){
-//            if let distanceToDestinationStop = busStopSeoulViewModel.distanceToDestinationStop() {
-//                Text("\(abs(distanceToDestinationStop))")
-//                    .font(.pretendard(.bold, size: 24))
-//                    .foregroundStyle(.gray900)
-//            }
-//            Text((busStopSeoulViewModel.distanceToDestinationStop() ?? 0) >= 0 ? "정거장 전" : "정거장 후")
-            Text("\(Int(nearestBusViewModel.remainingStop ?? 0)) 정류장 전")
+            Text("\(abs(Int(nearestBusViewModel.remainingStop ?? 0)))")
+                .font(.pretendard(.bold, size: 24))
+                .foregroundStyle(.gray900)
+            Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정거장 전" : "정거장 후")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
             Spacer()
             Button(action: {
-
+                
                 print(nearestBusViewModel.isCalculating)
                 // 현재 정류장 위치 찾기 종료
                 nearestBusViewModel.stop()
                 dismiss()
-
+                
                 // 이용기록
                 let currentTime = Date()
                 
                 if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
                     let newUsage = Usage_history(
+                        bus: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus,
                         route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
                         city_code: "1",
-                        destination_stop_id: String(busStopSeoulViewModel.busStations[currentBusIndex].stationNo),
+                        destination_stop_id: busStopSeoulViewModel.busStations[currentBusIndex].station,
                         destination_stop_name: busStopSeoulViewModel.busStations[currentBusIndex].stationNm,
                         bus_no: busStopSeoulViewModel.bus?.busRouteNm ?? "번호 없음",
                         route_type: busStopSeoulViewModel.bus?.routeType ?? "타입 없음",
@@ -260,7 +254,7 @@ struct AlertStopsSection: View {
                 busStopSeoulViewModel.returnToRootView = true
                 
                 
-
+                
             }){
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.gray150)
@@ -277,12 +271,12 @@ struct AlertStopsSection: View {
                     print("gggggg",busStopSeoulViewModel.busStations[index].station)
                     nearestBusViewModel.stationIdInput = busStopSeoulViewModel.busStations[index].station
                     nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
-
+                    
                     nearestBusViewModel.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
-                             busStopSeoulViewModel.busStations[index].busRouteId)
+                                                busStopSeoulViewModel.busStations[index].busRouteId)
                     print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
                 }
-
+                
             }
         }
         .padding(EdgeInsets(top: 21, leading: 20, bottom: 48, trailing: 20))
@@ -301,53 +295,53 @@ struct BusStopInfoSection: View {
     var body: some View {
         if isBookmark {
             VStack(alignment:. leading, spacing: 4){
-            HStack (alignment: .center) {
-                SearchBusUtil.CustomBusNoView(busNo: modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음",
-                                              routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
-                Spacer()
-                if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
-                    Button(action: {
-                        isFavorite.toggle()
-                    }) {
-                        Image(isFavorite ? "star_fill" : "star_empty")
+                HStack (alignment: .center) {
+                    SearchBusUtil.CustomBusNoView(busNo: modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음",
+                                                  routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
+                    Spacer()
+                    if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
+                        Button(action: {
+                            isFavorite.toggle()
+                        }) {
+                            Image(isFavorite ? "star_fill" : "star_empty")
+                        }
                     }
                 }
-            }
-            HStack(spacing: 6){
-                Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
-                Text("↔")
-                Text(modalStateViewModel.bus?.edStationNm ?? "도착역 없음")
-            }
-            .font(.pretendard(.semibold, size: 18))
-            .foregroundStyle(.gray600)
-//            .padding(.bottom, 4)
-        }
-            .padding(EdgeInsets(top: 10, leading: 20, bottom: 16, trailing: 20))
-    } else {
-        VStack(alignment:. leading, spacing: 12){
-        HStack (alignment: .center){
-            SearchBusUtil.CustomBusNoView(busNo: modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음",
-                                          routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
-            Spacer()
-            if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
-                Button(action: {
-                    isFavorite.toggle()
-                }) {
-                    Image(isFavorite ? "star_fill" : "star_empty")
+                HStack(spacing: 6){
+                    Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
+                    Text("↔")
+                    Text(modalStateViewModel.bus?.edStationNm ?? "도착역 없음")
                 }
+                .font(.pretendard(.semibold, size: 18))
+                .foregroundStyle(.gray600)
+                //            .padding(.bottom, 4)
             }
+            .padding(EdgeInsets(top: 10, leading: 20, bottom: 16, trailing: 20))
+        } else {
+            VStack(alignment:. leading, spacing: 12){
+                HStack (alignment: .center){
+                    SearchBusUtil.CustomBusNoView(busNo: modalStateViewModel.bus?.busRouteNm ?? "버스번호 없음",
+                                                  routeType: modalStateViewModel.bus?.routeType ?? "", size: 20)
+                    Spacer()
+                    if modalStateViewModel.modalState == .alertStopsLarge || modalStateViewModel.modalState == .alertStopsMedium  {
+                        Button(action: {
+                            isFavorite.toggle()
+                        }) {
+                            Image(isFavorite ? "star_fill" : "star_empty")
+                        }
+                    }
+                }
+                HStack(spacing: 6){
+                    Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
+                    Text("↔")
+                    Text(modalStateViewModel.bus?.edStationNm ?? "도착역 없음")
+                }
+                .font(.pretendard(.semibold, size: 18))
+                .foregroundStyle(.gray600)
+                .padding(.bottom, 4)
+            }
+            .padding(EdgeInsets(top: 26, leading: 20, bottom: 16, trailing: 20))
         }
-        HStack(spacing: 6){
-            Text(modalStateViewModel.bus?.stStationNm ?? "시작역 없음")
-            Text("↔")
-            Text(modalStateViewModel.bus?.edStationNm ?? "도착역 없음")
-        }
-        .font(.pretendard(.semibold, size: 18))
-        .foregroundStyle(.gray600)
-        .padding(.bottom, 4)
-    }
-        .padding(EdgeInsets(top: 26, leading: 20, bottom: 16, trailing: 20))
-    }
     }
 }
 
