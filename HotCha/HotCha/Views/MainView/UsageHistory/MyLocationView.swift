@@ -5,36 +5,75 @@
 //  Created by 문재윤 on 2/13/25.
 //
 
+//import SwiftUI
+//import CoreLocation
+//
+//struct MyLocationView: View {
+//    @StateObject private var viewModel = LocationViewModel()
+//    private var myArea: String? = "화인할 수 없음"
+//    
+//    var body: some View {
+//        HStack {
+//            // 행정구역 정보 표시
+//            if let administrativeArea = viewModel.administrativeArea, let address = viewModel.address
+//                {
+//                Image("mappin")
+//                    .padding(.leading, 20)
+//                Text("\(administrativeArea)")
+////                \(address)
+//                    .font(.pretendard(.semibold, size: 16))
+//                    .foregroundStyle(Color("gray150"))
+//
+//            } else {
+//                Image(systemName: "location.slash.fill")
+//                    .padding(.leading, 20)
+//                Text("위치를 확인할 수 없음")
+//                    .font(.pretendard(.semibold, size: 10))
+//                    .foregroundStyle(Color("gray150"))            }
+//
+//        }
+//        .onAppear {
+//            viewModel.requestPermission()  // 앱 실행 시 권한 요청
+//            viewModel.requestalwaysPermission()
+//            viewModel.requestLocation()
+//        }
+//    }
+//}
 import SwiftUI
 import CoreLocation
 
 struct MyLocationView: View {
     @StateObject private var viewModel = LocationViewModel()
+    @State var myArea: String? = "화인할 수 없음"
     
     var body: some View {
         HStack {
             // 행정구역 정보 표시
-            if let administrativeArea = viewModel.administrativeArea, let address = viewModel.address
-                {
+            if myArea != "화인할 수 없음" {
                 Image("mappin")
                     .padding(.leading, 20)
-                Text("\(administrativeArea)")
-//                \(address)
+                Text("\(myArea ?? "")")
                     .font(.pretendard(.semibold, size: 16))
                     .foregroundStyle(Color("gray150"))
-
             } else {
                 Image(systemName: "location.slash.fill")
                     .padding(.leading, 20)
-                Text("위치를 확인할 수 없음")
+                Text("\(myArea ?? "")")
                     .font(.pretendard(.semibold, size: 10))
-                    .foregroundStyle(Color("gray150"))            }
-
+                    .foregroundStyle(Color("gray150"))
+            }
         }
         .onAppear {
-            viewModel.requestPermission()  // 앱 실행 시 권한 요청
+            viewModel.requestPermission()
             viewModel.requestalwaysPermission()
             viewModel.requestLocation()
+        }
+        .onChange(of: viewModel.administrativeArea) { oldValue, newValue in
+            if newValue != nil {
+                myArea = newValue
+                viewModel.stopTrackingLocation()
+                print("중지됨")
+            }
         }
     }
 }
