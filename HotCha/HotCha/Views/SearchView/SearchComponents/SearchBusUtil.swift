@@ -25,7 +25,7 @@ struct SearchBusUtil {
         }
         
         // 노선 유형에 따른 색상 반환
-        static func getColorForRouteType(_ routeType: String) -> Color {
+    static func getColorForRouteType(_ routeType: String, busNo: String = "") -> Color {
             switch routeType {
             case "1": // 공항
                 return Color("bluec")
@@ -42,7 +42,12 @@ struct SearchBusUtil {
             case "7": // 인천
                 return Color("bluec")
             case "8": // 경기
-                return Color("brownc")
+                if busNo.hasPrefix("M")
+                {
+                    return Color("redc")
+                } else {
+                    return Color("brownc")
+                }
             default:
                 return Color("bluec")
             }
@@ -50,7 +55,7 @@ struct SearchBusUtil {
         
         // 커스텀 버스 번호 뷰
     static func CustomBusNoView(busNo: String, routeType: String, weight: Font.PretendardWeight = .semibold, size: CGFloat = 14) -> some View {
-            let color = getColorForRouteType(routeType)
+            let color = getColorForRouteType(routeType, busNo: busNo)
             
             return Text(busNo)
                 .font(.pretendard(weight, size: size))
