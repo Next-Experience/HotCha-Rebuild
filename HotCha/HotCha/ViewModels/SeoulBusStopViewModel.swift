@@ -134,8 +134,11 @@ class BusStopSeoulViewModel: ObservableObject {
         } else {
             if busStations[destIndex].busStopCase.contains(.currentStop) {
                 busStations[destIndex].busStopCase = .currentStop
+            } else if busStations[destIndex].busStopCase.contains(.disableStop) {
+                busStations[destIndex].busStopCase = .disableStop
+            } else {
+                busStations[destIndex].busStopCase = .ableStop
             }
-            else { busStations[destIndex].busStopCase = .ableStop }
         }
         busStations[destIndex].arrivalStation = false
         
@@ -318,8 +321,8 @@ class BusStopSeoulViewModel: ObservableObject {
     func selectAlarmStation(alarmIndex: Int) {
         @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2
         
-        // disable 정류장이 아니면
-        guard busStations[alarmIndex].busStopCase != .disableStop else { return }
+        // disable 정류장이 아니면 -> disabled된 정류장도 알람정류장 선택 가능하게 함
+//        guard busStations[alarmIndex].busStopCase != .disableStop else { return }
         
         // 목적지 정류장 인덱스 확인
         guard let destIndex = getDestinationStationIndex() else { return }
@@ -346,6 +349,8 @@ class BusStopSeoulViewModel: ObservableObject {
         busStations[finalIndex].alarmStation = true
         if busStations[finalIndex].busStopCase.contains(.currentStop) {
             busStations[finalIndex].busStopCase = .bothCurrentBusWithAlarm
+        } else if busStations[finalIndex].busStopCase.contains(.disableStop) {
+            busStations[finalIndex].busStopCase = .bothDisableBusWithAlarm
         } else {
             busStations[finalIndex].busStopCase = .alarmStop
         }
@@ -403,7 +408,7 @@ class BusStopSeoulViewModel: ObservableObject {
         print("설정완료 - index: \(destIndex)")
     }
     
-    // TODO: 알람 정류장 설정 버튼 (다른 View에서 호출) 미정차 정류장 고려해서 수정
+    // 알람 정류장 설정
     func setAlarmNStationsBeforeDestination() {
         @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2 // 알람 정류장과 도착 정류장 사이의 distance
         // 목적지 정류장 확인
@@ -458,8 +463,10 @@ class BusStopSeoulViewModel: ObservableObject {
                     busStations[i].busStopCase = .destinationStop
                 } else if busStations[i].alarmStation || busStations[i].busStopCase.contains(.alarmStop) {
                     busStations[i].busStopCase = .alarmStop
-                } else if busStations[i].busStopCase != .disableStop {
+                } else if busStations[i].busStopCase == .ableStop {
                     busStations[i].busStopCase = .ableStop
+                } else if busStations[i].busStopCase == .disableStop { // disabled된 정류장도 현재 정류장 표시 가능하게 함
+                    busStations[i].busStopCase = .disableStop
                 }
             }
         }
