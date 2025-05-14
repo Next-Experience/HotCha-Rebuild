@@ -38,9 +38,16 @@ struct MainTextfiled: View {
                 HStack{
                     HStack{
                         //                    TextField("지금 탑승 중인 버스번호를 알려주세요", text: $textfiledValue)
-                        Text("지금 탑승 중인 버스번호를 알려주세요")
-                            .font(.pretendard(.medium, size: 16))
-                            .foregroundStyle(Color("gray300"))
+                        if !isBookmark {
+                            Text("지금 탑승 중인 버스번호를 알려주세요")
+                                .font(.pretendard(.medium, size: 16))
+                                .foregroundStyle(Color("gray300"))
+                        } else {
+                            Text("즐겨찾기로 저장할 버스번호를 알려주세요")
+                                .font(.pretendard(.medium, size: 16))
+                                .foregroundStyle(Color("gray300"))
+                        }
+                            
                         Spacer()
                         Image("searchbtn")
                     }

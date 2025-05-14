@@ -20,7 +20,7 @@ struct SearchView: View {
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
     @StateObject private var viewModel = BusRouteViewModel()
     
-    private func formatBusRoute(_ route: Bus_info_seoul) -> some View {
+    func formatBusRoute(_ route: Bus_info_seoul) -> some View {
         return VStack(spacing: 0) {
             // 각 버스 항목
             HStack {
@@ -55,7 +55,7 @@ struct SearchView: View {
     var body: some View {
         VStack {
             if textfiledValue.isEmpty {
-                SearchHistoryView(modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
+                SearchHistoryView(isBookmark: $isBookmark, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
             } else {
                 // 필터링된 버스 노선들
                 let filteredBusInfo = SearchBusSorting.filterBuses(buses: bus_info_seoul, searchText: textfiledValue)
