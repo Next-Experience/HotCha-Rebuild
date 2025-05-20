@@ -67,7 +67,7 @@ struct BusStopListView: View {
         guard busStopSeoulViewModel.currentAlarmIndex != nil else { return }
         
         DispatchQueue.main.async {
-            busStopSeoulViewModel.currentBusLocationMapping(nextStId: String(currBusStop.station))
+            busStopSeoulViewModel.currentBusLocationMapping(nextStId: String(currBusStop.station), viewModel: nearestBusViewModel)
         }
     }
 }
