@@ -174,6 +174,10 @@ class NearestBusViewModel: ObservableObject {
                     triggerAlarm()
                     alarmFired = true
                 }
+                if remaining == 0 && !alarmFired {
+                    triggerAlarm()
+                    alarmFired = true
+                }
                 
             } else {
                 let remaining = destinationStop1.seq - currStop1.seq
