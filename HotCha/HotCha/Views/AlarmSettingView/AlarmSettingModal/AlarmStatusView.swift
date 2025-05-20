@@ -355,7 +355,7 @@ struct BusStopInfoSection: View {
                                                 bus_no: yes.busRouteNm,
                                                 route_type: yes.routeType,
                                                 bookmark_label: "빠른 추가 \(yes.busRouteNm)",
-                                                bookmark_type: 0,
+                                                bookmark_type: 0
                                             )
                                             modelContext.insert(newBookmark)
                                             
