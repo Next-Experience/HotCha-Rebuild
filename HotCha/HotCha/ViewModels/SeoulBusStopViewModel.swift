@@ -449,11 +449,22 @@ class BusStopSeoulViewModel: ObservableObject {
         isSelectDestinationMode = false
     }
     
-    func currentBusLocationMapping(nextStId: String) {
+    func currentBusLocationMapping(nextStId: String, viewModel: NearestBusViewModel) {
         @AppStorage("soundToggle") var soundToggle: Bool = true
         @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
         
         print("현재 버스 위치 매핑 - 정류장 ID: \(nextStId)")
+        
+     
+        if viewModel.alarmFired {
+                DispatchQueue.main.asyncAfter(deadline: .now()) {
+                        self.navigateToAlarmEndView = true
+                }
+                print("navigateToAlarmEndView \(navigateToAlarmEndView)")
+            }
+    
+        
+        
         
         // 먼저 이전에 .currentStop으로 표시된 정류장의 상태를 복원
         for i in 0..<busStations.count {
@@ -496,7 +507,7 @@ class BusStopSeoulViewModel: ObservableObject {
                     print("🔔 알람 정류장에 도착!")
 
                     // 알람종료뷰로 이동하기 위한 트리거, 알람 이동중에 현재 버스 위치가 겹친 걸로 알람이 울리지 않게 하기위한 장치
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
                         if let alarmIndex = self.getAlarmStationIndex(), index == alarmIndex {
                             self.navigateToAlarmEndView = true
                         }

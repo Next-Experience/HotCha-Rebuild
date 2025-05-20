@@ -16,8 +16,8 @@ struct MainUsageHistoryView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
                 
-//                // 이용기록 상단에 안내 문구
-//                HistoryAnnounce()
+                // 이용기록 상단에 안내 문구
+                HistoryAnnounce()
 //                Text("이거눌러 테스트")
 //                    .onTapGesture {
 //                        showinghistory = true

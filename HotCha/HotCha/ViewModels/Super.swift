@@ -26,7 +26,7 @@ class NearestBusViewModel: ObservableObject {
     var busRouteId: String = ""
     private var cancellables = Set<AnyCancellable>()
     private var lastSeq: Int? = nil
-    private var alarmFired = false // 알람 중복 방지
+    var alarmFired = false // 알람 중복 방지
     
     @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2
     @AppStorage("soundToggle") var soundToggle: Bool = true
@@ -158,6 +158,8 @@ class NearestBusViewModel: ObservableObject {
                 self.remainingStop = remaining
                 print("📍 도착! 새로운 현재 정류장: \(result.station.stationNm), 남은 정류장: \(remaining)")
                 if let alarmStop = busStops.first(where: { $0.seq == destinationStop1.seq - self.alarmStopDistanceFromDestination }) {
+                    
+                    
                     LiveActivityManager.shared.updateLiveActivity(
                         progress: 1.0,
                         currentStop: result.station.stationNm,
