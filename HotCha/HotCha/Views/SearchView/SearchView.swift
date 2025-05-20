@@ -26,7 +26,9 @@ struct SearchView: View {
             HStack {
                 // 버스 번호 및 타입 블록
                 SearchBusUtil.CustomBusNoView(busNo: route.busRouteNm, routeType: route.routeType)
-                
+                Text("\(citycodetoName(for: route.city_code))")
+                    .font(.pretendard(.semibold, size: 14))
+                    .foregroundStyle(Color("gray300"))
                 // 버스 타입 필터링
                 BusTypeLabelView(busNo: route.busRouteAbrv, routeType: route.routeType)
                 
@@ -70,6 +72,21 @@ struct SearchView: View {
                                         Button(action: {
     viewModel.fetchBusRoutes(searchStr: "")
     saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
+            let cityList = [
+                21, // 부산
+                22, // 대구
+                12, // 세종
+                39, // 제주
+                25,  // 대전
+                23, //인천
+                26, //울산
+                37010 // 포항
+            ]
+
+            for city in cityList {
+                fetchAndSaveBusData(cityCode: city, routeNo: "", context: modelContext)
+            }
+                                            
 }) {
     Text("새로고침")
 }
@@ -98,5 +115,30 @@ struct SearchView: View {
             busStopSeoulViewModel.returnToRootView = false
         }
         .background(Color("gray50"))
+    }
+}
+
+
+func citycodetoName(for code: String) -> String {
+    if code == "21" {
+        return "부산"
+    } else if code == "1" {
+        return "서울"
+    } else if code == "22" {
+        return "대구"
+    } else if code == "12" {
+        return "세종"
+    } else if code == "39" {
+        return "제주"
+    } else if code == "25" {
+        return "대전"
+    } else if code == "23" {
+        return "인천"
+    } else if code == "26" {
+        return "울산"
+    } else if code == "37010" {
+        return "포항"
+    } else {
+        return "알 수 없음"
     }
 }

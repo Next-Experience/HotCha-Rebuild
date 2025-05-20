@@ -23,7 +23,7 @@ struct HotChaApp: App {
     var body: some Scene {
         WindowGroup {
             SplashView()
-//            BusTrackerView()
+//            BusStopList___View()
                 .modelContainer(HotchaContainer)
         }
     }

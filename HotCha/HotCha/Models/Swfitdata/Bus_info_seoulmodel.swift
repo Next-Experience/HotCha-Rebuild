@@ -23,8 +23,9 @@ class Bus_info_seoul: Identifiable {
     var length: String
     var routeType: String
     var term: String
+    var city_code: String
     
-    init(busRouteAbrv: String, busRouteId: String, busRouteNm: String, corpNm: String, stStationNm: String, edStationNm: String, firstBusTm: String, firstLowTm: String, lastBusTm: String, lastBusYn: String, lastLowTm: String, length: String, routeType: String, term: String) {
+    init(busRouteAbrv: String, busRouteId: String, busRouteNm: String, corpNm: String, stStationNm: String, edStationNm: String, firstBusTm: String, firstLowTm: String, lastBusTm: String, lastBusYn: String, lastLowTm: String, length: String, routeType: String, term: String, city_code: String) {
         self.busRouteAbrv = busRouteAbrv
         self.busRouteId = busRouteId
         self.busRouteNm = busRouteNm
@@ -39,6 +40,7 @@ class Bus_info_seoul: Identifiable {
         self.length = length
         self.routeType = routeType
         self.term = term
+        self.city_code = city_code
     }
 }
 

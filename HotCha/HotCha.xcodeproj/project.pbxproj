@@ -66,6 +66,9 @@
 			exceptions = (
 				9D86EEB22DC9F908003E6FED /* Exceptions for "HotchaLive" folder in "HotchaLiveExtension" target */,
 			);
+			explicitFileTypes = {
+				Info.plist = sourcecode.c.objc;
+			};
 			path = HotchaLive;
 			sourceTree = "<group>";
 		};
@@ -74,6 +77,9 @@
 			exceptions = (
 				9DD91FEB2D5235A600789318 /* Exceptions for "HotCha" folder in "HotCha" target */,
 			);
+			explicitFileTypes = {
+				Info.plist = sourcecode.c.objc.preprocessed;
+			};
 			path = HotCha;
 			sourceTree = "<group>";
 		};
@@ -325,6 +331,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
@@ -563,6 +570,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
@@ -599,6 +607,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱에서 내 위치를 사용하여 서비스를 제공하기 위해 위치 권한이 필요합니다.";

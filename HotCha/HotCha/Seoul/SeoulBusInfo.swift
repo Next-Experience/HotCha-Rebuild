@@ -122,7 +122,8 @@ func saveBusRoutesToDatabase(routes: [BusRoute], context: ModelContext) {
             length: route.length,
             routeType: route.routeType,
 //            (1:공항, 2:마을, 3:간선, 4:지선, 5:순환, 6:광역, 7:인천, 8:경기, 9:폐지, 0:공용)
-            term: route.term
+            term: route.term,
+            city_code: "1"
         )
 
         context.insert(newBusInfo) // SwiftData에 추가

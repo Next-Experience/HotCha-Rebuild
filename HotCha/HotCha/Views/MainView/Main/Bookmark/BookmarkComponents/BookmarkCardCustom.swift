@@ -119,7 +119,7 @@ struct BookmarkCardCustomView: View {
                 .navigationDestination(isPresented: $shouldNavigate) {
                     AlarmSettingView(
                         bus: .constant(bookmark.bus),
-                        cityCode: .constant(1),
+                        cityCode: .constant(Int(bookmark.bus.city_code) ?? 1),
                         isBookmark: $isBookmark,
                         type_name: $type_name,
                         modalStateViewModel: modalStateViewModel,

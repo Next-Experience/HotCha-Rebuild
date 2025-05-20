@@ -27,7 +27,8 @@ struct AddUsageHistoryView: View {
         lastLowTm: "--:--",
         length: "0",
         routeType: "0",
-        term: "0"
+        term: "0",
+        city_code: "1"
     )
     @State private var routeID: String = ""
     @State private var cityCode: String = ""

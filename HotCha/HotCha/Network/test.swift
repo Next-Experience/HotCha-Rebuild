@@ -79,9 +79,9 @@ func savejibangBusRoutesToDatabase(buses: [Bus], cityCode: String, context: Mode
             stStationNm: bus.startnodenm,
             edStationNm: bus.endnodenm,
             firstBusTm: bus.startvehicletime,
-            firstLowTm: "",
+            firstLowTm: bus.startvehicletime,
             lastBusTm: bus.endvehicletime,
-            lastBusYn: "",
+            lastBusYn: bus.endvehicletime,
             lastLowTm: "",
             length: "",
             routeType: bus.routetp,
@@ -97,5 +97,16 @@ func savejibangBusRoutesToDatabase(buses: [Bus], cityCode: String, context: Mode
         print("✅ 버스 정보가 SwiftData에 저장되었습니다.")
     } catch {
         print("❌ 저장 중 오류 발생: \(error)")
+    }
+}
+
+func fetchAndSaveBusData(cityCode: Int, routeNo: String, context: ModelContext) {
+    fetchBusData(citycode: cityCode, routeNo: routeNo) { buses in
+        guard !buses.isEmpty else {
+            print("❗️버스 데이터를 가져오지 못했습니다.")
+            return
+        }
+        // 가져온 데이터를 저장
+        savejibangBusRoutesToDatabase(buses: buses, cityCode: String(cityCode), context: context)
     }
 }

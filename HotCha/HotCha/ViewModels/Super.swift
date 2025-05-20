@@ -36,83 +36,166 @@ class NearestBusViewModel: ObservableObject {
         stop()
     }
     
-    func start(stationId: String, routeId: String) {
+//    func start(stationId: String, routeId: String) {
+//        guard !isCalculating else {
+//            print("⚠️ 이미 실행 중")
+//            return
+//        }
+//        
+//        self.stationIdInput = stationId
+//        self.busRouteId = routeId
+//        self.isCalculating = true
+//        self.alarmFired = false
+//        self.lastSeq = nil
+//        
+//        locationviewModel.requestPermission()
+//        locationviewModel.startTrackingLocation()
+//        locationviewModel.requestalwaysPermission()
+//        
+//        print("🚀 정류장 목록 패치 시작")
+//        fetchBusStations(routeId: routeId) { [weak self] stops, error in
+//            guard let self = self else { return }
+//            
+//            if let error = error {
+//                print("❌ 정류장 로딩 실패: \(error)")
+//                return
+//            }
+//            
+//            DispatchQueue.main.async {
+//                self.busStops = stops
+//            }
+//            self.busStops1 = stops
+//            print("✅ 정류장 \(stops.count)개 로딩 완료")
+//            for i in busStops {
+//                print(i.stationNm,"----")
+//                print(i.station,"----")
+//            }
+//            if let matchedStop = stops.first(where: { String($0.station) == stationId }) {
+//                DispatchQueue.main.async {
+//                    self.destinationStop1 = matchedStop
+//                }
+//                
+//                self.destinationStop1 = matchedStop
+//                
+//                if let alarmStop = stops.first(where: { $0.seq == matchedStop.seq - self.alarmStopDistanceFromDestination }) {
+//                    print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
+//                    // ⭐️ 시작 정류장 설정
+//                    if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
+//                        DispatchQueue.main.async {
+//                            self.currBusStop = start
+//                        }
+//                        self.currBusStop1 = start
+//                        self.lastSeq = start.seq
+//                        print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
+//                        
+//                        LiveActivityManager.shared.startLiveActivity(
+//                            title: "핫챠",
+//                            description: routeId,
+//                            progress: 0.9,
+//                            busname: start.busRouteNm,
+//                            currentStop: start.stationNm,
+//                            stopsRemaining: matchedStop.seq - start.seq,
+//                            alarmstop: alarmStop.stationNm,
+//                            destinationStation: matchedStop.stationNm,
+//                            Updatetime: formattedTime(from: Date())
+//                        )
+//                    }
+//                }
+//            } else {
+//                print("⚠️ stationId와 일치하는 정류장을 찾을 수 없습니다")
+//            }
+//            
+//            self.subscribeToLocationUpdates()
+//            
+//
+//
+//            
+//        }
+//        
+//        
+//    }
+    
+    func start(stationId: String, routeId: String, cityCode: String) {
         guard !isCalculating else {
             print("⚠️ 이미 실행 중")
             return
         }
-        
+
         self.stationIdInput = stationId
         self.busRouteId = routeId
         self.isCalculating = true
         self.alarmFired = false
         self.lastSeq = nil
-        
+
         locationviewModel.requestPermission()
         locationviewModel.startTrackingLocation()
         locationviewModel.requestalwaysPermission()
-        
+
         print("🚀 정류장 목록 패치 시작")
-        fetchBusStations(routeId: routeId) { [weak self] stops, error in
+
+        let fetchCompletion: ([BusStop], String?) -> Void = { [weak self] stops, error in
             guard let self = self else { return }
-            
+
             if let error = error {
                 print("❌ 정류장 로딩 실패: \(error)")
                 return
             }
-            
+
             DispatchQueue.main.async {
                 self.busStops = stops
             }
             self.busStops1 = stops
             print("✅ 정류장 \(stops.count)개 로딩 완료")
-            for i in busStops {
-                print(i.stationNm,"----")
-                print(i.station,"----")
+
+            for i in stops {
+                print(i.stationNm, "----")
+                print(i.station, "----")
             }
-            if let matchedStop = stops.first(where: { String($0.station) == stationId }) {
-                DispatchQueue.main.async {
-                    self.destinationStop1 = matchedStop
-                }
-                
-                self.destinationStop1 = matchedStop
-                
-                if let alarmStop = stops.first(where: { $0.seq == matchedStop.seq - self.alarmStopDistanceFromDestination }) {
-                    print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
-                    // ⭐️ 시작 정류장 설정
-                    if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
-                        DispatchQueue.main.async {
-                            self.currBusStop = start
-                        }
-                        self.currBusStop1 = start
-                        self.lastSeq = start.seq
-                        print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
-                        
-                        LiveActivityManager.shared.startLiveActivity(
-                            title: "핫챠",
-                            description: routeId,
-                            progress: 0.9,
-                            busname: start.busRouteNm,
-                            currentStop: start.stationNm,
-                            stopsRemaining: matchedStop.seq - start.seq,
-                            alarmstop: alarmStop.stationNm,
-                            destinationStation: matchedStop.stationNm,
-                            Updatetime: formattedTime(from: Date())
-                        )
-                    }
-                }
-            } else {
+
+            guard let matchedStop = stops.first(where: { String($0.station) == stationId }) else {
                 print("⚠️ stationId와 일치하는 정류장을 찾을 수 없습니다")
+                return
             }
-            
+
+            DispatchQueue.main.async {
+                self.destinationStop1 = matchedStop
+            }
+            self.destinationStop1 = matchedStop
+
+            if let alarmStop = stops.first(where: { $0.seq == matchedStop.seq - self.alarmStopDistanceFromDestination }) {
+                print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
+
+                if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
+                    DispatchQueue.main.async {
+                        self.currBusStop = start
+                    }
+                    self.currBusStop1 = start
+                    self.lastSeq = start.seq
+                    print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
+
+                    LiveActivityManager.shared.startLiveActivity(
+                        title: "핫챠",
+                        description: routeId,
+                        progress: 0.9,
+                        busname: start.busRouteNm,
+                        currentStop: start.stationNm,
+                        stopsRemaining: matchedStop.seq - start.seq,
+                        alarmstop: alarmStop.stationNm,
+                        destinationStation: matchedStop.stationNm,
+                        Updatetime: formattedTime(from: Date())
+                    )
+                }
+            }
+
             self.subscribeToLocationUpdates()
-            
-
-
-            
         }
-        
-        
+
+        // ✅ 여기서 바로 분기
+        if cityCode == "1" {
+            HotCha.fetchBusStations(routeId: routeId, completion: fetchCompletion)
+        } else {
+            HotCha.fetchBusStation(cityCode: cityCode, routeId: routeId, completion: fetchCompletion)
+        }
     }
     
     func stop() {
@@ -196,6 +279,14 @@ class NearestBusViewModel: ObservableObject {
                         Updatetime: formattedTime(from: Date())
                         
                     )
+                }
+                if remaining == alarmStopDistanceFromDestination && !alarmFired {
+                    triggerAlarm()
+                    alarmFired = true
+                }
+                if remaining == 0 && !alarmFired {
+                    triggerAlarm()
+                    alarmFired = true
                 }
             }
         }
@@ -306,7 +397,7 @@ struct BusTrackerView: View {
 
             // 시작 버튼
             Button("추적 시작") {
-                viewModel.start(stationId: stationId, routeId: routeId)
+                viewModel.start(stationId: stationId, routeId: routeId, cityCode: "1")
             }
             .padding()
             .background(Color.blue)
