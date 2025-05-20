@@ -501,20 +501,20 @@ class BusStopSeoulViewModel: ObservableObject {
 //            let distance = distanceToDestinationStop()
             
             // 알람 모드에서 현재 정류장이 알람 정류장인지 체크
-            if !isSelectDestinationMode, let alarmIndex = getAlarmStationIndex() {
-                if index == alarmIndex {
-                    // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
-                    print("🔔 알람 정류장에 도착!")
+//            if !isSelectDestinationMode, let alarmIndex = getAlarmStationIndex() {
+//                if index == alarmIndex {
+//                    // 알람 정류장에 도착 - 여기서 알람 로직을 추가할 수 있음
+//                    print("🔔 알람 정류장에 도착!")
 
                     // 알람종료뷰로 이동하기 위한 트리거, 알람 이동중에 현재 버스 위치가 겹친 걸로 알람이 울리지 않게 하기위한 장치
-                    DispatchQueue.main.asyncAfter(deadline: .now()) {
-                        if let alarmIndex = self.getAlarmStationIndex(), index == alarmIndex {
-                            self.navigateToAlarmEndView = true
-                        }
-                    }
-                    print("navigateToAlarmEndView \(navigateToAlarmEndView)")
-                }
-            }
+//                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+//                        if let alarmIndex = self.getAlarmStationIndex(), index == alarmIndex {
+//                            self.navigateToAlarmEndView = true
+//                        }
+//                    }
+//                    print("navigateToAlarmEndView \(navigateToAlarmEndView)")
+//                }
+//            }
         } else {
             print("경고: 정류장 ID \(nextStId)를 찾을 수 없습니다.")
         }
