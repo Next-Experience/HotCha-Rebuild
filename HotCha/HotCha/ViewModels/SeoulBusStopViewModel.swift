@@ -57,7 +57,8 @@ class BusStopSeoulViewModel: ObservableObject {
           lastLowTm: "—:—",
           length: "0",
           routeType: "0",
-          term: "0"
+          term: "0",
+          city_code: "?"
       )
     
     func setupBus(bus: Bus_info_seoul) {
@@ -65,7 +66,7 @@ class BusStopSeoulViewModel: ObservableObject {
     }
     
     // Route ID를 직접 인자로 받아 데이터를 가져오는 메서드
-    func fetchBusStations(routeid: String, completion: @escaping (Bool) -> Void) {
+    func fetchBusStations(citycode: String, routeid: String, completion: @escaping (Bool) -> Void) {
         guard !routeid.isEmpty else {
             errorMessage = "Route ID를 입력하세요."
             return
@@ -73,26 +74,48 @@ class BusStopSeoulViewModel: ObservableObject {
         
         isLoading = true
         errorMessage = nil
-        
-        HotCha.fetchBusStations(routeId: routeid) { [weak self] stations, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                if let error = error {
-                    self?.errorMessage = error
-                } else {
-                    self?.busStations = stations
-                    self?.setFirstAndLastFlags()
-                    self?.filteringDisabledStation() // 미정차 구역 필터링
-                    // 검색어가 있는 경우 필터링 다시 적용
-                    if !(self?.searchText.isEmpty ?? true) {
-                        self?.applyFiltering(with: self?.searchText ?? "")
+        if citycode == "1" {
+            HotCha.fetchBusStations(routeId: routeid) { [weak self] stations, error in
+                DispatchQueue.main.async {
+                    self?.isLoading = false
+                    if let error = error {
+                        self?.errorMessage = error
+                    } else {
+                        self?.busStations = stations
+                        self?.setFirstAndLastFlags()
+                        self?.filteringDisabledStation() // 미정차 구역 필터링
+                        // 검색어가 있는 경우 필터링 다시 적용
+                        if !(self?.searchText.isEmpty ?? true) {
+                            self?.applyFiltering(with: self?.searchText ?? "")
+                        }
+                        
+                        completion(true)
                     }
-                    
-                    completion(true)
+                }
+            }
+        } else {
+            HotCha.fetchBusStation(cityCode: citycode, routeId: routeid) { [weak self] stations, error in
+                DispatchQueue.main.async {
+                    self?.isLoading = false
+                    if let error = error {
+                        self?.errorMessage = error
+                    } else {
+                        self?.busStations = stations
+                        self?.setFirstAndLastFlags()
+                        self?.filteringDisabledStation() // 미정차 구역 필터링
+                        // 검색어가 있는 경우 필터링 다시 적용
+                        if !(self?.searchText.isEmpty ?? true) {
+                            self?.applyFiltering(with: self?.searchText ?? "")
+                        }
+                        
+                        completion(true)
+                    }
                 }
             }
         }
     }
+    
+    
     
     // 미정차 구역 필터링
     func filteringDisabledStation(){

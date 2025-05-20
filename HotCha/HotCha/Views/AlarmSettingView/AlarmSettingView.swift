@@ -33,7 +33,7 @@ struct AlarmSettingView: View {
         ZStack {
             NavigationStack {
                 BusStopListView(bus: bus,
-                                cityCode: 1,
+                                cityCode: Int(bus.city_code) ?? 1,
                                 busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel)
                 // 알람 종료뷰로 이동
                 .overlay {
@@ -63,7 +63,7 @@ struct AlarmSettingView: View {
                 .environmentObject(sheetManager)
                 .sheet(isPresented: $sheetManager.showAlarmSearchSheet1) {
                     ScrollView {
-                        SettingModalView(bus: bus, cityCode: 1, isBookmark: $isBookmark, type_name: $type_name)
+                        SettingModalView(bus: bus, cityCode: Int(bus.city_code) ?? 1, isBookmark: $isBookmark, type_name: $type_name)
                             .environmentObject(sheetManager)
                             .environmentObject(modalStateViewModel)
                             .environmentObject(busStopSeoulViewModel)
@@ -78,7 +78,7 @@ struct AlarmSettingView: View {
                     .scrollDisabled(true)
                 }
                 .sheet(isPresented: $sheetManager.showAlarmInfoSheet2) {
-                    SettingModalView(bus: bus, cityCode: 1, isBookmark: $isBookmark, type_name: $type_name)
+                    SettingModalView(bus: bus, cityCode: Int(bus.city_code) ?? 1, isBookmark: $isBookmark, type_name: $type_name)
                         .environmentObject(sheetManager)
                         .environmentObject(modalStateViewModel)
                         .environmentObject(busStopSeoulViewModel)
@@ -246,7 +246,7 @@ struct SettingModalView: View {
                             let newBookmark = Bookmarkmodel(
                                 bus: bus,
                                 route_id: bus.busRouteId,
-                                city_code: String(cityCode),
+                                city_code: bus.city_code,
                                 destination_stop_id: destinationStationid,
                                 destination_stop_name: destinationStationName,
                                 bus_no: bus.busRouteNm,
@@ -319,7 +319,8 @@ struct SettingModalView: View {
             lastLowTm: "",
             length: "24.6",
             routeType: "3", // 예: 간선
-            term: "12"
+            term: "12",
+            city_code: "1"
         ),
         cityCode: 1, isBookmark: .constant(true), type_name: .constant("집")
     )

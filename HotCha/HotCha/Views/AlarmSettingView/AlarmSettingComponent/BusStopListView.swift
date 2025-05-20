@@ -32,7 +32,10 @@ struct BusStopListView: View {
         .background(.gray900)
         .onAppear {
             if busStopSeoulViewModel.busStations.isEmpty {
-                busStopSeoulViewModel.fetchBusStations(routeid: bus.busRouteId) { success in
+                
+                
+                
+                busStopSeoulViewModel.fetchBusStations(citycode: bus.city_code, routeid: bus.busRouteId) { success in
                     print("fetch bus stations 성공")
                     // 북마크 또는 이용 기록으로 실행되는 경우
                     if busStopSeoulViewModel.shortcutExecute == true {
@@ -44,9 +47,13 @@ struct BusStopListView: View {
                         // 도착 정류장 이후 disabled
                         busStopSeoulViewModel.disableAfterDestinationStation()
                         // TODO: 현재 위치한 정류장 찾기 시작 (라이브액티비티 실행도)
-                        nearestBusViewModel.start(stationId: busStopSeoulViewModel.shortcutDestinationId ?? "", routeId: busStopSeoulViewModel.bus?.busRouteId ?? "")
+                        nearestBusViewModel.start(stationId: busStopSeoulViewModel.shortcutDestinationId ?? "", routeId: busStopSeoulViewModel.bus?.busRouteId ?? "", cityCode: bus.city_code)
                     }
                 }
+                
+                
+                
+                
             }
             
         }

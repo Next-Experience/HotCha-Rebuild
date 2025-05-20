@@ -273,7 +273,7 @@ struct AlertStopsSection: View {
                     nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
                     
                     nearestBusViewModel.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
-                                                busStopSeoulViewModel.busStations[index].busRouteId)
+                                                busStopSeoulViewModel.busStations[index].busRouteId, cityCode: busStopSeoulViewModel.bus?.city_code ?? "1")
                     print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
                 }
                 
@@ -349,7 +349,7 @@ struct BusStopInfoSection: View {
                                             let newBookmark = Bookmarkmodel(
                                                 bus: yes,
                                                 route_id: yes.busRouteId,
-                                                city_code: "1",
+                                                city_code: yes.city_code,
                                                 destination_stop_id: busStopSeoulViewModel.busStations[index].station,
                                                 destination_stop_name: busStopSeoulViewModel.busStations[index].stationNm,
                                                 bus_no: yes.busRouteNm,
