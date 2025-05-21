@@ -38,17 +38,18 @@ func startAlarmToggle(isOn: Bool, title: String, body: String, useSound: Bool, u
         startAlarm(title: title, body: body, useSound: useSound, useVibration: useVibration)
 
         // 2초 간격으로 푸시 알림 반복
-        alarmTimer?.invalidate() // 기존 타이머가 있다면 무효화
-        alarmTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-            startAlarm(title: title, body: body, useSound: useSound, useVibration: useVibration)
-        }
-        
-        for i in 1..<10 {
+//        alarmTimer?.invalidate() // 기존 타이머가 있다면 무효화
+//        alarmTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
+//            startAlarm(title: title, body: body, useSound: useSound, useVibration: useVibration)
+//        }
+//        
+        for i in 1..<30 {
+            let notisound = useVibration ? "default" : "novibration"
             sendPushNotification(
                 title: title,
                 body: body,
-                sound: "default",
-                delay: Double(i) * 3
+                sound: notisound,
+                delay: Double(i) * 2
             )
         }
         print("알람이 시작")

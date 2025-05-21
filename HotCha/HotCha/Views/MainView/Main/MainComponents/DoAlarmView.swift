@@ -21,7 +21,7 @@ struct DoAlarmView: View {
                     .font(.pretendard(.bold, size: 24))
                     .foregroundStyle(Color("gray900"))
                 
-                Text("") // AlarmStatusView AlertStopsSection 구조체 참조
+                Text("") 
                     .font(.pretendard(.bold, size: 24))
                     .foregroundStyle(Color("mainpurple"))
 

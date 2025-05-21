@@ -206,7 +206,7 @@ struct AlertStopsSection: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var modelContext
-    
+    @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2
     var body: some View {
         HStack(alignment: .bottom){
             Text("\(abs(Int(nearestBusViewModel.remainingStop ?? 0)))")
@@ -215,7 +215,14 @@ struct AlertStopsSection: View {
             Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정류장 전" : "정류장 후")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
-            
+//                .task {
+//                    if nearestBusViewModel.remainingStop == alarmStopDistanceFromDestination && nearestBusViewModel.remainingStop == 0
+//                    {
+//                        DispatchQueue.main.asyncAfter(deadline: .now()) {
+//                            busStopSeoulViewModel.navigateToAlarmEndView = true
+//                        }
+//                    }
+//                }
             
             Spacer()
             Button(action: {

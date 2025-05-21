@@ -70,7 +70,7 @@ struct AlarmEndView: View {
                             useVibration: false
                         )
                         
-                        busStopSeoulViewModel.navigateToAlarmEndView = false // AlarmEndView 닫기
+                        nearestBusViewModel.navigateToAlarmEndView = false // AlarmEndView 닫기
                         sheetManager.showAlarmInfoSheet2 = true // 시트2 열기
                     }
                 }
