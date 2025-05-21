@@ -65,33 +65,34 @@ struct SearchView: View {
                 if filteredBusInfo.isEmpty {
                     // 검색 결과가 없을 때
                     VStack {
-                        Spacer()
                         Text("검색 결과가 없습니다")
                             .font(.pretendard(.medium, size: 16))
                             .foregroundStyle(Color("gray500"))
-                                        Button(action: {
-    viewModel.fetchBusRoutes(searchStr: "")
-    saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
-            let cityList = [
-                21, // 부산
-                22, // 대구
-                12, // 세종
-                39, // 제주
-                25,  // 대전
-                23, //인천
-                26, //울산
-                37010 // 포항
-            ]
-
-            for city in cityList {
-                fetchAndSaveBusData(cityCode: city, routeNo: "", context: modelContext)
-            }
-                                            
-}) {
-    Text("새로고침")
-}
+                        Button(action: {
+                            viewModel.fetchBusRoutes(searchStr: "")
+                            saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
+                            let cityList = [
+                                21, // 부산
+                                22, // 대구
+                                12, // 세종
+                                39, // 제주
+                                25,  // 대전
+                                23, //인천
+                                26, //울산
+                                37010 // 포항
+                            ]
+                            
+                            for city in cityList {
+                                fetchAndSaveBusData(cityCode: city, routeNo: "", context: modelContext)
+                            }
+                            
+                        }) {
+                            Text("새로고침")
+                                .foregroundStyle(.mainpurple)
+                        }
                         Spacer()
                     }
+                    .padding(.top, 100)
                 } else {
                     // 검색 결과가 있을 때
                     ScrollView {
