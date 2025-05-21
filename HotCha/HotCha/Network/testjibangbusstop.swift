@@ -71,8 +71,8 @@ class BusStopXMLParser: NSObject, XMLParserDelegate {
 func fetchBusStation(cityCode: String, routeId: String, completion: @escaping ([BusStop], String?) -> Void) {
     let serviceKey = "B%2FSwHGsQuvan%2F%2Fs6M6QvZooclQm9QpSHe%2BqbWjT4xPwDgHNXOES93T9i1%2BDKEJPWfCgcTf12X64bS9A42fFRkA%3D%3D"
     
-    let urlString = "http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteAcctoThrghSttnList?serviceKey=\(serviceKey)&pageNo=1&numOfRows=100&_type=xml&cityCode=\(cityCode)&routeId=\(routeId)"
-    
+    let urlString = "http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteAcctoThrghSttnList?serviceKey=\(serviceKey)&pageNo=1&numOfRows=99999&_type=xml&cityCode=\(cityCode)&routeId=\(routeId)&numOfRows=9999&pageNo=1"
+
     guard let url = URL(string: urlString) else {
         print("❌ URL 생성 실패")
         completion([], "URL 생성 실패")
