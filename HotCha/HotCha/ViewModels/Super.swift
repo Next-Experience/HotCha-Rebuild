@@ -22,6 +22,7 @@ class NearestBusViewModel: ObservableObject {
     var busStops1: [BusStop] = []
     var currBusStop1: BusStop? = nil
     var destinationStop1: BusStop? = nil
+    @Published var isarrived: Int = 0
     
     var stationIdInput: String = "" // 도착 정류장
     var busRouteId: String = ""
@@ -170,6 +171,9 @@ class NearestBusViewModel: ObservableObject {
             if result.arrived == 0 {
                 self.currBusStop1 = result.station
                 self.lastSeq = result.station.seq
+                DispatchQueue.main.async {
+                    self.isarrived = result.arrived
+                }
                 let remaining = destinationStop1.seq - currStop1.seq
                 self.remainingStop = remaining
                 print("📍 도착! 새로운 현재 정류장: \(result.station.stationNm), 남은 정류장: \(remaining)")
@@ -186,11 +190,11 @@ class NearestBusViewModel: ObservableObject {
                         
                     )
                 }
-                if remaining == alarmStopDistanceFromDestination && !alarmFired {
+                if remaining == alarmStopDistanceFromDestination && !alarmFired && isarrived == 1 {
                     triggerAlarm()
                     alarmFired = true
                 }
-                if remaining == 0 && !alarmFired {
+                if remaining == 0 && !alarmFired && isarrived == 1 {
                     triggerAlarm()
                     alarmFired = true
                 }
@@ -198,6 +202,7 @@ class NearestBusViewModel: ObservableObject {
             } else {
                 let remaining = destinationStop1.seq - currStop1.seq
                 self.remainingStop = remaining
+                self.isarrived = result.arrived
                 print(result.arrived, "아직 도착 안함" )
                 print(currStop1.stationNm, currStop1.seq, "현재 정류장")
                 print(destinationStop1.stationNm, destinationStop1.seq, "도착 정류장")
@@ -213,11 +218,11 @@ class NearestBusViewModel: ObservableObject {
                         
                     )
                 }
-                if remaining == alarmStopDistanceFromDestination && !alarmFired {
+                if remaining == alarmStopDistanceFromDestination && !alarmFired && isarrived == 1 {
                     triggerAlarm()
                     alarmFired = true
                 }
-                if remaining == 0 && !alarmFired {
+                if remaining == 0 && !alarmFired && isarrived == 1 {
                     triggerAlarm()
                     alarmFired = true
                 }
