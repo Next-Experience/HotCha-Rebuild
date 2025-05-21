@@ -12,7 +12,8 @@ import AVFoundation
 import SwiftUI
 
 class NearestBusViewModel: ObservableObject {
-    @Published var remainingStop: Int?
+    @EnvironmentObject var busStopSeoulViewModel: BusStopSeoulViewModel
+      var remainingStop: Int?
     @Published var busStops: [BusStop] = []
     @Published var isCalculating = false
     var locationviewModel = LocationViewModel()
@@ -32,88 +33,12 @@ class NearestBusViewModel: ObservableObject {
     @AppStorage("soundToggle") var soundToggle: Bool = true
     @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
     
+    // 알람 종료뷰로 이동하기위한 트리거
+    @Published var  navigateToAlarmEndView = false
+    
     deinit {
-        stop()
     }
     
-//    func start(stationId: String, routeId: String) {
-//        guard !isCalculating else {
-//            print("⚠️ 이미 실행 중")
-//            return
-//        }
-//        
-//        self.stationIdInput = stationId
-//        self.busRouteId = routeId
-//        self.isCalculating = true
-//        self.alarmFired = false
-//        self.lastSeq = nil
-//        
-//        locationviewModel.requestPermission()
-//        locationviewModel.startTrackingLocation()
-//        locationviewModel.requestalwaysPermission()
-//        
-//        print("🚀 정류장 목록 패치 시작")
-//        fetchBusStations(routeId: routeId) { [weak self] stops, error in
-//            guard let self = self else { return }
-//            
-//            if let error = error {
-//                print("❌ 정류장 로딩 실패: \(error)")
-//                return
-//            }
-//            
-//            DispatchQueue.main.async {
-//                self.busStops = stops
-//            }
-//            self.busStops1 = stops
-//            print("✅ 정류장 \(stops.count)개 로딩 완료")
-//            for i in busStops {
-//                print(i.stationNm,"----")
-//                print(i.station,"----")
-//            }
-//            if let matchedStop = stops.first(where: { String($0.station) == stationId }) {
-//                DispatchQueue.main.async {
-//                    self.destinationStop1 = matchedStop
-//                }
-//                
-//                self.destinationStop1 = matchedStop
-//                
-//                if let alarmStop = stops.first(where: { $0.seq == matchedStop.seq - self.alarmStopDistanceFromDestination }) {
-//                    print("🎯 도착 정류장 매칭 완료: \(matchedStop.stationNm) (seq: \(matchedStop.seq))")
-//                    // ⭐️ 시작 정류장 설정
-//                    if let start = self.findStartingStation(from: self.locationviewModel.location ?? CLLocation(), stations: BusStopList_Items(item: stops), destinationSeq: matchedStop.seq) {
-//                        DispatchQueue.main.async {
-//                            self.currBusStop = start
-//                        }
-//                        self.currBusStop1 = start
-//                        self.lastSeq = start.seq
-//                        print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
-//                        
-//                        LiveActivityManager.shared.startLiveActivity(
-//                            title: "핫챠",
-//                            description: routeId,
-//                            progress: 0.9,
-//                            busname: start.busRouteNm,
-//                            currentStop: start.stationNm,
-//                            stopsRemaining: matchedStop.seq - start.seq,
-//                            alarmstop: alarmStop.stationNm,
-//                            destinationStation: matchedStop.stationNm,
-//                            Updatetime: formattedTime(from: Date())
-//                        )
-//                    }
-//                }
-//            } else {
-//                print("⚠️ stationId와 일치하는 정류장을 찾을 수 없습니다")
-//            }
-//            
-//            self.subscribeToLocationUpdates()
-//            
-//
-//
-//            
-//        }
-//        
-//        
-//    }
     
     func start(stationId: String, routeId: String, cityCode: String) {
         guard !isCalculating else {
@@ -302,6 +227,10 @@ class NearestBusViewModel: ObservableObject {
     
     private func triggerAlarm() {
         print("🚨 알람 트리거됨! 정류장 도착 임박")
+        DispatchQueue.main.asyncAfter(deadline: .now()) {
+            self.navigateToAlarmEndView = true
+        }
+
         
         startAlarmToggle(
             isOn: true,
@@ -370,108 +299,3 @@ class NearestBusViewModel: ObservableObject {
     }
 }
 
-
-import SwiftUI
-
-struct BusTrackerView: View {
-    @StateObject var viewModel = NearestBusViewModel()
-    @State private var stationId: String = "111000053"
-    @State private var routeId: String = "100100117"
-    @AppStorage("soundToggle") var soundToggle: Bool = true
-    @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
-
-    var body: some View {
-        VStack(spacing: 16) {
-            // 입력 필드
-            TextField("도착 정류장 ID", text: $stationId)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-
-            TextField("버스 노선 ID", text: $routeId)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-            HStack(spacing: 8){
-                Image("word")
-                    .frame(width: 20, height: 20)
-                Toggle("소리", isOn: $soundToggle)
-                    .toggleStyle(SwitchToggleStyle(tint: Color.mainpurple))
-            }
-            HStack{
-                Image("word")
-                    .frame(width: 20, height: 20)
-                Toggle("진동", isOn: $vibrationToggle)
-                    .toggleStyle(SwitchToggleStyle(tint: .mainpurple))
-            }
-
-            // 시작 버튼
-            Button("추적 시작") {
-                viewModel.start(stationId: stationId, routeId: routeId, cityCode: "1")
-            }
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            HStack {
-                Text("확인")
-                    .font(.pretendard(.semibold, size: 18))
-                    .padding(13)
-                    .foregroundStyle(Color("gray900"))
-            }
-            .frame(width: 150)
-            .background(Capsule().fill(Color("mainpurple")))
-            .onTapGesture {
-                startAlarmToggle(
-                    isOn: false,
-                    title: "",
-                    body: "",
-                    useSound: false,
-                    useVibration: false
-                )
-                viewModel.stop()
-             
-            }
-
-            Divider()
-
-            // 리스트에 정류장과 공백 포함
-            List(viewModel.busStops, id: \.seq) { stop in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text(stop.stationNm)
-                            .font(.headline)
-                        Text("정류장 ID: \(stop.station)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-
-                    Spacer()
-
-                    if let current = viewModel.currBusStop1, current.station == stop.station {
-                        Text("🚌 도착")
-                            .foregroundColor(.blue)
-                            .font(.subheadline)
-                    } else if let current = viewModel.currBusStop1,
-                              let destSeq = viewModel.destinationStop1?.seq,
-                              current.seq < stop.seq && stop.seq <= destSeq {
-                        Text("⏳ 도착 전")
-                            .foregroundColor(.orange)
-                            .font(.subheadline)
-                    }
-
-                    if viewModel.destinationStop1?.station == stop.station {
-                        Text("🏁 도착지")
-                            .foregroundColor(.red)
-                            .font(.subheadline)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-
-            if viewModel.isCalculating {
-                Text("🚀 위치 추적 중...")
-                    .foregroundColor(.green)
-            }
-        }
-        .padding()
-    }
-}

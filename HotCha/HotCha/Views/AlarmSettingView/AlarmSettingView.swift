@@ -24,7 +24,7 @@ struct AlarmSettingView: View {
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
     
     @State private var selectedDetent: PresentationDetent = .fraction(0.4)
-    @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false // 알람 실행 중 여부
+//    @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false // 알람 실행 중 여부
     
     // 시트 구분을 위한 ID 추가
     @State private var sheetId = UUID()
@@ -37,7 +37,7 @@ struct AlarmSettingView: View {
                                 busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel)
                 // 알람 종료뷰로 이동
                 .overlay {
-                    if busStopSeoulViewModel.navigateToAlarmEndView {
+                    if nearestBusViewModel.navigateToAlarmEndView {
                         // 어두운 배경
                         Rectangle()
                             .fill(Color.black.opacity(0.8))
@@ -93,15 +93,15 @@ struct AlarmSettingView: View {
             .onAppear {
                 print(bus.busRouteNm, bus.busRouteId, "아 제발 좀 떠라 왜 안뜨냐")
             }
-            .onChange(of: busStopSeoulViewModel.navigateToAlarmEndView) { newValue in
+            .onChange(of: nearestBusViewModel.navigateToAlarmEndView) { newValue in
                 if newValue == true{
                     // 알람 종료 뷰로 이동하면 시트 모두 닫기
                     busStopSeoulViewModel.closeAllSheets(using: sheetManager)
                 } else {
                     selectedDetent = .fraction(0.4)
                 }
-                
-            }.onChange(of: busStopSeoulViewModel.returnToRootView) { newValue in
+            }
+            .onChange(of: busStopSeoulViewModel.returnToRootView) { newValue in
                 if newValue {
                     // 안내 종료 시 뷰 닫기
                     dismiss()
@@ -130,7 +130,7 @@ struct AlarmSettingView: View {
                             }
                             // 화면 닫기
                             dismiss()
-                            //                    busLocationViewModel.stopFetching()
+              
                         }) {
                             Image(systemName: "chevron.left")
                                 .font(.title2)

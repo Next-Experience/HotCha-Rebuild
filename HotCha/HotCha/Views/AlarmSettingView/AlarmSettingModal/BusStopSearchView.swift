@@ -140,10 +140,6 @@ struct MainPurpleAlarmButton: View {
     
     //    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
     //    @Binding var cityCode: Int
-    
-    
-    // 현재 진행중인 알람이 있는지 여부
-    @AppStorage("isAlarmInProgress") var isAlarmInProgress: Bool = false
     @EnvironmentObject var nearestBusViewModel: NearestBusViewModel
     
     var body: some View {
@@ -187,8 +183,8 @@ struct MainPurpleAlarmButton: View {
                 }
                 
                 busStopSeoulViewModel.isReload = true // 알람이 시작한 상태이기 때문에, 시작한 상태로 알람에 다시 들어오면 정보를 그대로 띄워주기 위한 트리거
-                // TODO: 앱스토리지에 알람 진행중인 상태 저장
-                isAlarmInProgress = true
+//                // TODO: 앱스토리지에 알람 진행중인 상태 저장
+//                isAlarmInProgress = true
                 
             }, label: {
                 Text("알림 시작")
