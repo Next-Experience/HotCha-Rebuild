@@ -467,10 +467,6 @@ class BusStopSeoulViewModel: ObservableObject {
         
         print("현재 버스 위치 매핑 - 정류장 ID: \(nextStId)")
         
-     
-
-        
-        
         // 먼저 이전에 .currentStop으로 표시된 정류장의 상태를 복원
         for i in 0..<busStations.count {
             if busStations[i].busStopCase.contains(.currentStop) {
@@ -479,10 +475,10 @@ class BusStopSeoulViewModel: ObservableObject {
                     busStations[i].busStopCase = .destinationStop
                 } else if busStations[i].alarmStation || busStations[i].busStopCase.contains(.alarmStop) {
                     busStations[i].busStopCase = .alarmStop
-                } else if busStations[i].busStopCase == .ableStop {
-                    busStations[i].busStopCase = .ableStop
-                } else if busStations[i].busStopCase == .disableStop { // disabled된 정류장도 현재 정류장 표시 가능하게 함
+                }  else if busStations[i].busStopCase.contains(.disableStop)  { // disabled된 정류장도 현재 정류장 표시 가능하게 함
                     busStations[i].busStopCase = .disableStop
+                } else {
+                    busStations[i].busStopCase = .ableStop
                 }
             }
         }
@@ -494,6 +490,8 @@ class BusStopSeoulViewModel: ObservableObject {
             } else if (busStations[index].busStopCase.contains(.destinationStop)) {
                 // 알람 정류장과 현재 정류장 위치가 같으면 OptionSet으로 두 상태를 함께 나타냄
                 busStations[index].busStopCase = .bothCurrentBusWithDest
+            } else if busStations[index].busStopCase.contains(.disableStop) {
+                busStations[index].busStopCase = .bothCurrentBusWithDisable
             } else {
                 // 정류장 상태를 현재 버스 위치로 변경
                 busStations[index].busStopCase = .currentStop

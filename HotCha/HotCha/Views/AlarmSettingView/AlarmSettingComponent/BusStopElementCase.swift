@@ -20,6 +20,7 @@ struct BusStopElementCase: OptionSet, Hashable {
     static let bothCurrentBusWithAlarm: BusStopElementCase = [.currentStop, .alarmStop]
     static let bothDisableBusWithAlarm: BusStopElementCase = [.disableStop, .alarmStop]
     static let bothCurrentBusWithDest: BusStopElementCase = [.currentStop, .destinationStop]
+    static let bothCurrentBusWithDisable: BusStopElementCase = [.currentStop, .disableStop]
 }
 
 extension BusStopElementCase {
