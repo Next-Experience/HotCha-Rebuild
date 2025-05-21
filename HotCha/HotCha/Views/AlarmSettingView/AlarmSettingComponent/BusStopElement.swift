@@ -56,7 +56,7 @@ struct BusStopElement: View {
                     Spacer()
                 }
                 
-                Text(busStop?.busRouteNm ?? "노선번호 없음")
+                Text(busStop?.station ?? "노선번호 없음")
                     .font(.pretendard(.medium, size: 12))
                     .foregroundStyle(.gray500)
             }
