@@ -24,7 +24,7 @@ struct MainView: View {
         length: "0",
         routeType: "0", // 예: 간선
         term: "0",
-        city_code: "1",
+        city_code: "1"
     )// 선택된 버스 정보
     @State var cityCode: Int = 1
     @State var isEditMode: Bool = false
