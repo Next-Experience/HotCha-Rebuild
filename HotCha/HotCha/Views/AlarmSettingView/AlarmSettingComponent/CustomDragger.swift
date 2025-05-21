@@ -96,6 +96,10 @@ class DraggableBusStopTableViewController: UITableViewController {
         longPress.minimumPressDuration = 0.5
         tableView.addGestureRecognizer(longPress)
         
+        // 스크롤 바 disable
+        tableView.showsVerticalScrollIndicator = false
+        tableView.showsHorizontalScrollIndicator = false
+        
         // 뷰모델의 필터링된 정류장 ID 변경 구독
         setupFilteredStationObserver()
     }
