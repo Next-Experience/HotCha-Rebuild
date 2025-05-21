@@ -277,13 +277,13 @@ struct AlertStopsSection: View {
             .onAppear {
                 
                 if let index = busStopSeoulViewModel.currentDestinationIndex {
-                    print("gggggg",busStopSeoulViewModel.busStations[index].station)
+                
                     nearestBusViewModel.stationIdInput = busStopSeoulViewModel.busStations[index].station
                     nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
                     
                     nearestBusViewModel.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
                                                 busStopSeoulViewModel.busStations[index].busRouteId, cityCode: busStopSeoulViewModel.bus?.city_code ?? "1")
-                    print(busStopSeoulViewModel.busStations[index].busRouteNm,":버스 이름", busStopSeoulViewModel.busStations[index].stationNm,":도착 정류장 이름" )
+                   
                 }
                 
             }
