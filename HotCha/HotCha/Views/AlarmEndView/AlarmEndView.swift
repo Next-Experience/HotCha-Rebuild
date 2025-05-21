@@ -118,8 +118,12 @@ struct AlarmEndView: View {
                             modelContext.insert(newUsage)
                         }
                         
+                        nearestBusViewModel.navigateToAlarmEndView = false
+                        
                         // 데이터 초기화
                         busStopSeoulViewModel.leaveAlarm()
+                        
+                        busStopSeoulViewModel.closeAllSheets(using: sheetManager)
                         
                         // 초기 알람 설정 상태로 초기화
                         modalStateViewModel.modalState = .alarmWait
