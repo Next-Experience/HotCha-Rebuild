@@ -22,7 +22,7 @@ class NearestBusViewModel: ObservableObject {
     var busStops1: [BusStop] = []
     var currBusStop1: BusStop? = nil
     var destinationStop1: BusStop? = nil
-    @Published var isarrived: Int = 0
+    var isarrived: Int = 0
     
     var stationIdInput: String = "" // 도착 정류장
     var busRouteId: String = ""
@@ -52,7 +52,7 @@ class NearestBusViewModel: ObservableObject {
         self.isCalculating = true
         self.alarmFired = false
         self.lastSeq = nil
-
+        self.currBusStop = nil
         locationviewModel.requestPermission()
         locationviewModel.startTrackingLocation()
         locationviewModel.requestalwaysPermission()
@@ -166,7 +166,9 @@ class NearestBusViewModel: ObservableObject {
             stations: busStopList,
             currentStop: currStop1
         ) {
-
+            DispatchQueue.main.async {
+                self.currBusStop = currStop1
+            }
             let (nextStationId, _) = result
             if result.arrived == 0 {
                 self.currBusStop1 = result.station
@@ -203,9 +205,6 @@ class NearestBusViewModel: ObservableObject {
                 let remaining = destinationStop1.seq - currStop1.seq
                 self.remainingStop = remaining
                 self.isarrived = result.arrived
-                print(result.arrived, "아직 도착 안함" )
-                print(currStop1.stationNm, currStop1.seq, "현재 정류장")
-                print(destinationStop1.stationNm, destinationStop1.seq, "도착 정류장")
                 print("----라액------")
                 if let alarmStop = busStops.first(where: { $0.seq == destinationStop1.seq - self.alarmStopDistanceFromDestination }) {
                     LiveActivityManager.shared.updateLiveActivity(
@@ -254,12 +253,14 @@ class NearestBusViewModel: ObservableObject {
         stations: BusStopList_Items,
         destinationSeq: Int
     ) -> BusStop? {
+        print("첫번째 정류장 찾기 시작 !!")
         let sortedByDistance = stations.item.sorted {
             let loc1 = CLLocation(latitude: $0.gpsY, longitude: $0.gpsX)
             let loc2 = CLLocation(latitude: $1.gpsY, longitude: $1.gpsX)
             return location.distance(from: loc1) < location.distance(from: loc2)
         }
         let closestTwo = Array(sortedByDistance.prefix(2))
+        print("가장 가까운  두 정류장 !\(closestTwo[0].stationNm),,,,,,\(closestTwo[1].stationNm)")
         return closestTwo.min {
             abs($0.seq - destinationSeq) < abs($1.seq - destinationSeq)
         }
