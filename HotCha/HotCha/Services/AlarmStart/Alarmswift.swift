@@ -27,6 +27,9 @@ func startAlarm(title: String, body: String, useSound: Bool, useVibration: Bool)
     }
 
     sendPushNotification(title: title, body: body, sound: notificationSound)
+    
+
+    
 }
 
 func startAlarmToggle(isOn: Bool, title: String, body: String, useSound: Bool, useVibration: Bool) {
@@ -39,10 +42,23 @@ func startAlarmToggle(isOn: Bool, title: String, body: String, useSound: Bool, u
         alarmTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
             startAlarm(title: title, body: body, useSound: useSound, useVibration: useVibration)
         }
-
+        
+        for i in 1..<10 {
+            sendPushNotification(
+                title: title,
+                body: body,
+                sound: "default",
+                delay: Double(i) * 3
+            )
+        }
+        print("알람이 시작")
     } else {
         // 알람 종료
         SoundManager.shared.stopSound()
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        
+        // 현재 화면에 표시된 알림도 제거 (선택사항)
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         alarmTimer?.invalidate()
         alarmTimer = nil
         print("⏹ 알람 정지됨")

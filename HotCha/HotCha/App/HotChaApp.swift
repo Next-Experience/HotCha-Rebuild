@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct HotChaApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var HotchaContainer: ModelContainer = {
             // 스키마는 데이터 모델을 정의하는 역할
             let schema = Schema([Bookmarkmodel.self, Usage_history.self, Bus_info_seoul.self])
@@ -26,5 +27,23 @@ struct HotChaApp: App {
 //            BusStopList___View()
                 .modelContainer(HotchaContainer)
         }
+    }
+}
+
+
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+
+        UNUserNotificationCenter.current().delegate = self
+        requestNotificationPermission()
+
+        return true
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
     }
 }

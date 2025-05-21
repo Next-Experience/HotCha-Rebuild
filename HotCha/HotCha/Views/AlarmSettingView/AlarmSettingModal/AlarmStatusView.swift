@@ -215,6 +215,8 @@ struct AlertStopsSection: View {
             Text(Int(nearestBusViewModel.remainingStop ?? 0) >= 0 ? "정류장 전" : "정류장 후")
                 .font(.pretendard(.bold, size: 24))
                 .foregroundStyle(.gray900)
+            
+            
             Spacer()
             Button(action: {
                 

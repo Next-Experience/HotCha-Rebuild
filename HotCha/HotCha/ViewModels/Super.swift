@@ -199,6 +199,14 @@ class NearestBusViewModel: ObservableObject {
     }
     
     func stop() {
+        startAlarmToggle(
+            isOn: false,
+            title: "",
+            body: "",
+            useSound: false,
+            useVibration: false
+        )
+
         isCalculating = false
         cancellables.removeAll()
         locationviewModel.stopTrackingLocation()

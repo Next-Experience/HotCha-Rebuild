@@ -7,7 +7,7 @@
 
 import UserNotifications
 
-func sendPushNotification(title: String, body: String, sound: String, delay: TimeInterval = 5) {
+func sendPushNotification(title: String, body: String, sound: String, delay: TimeInterval = 1) {
     let content = UNMutableNotificationContent()
     content.title = title
     content.body = body
