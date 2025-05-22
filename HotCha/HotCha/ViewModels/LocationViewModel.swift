@@ -19,7 +19,7 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
-        manager.distanceFilter = 1 // 50미터 이상 이동 시에만 업데이트
+        manager.distanceFilter = 20 // 50미터 이상 이동 시에만 업데이트
         manager.allowsBackgroundLocationUpdates = true
         manager.pausesLocationUpdatesAutomatically = false
     }
