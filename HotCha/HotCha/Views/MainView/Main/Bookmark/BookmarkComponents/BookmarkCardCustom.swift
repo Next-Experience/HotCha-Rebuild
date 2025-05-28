@@ -118,7 +118,7 @@ struct BookmarkCardCustomView: View {
                 }
                 .navigationDestination(isPresented: $shouldNavigate) {
                     AlarmSettingView(
-                        bus: .constant(bookmark.bus),
+                        bus: Bus_info_seoul(from:bookmark.bus),
                         cityCode: .constant(Int(bookmark.bus.city_code) ?? 1),
                         isBookmark: $isBookmark,
                         type_name: $type_name,

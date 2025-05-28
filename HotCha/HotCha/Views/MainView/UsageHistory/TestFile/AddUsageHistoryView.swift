@@ -60,7 +60,7 @@ struct AddUsageHistoryView: View {
                 // TODO: 안내 종료할 때 이 버튼을 안내 종료 버튼에 붙여넣기
                 Button("저장") {
                     let newUsage = Usage_history(
-                        bus: bus,
+                        bus: BusFavoriteHistory(from: bus),
                         route_id: routeID,
                         city_code: cityCode,
                         destination_stop_id: destinationStopID, destination_stop_name: destinationStopname,

@@ -237,7 +237,7 @@ struct AlertStopsSection: View {
                 
                 if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
                     let newUsage = Usage_history(
-                        bus: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus,
+                        bus: BusFavoriteHistory(from: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus),
                         route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
                         city_code: "1",
                         destination_stop_id: busStopSeoulViewModel.busStations[currentBusIndex].station,
@@ -356,7 +356,7 @@ struct BusStopInfoSection: View {
                                     .onTapGesture {
                                         if (bookmarkdata.filter { $0.bookmark_type == 0 }.count < 4) {
                                             let newBookmark = Bookmarkmodel(
-                                                bus: yes,
+                                                bus: BusFavoriteHistory(from: yes),
                                                 route_id: yes.busRouteId,
                                                 city_code: yes.city_code,
                                                 destination_stop_id: busStopSeoulViewModel.busStations[index].station,

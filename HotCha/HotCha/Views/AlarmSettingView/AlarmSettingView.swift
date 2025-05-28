@@ -13,7 +13,7 @@ struct AlarmSettingView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
     
-    @Binding var bus: Bus_info_seoul // 선택된 버스 정보
+    let bus: Bus_info_seoul // 선택된 버스 정보
     @Binding var cityCode: Int
     @Binding var isBookmark: Bool
     @Binding var type_name: String
@@ -244,7 +244,7 @@ struct SettingModalView: View {
                             busStopSeoulViewModel.busStations[busStopSeoulViewModel.currentDestinationIndex!].station : bus.edStationNm
                             
                             let newBookmark = Bookmarkmodel(
-                                bus: bus,
+                                bus: BusFavoriteHistory(from: bus),
                                 route_id: bus.busRouteId,
                                 city_code: bus.city_code,
                                 destination_stop_id: destinationStationid,

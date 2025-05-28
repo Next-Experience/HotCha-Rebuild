@@ -1,14 +1,15 @@
 //
-//  SeoulBusDatamodel.swift
+//  BusFavoriteHistory.swift
 //  HotCha
 //
-//  Created by 문재윤 on 3/29/25.
+//  Created by Yeji Seo on 5/27/25.
 //
+
 
 import SwiftData
 
 @Model
-class Bus_info_seoul: Identifiable {
+class BusFavoriteHistory: Identifiable {
     var busRouteAbrv: String
     var busRouteId: String
     var busRouteNm: String
@@ -43,24 +44,25 @@ class Bus_info_seoul: Identifiable {
         self.city_code = city_code
     }
 }
-extension Bus_info_seoul {
-    convenience init(from favorite: BusFavoriteHistory) {
+
+extension BusFavoriteHistory {
+    convenience init(from bus: Bus_info_seoul) {
         self.init(
-            busRouteAbrv: favorite.busRouteAbrv,
-            busRouteId: favorite.busRouteId,
-            busRouteNm: favorite.busRouteNm,
-            corpNm: favorite.corpNm,
-            stStationNm: favorite.stStationNm,
-            edStationNm: favorite.edStationNm,
-            firstBusTm: favorite.firstBusTm,
-            firstLowTm: favorite.firstLowTm,
-            lastBusTm: favorite.lastBusTm,
-            lastBusYn: favorite.lastBusYn,
-            lastLowTm: favorite.lastLowTm,
-            length: favorite.length,
-            routeType: favorite.routeType,
-            term: favorite.term,
-            city_code: favorite.city_code
+            busRouteAbrv: bus.busRouteAbrv,
+            busRouteId: bus.busRouteId,
+            busRouteNm: bus.busRouteNm,
+            corpNm: bus.corpNm,
+            stStationNm: bus.stStationNm,
+            edStationNm: bus.edStationNm,
+            firstBusTm: bus.firstBusTm,
+            firstLowTm: bus.firstLowTm,
+            lastBusTm: bus.lastBusTm,
+            lastBusYn: bus.lastBusYn,
+            lastLowTm: bus.lastLowTm,
+            length: bus.length,
+            routeType: bus.routeType,
+            term: bus.term,
+            city_code: bus.city_code
         )
     }
 }
