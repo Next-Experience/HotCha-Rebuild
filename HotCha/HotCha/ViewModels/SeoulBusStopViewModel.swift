@@ -523,7 +523,6 @@ class BusStopSeoulViewModel: ObservableObject {
     
     // 알람을 아에 종료 할 때 이용기록 저장 및 데이터 초기화
     func leaveAlarm(){
-        @Environment(\.modelContext) var modelContext
         @AppStorage("remainingStops") var remainingStops: String = "불러오는 중..."
         
         

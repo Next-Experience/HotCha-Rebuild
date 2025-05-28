@@ -53,7 +53,7 @@ struct AddBookmarkView: View {
                     }
 
                     let newBookmark = Bookmarkmodel(
-                        bus: bus,
+                        bus: BusFavoriteHistory(from: bus),
                         route_id: routeID,
                         city_code: cityCode,
                         destination_stop_id: destinationStopID,

@@ -98,7 +98,7 @@ struct SearchView: View {
                     ScrollView {
                         LazyVStack {
                             ForEach(filteredBusInfo) { route in
-                                NavigationLink(destination: AlarmSettingView(bus: .constant(route), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
+                                NavigationLink(destination: AlarmSettingView(bus: route, cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
                                     formatBusRoute(route)
                                 }
                                 .buttonStyle(PlainButtonStyle())

@@ -10,7 +10,7 @@ import Foundation
 
 @Model
 class Usage_history {
-    var bus: Bus_info_seoul
+    var bus: BusFavoriteHistory
     var route_id: String
     var city_code: String
     var destination_stop_id: String
@@ -22,7 +22,7 @@ class Usage_history {
     var operator_no: String? = nil
     var vehicle_no: String
     
-    init(bus: Bus_info_seoul, route_id: String, city_code: String, destination_stop_id: String, destination_stop_name: String, bus_no: String, route_type: String, get_off_timestamp: Date, operator_name: String? = nil, operator_no: String? = nil, vehicle_no: String) {
+    init(bus: BusFavoriteHistory, route_id: String, city_code: String, destination_stop_id: String, destination_stop_name: String, bus_no: String, route_type: String, get_off_timestamp: Date, operator_name: String? = nil, operator_no: String? = nil, vehicle_no: String) {
         self.bus = bus
         self.route_id = route_id
         self.city_code = city_code

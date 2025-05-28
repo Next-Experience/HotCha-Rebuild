@@ -101,7 +101,7 @@ struct AlarmEndView: View {
                         
                         if let currentBusIndex = busStopSeoulViewModel.getDestinationStationIndex() {
                             let newUsage = Usage_history(
-                                bus: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus,
+                                bus: BusFavoriteHistory(from: busStopSeoulViewModel.bus ?? busStopSeoulViewModel.fallbackBus),
                                 route_id: busStopSeoulViewModel.bus?.busRouteId ?? "아이디 없음",
                                 city_code: "1",
                                 destination_stop_id: busStopSeoulViewModel.busStations[currentBusIndex].station,

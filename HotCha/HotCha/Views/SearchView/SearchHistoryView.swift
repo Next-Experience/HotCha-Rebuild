@@ -64,8 +64,8 @@ struct SearchHistoryView: View {
             if isBookmark {
                 VStack {
                     ForEach(Usage_history) {history in
-                        NavigationLink(destination: AlarmSettingView(bus: .constant(history.bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
-                            formatBusRoute(history.bus)
+                        NavigationLink(destination: AlarmSettingView(bus: Bus_info_seoul(from:history.bus), cityCode: .constant(1), isBookmark: $isBookmark, type_name: $type_name, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)) {
+                            formatBusRoute(Bus_info_seoul(from:history.bus))
                         }
                         .buttonStyle(PlainButtonStyle())
                         .simultaneousGesture(TapGesture().onEnded {
@@ -78,7 +78,7 @@ struct SearchHistoryView: View {
                     ForEach(Usage_history) {history in
                         SerachHistoryBlockView(history: history)
                             .onTapGesture {
-                                selectedBus = history.bus
+                                selectedBus = Bus_info_seoul(from:history.bus)
                                 // 알람 시작
                                 busStopSeoulViewModel.shortcutDestinationId = history.destination_stop_id
                                 busStopSeoulViewModel.isReload = true
@@ -94,7 +94,7 @@ struct SearchHistoryView: View {
         }
         .navigationDestination(isPresented: $shouldNavigateAlarm) {
             AlarmSettingView(
-                bus: .constant(selectedBus ?? busStopSeoulViewModel.fallbackBus),
+                bus: selectedBus ?? busStopSeoulViewModel.fallbackBus,
                 cityCode: .constant(1),
                 isBookmark: $isBookmark,
                 type_name: $type_name,
