@@ -85,9 +85,13 @@ class BusRouteViewModel: NSObject, ObservableObject, XMLParserDelegate {
         }
     }
     
+
+    private var completionHandler: () -> Void = {}
+
     func parserDidEndDocument(_ parser: XMLParser) {
         DispatchQueue.main.async {
             self.busRoutes = self.tempRoutes
+            self.completionHandler() // 🔁 파싱 완료 후 콜백 실행
         }
     }
 }
