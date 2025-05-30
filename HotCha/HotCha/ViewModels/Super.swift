@@ -202,6 +202,8 @@ class NearestBusViewModel: ObservableObject {
                 }
                 
             } else {
+                self.currBusStop1 = result.station
+                self.lastSeq = result.station.seq
                 let remaining = destinationStop1.seq - currStop1.seq
                 self.remainingStop = remaining
                 self.isarrived = result.arrived
