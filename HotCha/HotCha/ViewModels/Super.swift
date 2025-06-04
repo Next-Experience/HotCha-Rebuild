@@ -41,7 +41,13 @@ class NearestBusViewModel: ObservableObject {
     }
     
     
-    func start(stationId: String, routeId: String, cityCode: String) {
+    func start(stationId: String, routeId: String, cityCode: String, busNumber: String? = nil, routeType: String? = nil) {
+        
+        print("📍 Super.swift - start 함수 시작")
+        print("  - 받은 routeType: \(routeType ?? "nil")")
+        print("  - 받은 busNumber: \(busNumber ?? "nil")")
+        print("  - cityCode: \(cityCode)")
+        
         guard !isCalculating else {
             print("⚠️ 이미 실행 중")
             return
@@ -98,12 +104,19 @@ class NearestBusViewModel: ObservableObject {
                     self.currBusStop1 = start
                     self.lastSeq = start.seq
                     print("🏁 시작 정류장 설정됨: \(start.stationNm) (seq: \(start.seq))")
+                    
+                    let displayBusName = (start.busRouteNm == "알 수 없음" && busNumber != nil) ? busNumber! : start.busRouteNm
+
+                    print("🎨 Live Activity 시작 직전")
+                    print("  - displayBusName: \(displayBusName)")
+                    print("  - routeType 전달값: \(routeType ?? "nil")")
 
                     LiveActivityManager.shared.startLiveActivity(
                         title: "핫챠",
                         description: routeId,
                         progress: 0.9,
-                        busname: start.busRouteNm,
+                        busname: displayBusName,
+                        routeType: routeType,
                         currentStop: start.stationNm,
                         stopsRemaining: matchedStop.seq - start.seq,
                         alarmstop: alarmStop.stationNm,
