@@ -281,8 +281,13 @@ struct AlertStopsSection: View {
                     nearestBusViewModel.stationIdInput = busStopSeoulViewModel.busStations[index].station
                     nearestBusViewModel.busRouteId = busStopSeoulViewModel.busStations[index].busRouteId
                     
+                    print("🚀 AlarmStatusView - start 호출")
+                    print("  - busStopSeoulViewModel.bus?.routeType: \(busStopSeoulViewModel.bus?.routeType ?? "nil")")
+                    print("  - busStopSeoulViewModel.bus?.busRouteNm: \(busStopSeoulViewModel.bus?.busRouteNm ?? "nil")")
+                    
                     nearestBusViewModel.start(stationId: busStopSeoulViewModel.busStations[index].station, routeId:
-                                                busStopSeoulViewModel.busStations[index].busRouteId, cityCode: busStopSeoulViewModel.bus?.city_code ?? "1")
+                                                busStopSeoulViewModel.busStations[index].busRouteId, cityCode: busStopSeoulViewModel.bus?.city_code ?? "1",
+                                              busNumber: busStopSeoulViewModel.bus?.busRouteNm, routeType: busStopSeoulViewModel.bus?.routeType)
                    
                 }
                 

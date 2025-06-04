@@ -47,7 +47,13 @@ struct BusStopListView: View {
                         // 도착 정류장 이후 disabled
                         busStopSeoulViewModel.disableAfterDestinationStation()
                         // TODO: 현재 위치한 정류장 찾기 시작 (라이브액티비티 실행도)
-                        nearestBusViewModel.start(stationId: busStopSeoulViewModel.shortcutDestinationId ?? "", routeId: busStopSeoulViewModel.bus?.busRouteId ?? "", cityCode: bus.city_code)
+                        
+                        print("🚀 BusStopListView - start 호출")
+                        print("  - bus.routeType: \(bus.routeType)")
+                        print("  - bus.busRouteNm: \(bus.busRouteNm)")
+                        
+                        nearestBusViewModel.start(stationId: busStopSeoulViewModel.shortcutDestinationId ?? "", routeId: busStopSeoulViewModel.bus?.busRouteId ?? "", cityCode: bus.city_code,
+                            busNumber: bus.busRouteNm)
                     }
                 }
                 
