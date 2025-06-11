@@ -9,20 +9,19 @@ import Foundation
 
 struct SearchBusSorting {
     
+    // 정규식 캐싱
+    private static let digitRegex = try? NSRegularExpression(pattern: "\\d+")
+    
     // 버스 노선에서 숫자만 추출하는 함수
     static func extractNumber(from routeNumber: String) -> Int {
-        // 정규식을 사용하여 숫자만 추출
-        let digitPattern = "\\d+"
-        let regex = try? NSRegularExpression(pattern: digitPattern)
-        
-        if let regex = regex,
-           let match = regex.firstMatch(in: routeNumber, range: NSRange(routeNumber.startIndex..., in: routeNumber)) {
-            if let range = Range(match.range, in: routeNumber) {
-                let numberStr = String(routeNumber[range])
-                return Int(numberStr) ?? 0
-            }
+        guard let regex = digitRegex,
+              let match = regex.firstMatch(in: routeNumber, range: NSRange(routeNumber.startIndex..., in: routeNumber)),
+              let range = Range(match.range, in: routeNumber) else {
+            return 0
         }
-        return 0
+        
+        let numberStr = String(routeNumber[range])
+        return Int(numberStr) ?? 0
     }
     
     // 검색어와 일치하는 순으로 정렬하는 함수
@@ -31,7 +30,7 @@ struct SearchBusSorting {
         guard !searchText.isEmpty else { return buses }
         
         // 검색어가 숫자인지 확인
-        let isNumericSearch = searchText.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil
+        let isNumericSearch = searchText.allSatisfy { $0.isNumber }
         
         return buses.sorted { bus1, bus2 in
             // 1. 검색어로 시작하는 버스 노선을 우선 정렬
@@ -61,12 +60,17 @@ struct SearchBusSorting {
         guard !searchText.isEmpty else { return buses }
         
         // 검색어가 숫자인지 확인
-        let isNumericSearch = searchText.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil
+        let isNumericSearch = searchText.allSatisfy { $0.isNumber }
+        let lowercasedSearch = searchText.lowercased()
         
         let filteredBuses = buses.filter { bus in
+            // 대소문자 구분 없이 검색
+            let lowercasedRouteNm = bus.busRouteNm.lowercased()
+            let lowercasedRouteAbrv = bus.busRouteAbrv.lowercased()
+            
             // 버스 번호나 약어에 검색어가 포함되는지 확인
-            let matchesRouteNm = bus.busRouteNm.contains(searchText)
-            let matchesRouteAbrv = bus.busRouteAbrv.contains(searchText)
+            let matchesRouteNm = lowercasedRouteNm.contains(lowercasedSearch)
+            let matchesRouteAbrv = lowercasedRouteAbrv.contains(lowercasedSearch)
             
             // 숫자 검색인 경우 추가 로직
             if isNumericSearch {
