@@ -205,21 +205,21 @@ class NearestBusViewModel: ObservableObject {
                         
                     )
                 }
-                if remaining == alarmStopDistanceFromDestination && !alarmFired && isarrived == 1 {
+                if remaining == alarmStopDistanceFromDestination && !alarmFired && isarrived == 0 {
                     triggerAlarm()
                     alarmFired = true
                 }
-                if remaining == 0 && !alarmFired && isarrived == 1 {
+                if remaining == 0 && !alarmFired && isarrived == 0 {
                     triggerAlarm()
                     alarmFired = true
                 }
                 
             } else {
-                self.currBusStop1 = result.station
-                self.lastSeq = result.station.seq
+
+
                 let remaining = destinationStop1.seq - currStop1.seq
                 self.remainingStop = remaining
-                self.isarrived = result.arrived
+                // self.isarrived = result.arrived
                 print("----라액------")
                 if let alarmStop = busStops.first(where: { $0.seq == destinationStop1.seq - self.alarmStopDistanceFromDestination }) {
                     LiveActivityManager.shared.updateLiveActivity(
@@ -232,14 +232,14 @@ class NearestBusViewModel: ObservableObject {
                         
                     )
                 }
-                if remaining == alarmStopDistanceFromDestination && !alarmFired && isarrived == 1 {
-                    triggerAlarm()
-                    alarmFired = true
-                }
-                if remaining == 0 && !alarmFired && isarrived == 1 {
-                    triggerAlarm()
-                    alarmFired = true
-                }
+                // if remaining == alarmStopDistanceFromDestination && !alarmFired && isarrived == 1 {
+                //     triggerAlarm()
+                //     alarmFired = true
+                // }
+                // if remaining == 0 && !alarmFired && isarrived == 1 {
+                //     triggerAlarm()
+                //     alarmFired = true
+                // }
             }
         }
     }
