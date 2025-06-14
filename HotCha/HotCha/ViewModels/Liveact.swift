@@ -31,6 +31,7 @@ struct HotchaLiveAttributes: ActivityAttributes {
     var title: String // 제목
     var description: String // 설명
     var busname: String         // 버스 이름
+    var routeType: String?      // 버스 타입
 }
 
 
@@ -40,20 +41,26 @@ import Foundation
 class LiveActivityManager {
     static let shared = LiveActivityManager()
     private init() {}
-
+    
     private var currentActivity: Activity<HotchaLiveAttributes>?
-
+    
     // 라이브 액티비티 시작
     func startLiveActivity(
         title: String,
         description: String,
         progress: Double,
         busname: String,
+        routeType: String? = nil,
         currentStop: String,
         stopsRemaining: Int,
         alarmstop: String,
         destinationStation: String,
         Updatetime: String) {
+            
+            print("🔴 LiveActivityManager - startLiveActivity")
+            print("  - 받은 busname: \(busname)")
+            print("  - 받은 routeType: \(routeType ?? "nil")")
+            
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             print("라이브 액티비티 실행 불가: 권한이 비활성화되어 있습니다.")
             return
@@ -62,7 +69,8 @@ class LiveActivityManager {
         let activityAttributes = HotchaLiveAttributes(
             title: title,
             description: description,
-            busname: busname
+            busname: busname,
+            routeType: routeType
         )
 
         let initialState = HotchaLiveAttributes.ContentState(

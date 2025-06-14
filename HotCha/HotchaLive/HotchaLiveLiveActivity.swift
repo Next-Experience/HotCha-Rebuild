@@ -22,6 +22,7 @@ struct HotchaLiveAttributes: ActivityAttributes {
         var title: String         // 라이브 액티비티 제목
         var description: String   // 설명
         var busname: String         // 버스 이름
+        var routeType: String?      // 버스 타입
     }
 
 
@@ -35,12 +36,14 @@ struct HotchaLiveLiveActivity: Widget {
                     HStack {
                         // 버스 번호 및 정류장 정보
                         HStack {
+                            let busColor = getBusColor(for: context.attributes.routeType ?? "")
+                            
                             Text("\(context.attributes.busname)")
                                 .font(.pretendard(.semibold, size: 14))
-                                .foregroundStyle(.skybluec)
+                                .foregroundStyle(busColor)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(Color.skybluec.opacity(0.2))
+                                .background(busColor.opacity(0.2))
                                 .cornerRadius(4)
                             
                             Text("\(context.state.destinationStation)")
@@ -131,7 +134,6 @@ struct HotchaLiveLiveActivity: Widget {
             }
         }
     }
-    
     
     private func getBusColor(for routeType: String) -> Color {
         switch routeType {

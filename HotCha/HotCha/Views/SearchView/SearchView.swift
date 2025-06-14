@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import SwiftData
+import Combine
 
 struct SearchView: View {
     @Binding var textfiledValue: String
@@ -19,6 +20,11 @@ struct SearchView: View {
     @ObservedObject var nearestBusViewModel: NearestBusViewModel
     @ObservedObject var sheetManager: AlarmSettingModalSheetManager
     @StateObject private var viewModel = BusRouteViewModel()
+    
+    // 검색 결과 상태 관리
+    @State private var filteredBusInfo: [Bus_info_seoul] = []
+    @State private var isSearching = false
+    @State private var searchTask: Task<Void, Never>?
     
     func formatBusRoute(_ route: Bus_info_seoul) -> some View {
         return VStack(spacing: 0) {
@@ -59,10 +65,17 @@ struct SearchView: View {
             if textfiledValue.isEmpty {
                 SearchHistoryView(isBookmark: $isBookmark, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
             } else {
-                // 필터링된 버스 노선들
-                let filteredBusInfo = SearchBusSorting.filterBuses(buses: bus_info_seoul, searchText: textfiledValue)
-                
-                if filteredBusInfo.isEmpty {
+                if isSearching {
+                    // 검색 중 로딩 표시
+                    VStack {
+                        ProgressView()
+                            .padding(.top, 100)
+                        Text("검색 중...")
+                            .font(.pretendard(.medium, size: 14))
+                            .foregroundStyle(Color("gray500"))
+                        Spacer()
+                    }
+                } else if filteredBusInfo.isEmpty {
                     // 검색 결과가 없을 때
                     VStack {
                         Text("검색 결과가 없습니다")
@@ -115,7 +128,42 @@ struct SearchView: View {
         .onAppear {
             busStopSeoulViewModel.returnToRootView = false
         }
+        .onChange(of: textfiledValue) { newValue in
+            // 기존 검색 작업 취소
+            searchTask?.cancel()
+            
+            if newValue.isEmpty {
+                filteredBusInfo = []
+                isSearching = false
+            } else {
+                isSearching = true
+                
+                // 디바운싱: 0.3초 후에 검색 실행
+                searchTask = Task {
+                    try? await Task.sleep(nanoseconds: 300_000_000) // 0.3초
+                    
+                    if !Task.isCancelled {
+                        await performSearch(searchText: newValue)
+                    }
+                }
+            }
+        }
         .background(Color("gray50"))
+    }
+    
+    @MainActor
+    private func performSearch(searchText: String) async {
+        // 백그라운드에서 필터링 수행
+        let buses = bus_info_seoul
+        
+        await Task.detached(priority: .userInitiated) {
+            let filtered = SearchBusSorting.filterBuses(buses: buses, searchText: searchText)
+            
+            await MainActor.run {
+                self.filteredBusInfo = filtered
+                self.isSearching = false
+            }
+        }.value
     }
 }
 
