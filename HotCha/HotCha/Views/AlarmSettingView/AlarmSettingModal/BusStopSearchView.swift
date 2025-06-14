@@ -156,6 +156,9 @@ struct MainPurpleAlarmButton: View {
                     modalStateViewModel.modalState = .alertStopsMedium
                     sheetManager.showAlarmSearchSheet1 = false
                     
+                    // 알람 시작 시 haptic
+                    HapticManager.shared.haptic(.light)
+                    
                     // 강제로 알람 활성화 상태 설정
                     UserDefaults.standard.set(true, forKey: "alarmActive")
                     UserDefaults.standard.synchronize() // 즉시 동기화

@@ -247,6 +247,8 @@ class DraggableBusStopTableViewController: UITableViewController {
                     if indexPath.row < destIndex {
                         // 알람 정류장 업데이트
                         updateAlarmStation(at: indexPath.row)
+                        // 알람 이동 시작 시 haptic
+                        HapticManager.shared.haptic(.medium)
                     }
                 }
                 // 목적지 모드일 때는 롱프레스 드래그로 선택되지 않도록 함
@@ -271,6 +273,8 @@ class DraggableBusStopTableViewController: UITableViewController {
                     // 목적지 정류장보다 앞에 있는 경우에만 업데이트
                     if newIndexPath.row < destIndex {
                         updateAlarmStation(at: newIndexPath.row)
+                        //drag 시 haptic
+                        HapticManager.shared.haptic(.light)
                     }
                 }
                 
