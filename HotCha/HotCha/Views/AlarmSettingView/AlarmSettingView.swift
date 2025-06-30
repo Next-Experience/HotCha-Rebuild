@@ -90,9 +90,6 @@ struct AlarmSettingView: View {
                         .presentationCornerRadius(20)
                 }
             }
-            .onAppear {
-                print(bus.busRouteNm, bus.busRouteId, "아 제발 좀 떠라 왜 안뜨냐")
-            }
             .onChange(of: nearestBusViewModel.navigateToAlarmEndView) { newValue in
                 if newValue == true{
                     // 알람 종료 뷰로 이동하면 시트 모두 닫기

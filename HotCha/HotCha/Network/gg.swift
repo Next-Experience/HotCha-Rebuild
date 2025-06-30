@@ -16,7 +16,7 @@ struct AlarmTestView: View {
         VStack(spacing: 20) {
             Button("🚨 알람 시작") {
                 sendPushNotification(title: "title", body: "body", sound: "notificationSound")
-                print("zㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ")
+//                print("zㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ")
                 for i in 1..<10 {
                     sendPushNotification(
                         title: "알림 \(i + 1)",

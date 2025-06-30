@@ -112,7 +112,7 @@ struct NavigationView: View {
                         .tag(0)
                         .overlay(OffsetProxy())
                         .onPreferenceChange(OffsetKey.self) { offset in
-                            print("MainView offset : \(offset)")
+//                            print("MainView offset : \(offset)")
                             if offset > 5 {
                                 isDragging = true
                             } else {
@@ -131,7 +131,7 @@ struct NavigationView: View {
                         .tag(2)
                         .overlay(OffsetProxy())
                         .onPreferenceChange(OffsetKey.self) { offset in
-                            print("MainSettingView offset : \(offset)")
+//                            print("MainSettingView offset : \(offset)")
                             if offset < -5 {
                                 isDragging = true
                             } else {

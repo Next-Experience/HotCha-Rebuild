@@ -41,7 +41,7 @@ struct OnboardingButtonview: View {
                     OnBoardingTrue = true
                     viewModel.fetchBusRoutes(searchStr: "")
                     saveBusRoutesToDatabase(routes: viewModel.busRoutes, context: modelContext)
-                    print("gjf")
+//                    print("gjf")
                     
                 }
             }
