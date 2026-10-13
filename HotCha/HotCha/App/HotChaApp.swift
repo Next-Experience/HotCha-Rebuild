@@ -17,6 +17,8 @@ struct HotChaApp: App {
             // 데이터 저장 방식 설정 가능
             let config = ModelConfiguration(schema: schema)
             // 스키마와 컨피그를 바탕으로 데이터베이스 생성
+            // 저장소를 못 열면 앱이 할 수 있는 일이 없다.
+            // swiftlint:disable:next force_try
             return try! ModelContainer(for: schema, configurations: [config])
         }()
     
@@ -24,7 +26,6 @@ struct HotChaApp: App {
     var body: some Scene {
         WindowGroup {
             SplashView()
-//            BusStopList___View()
                 .modelContainer(HotchaContainer)
         }
     }

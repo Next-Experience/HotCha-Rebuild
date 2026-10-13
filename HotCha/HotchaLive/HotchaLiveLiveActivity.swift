@@ -17,6 +17,7 @@ struct HotchaLiveAttributes: ActivityAttributes {
             var alarmstop: String       // 알람 정류장
             var destinationStation: String // 도착 정류장
             var Updatetime: String // 업데이트 시간
+            var distanceMeters: Int? = nil // 정류장 알람일 때 목적지까지 남은 거리
         }
 
         var title: String         // 라이브 액티비티 제목
@@ -67,14 +68,26 @@ struct HotchaLiveLiveActivity: Widget {
                     .padding(.top, 30)
                     
                     HStack {
-                        Text("\(abs(context.state.stopsRemaining))")
-                            .font(.pretendard(.semibold, size: 20))
-                            .foregroundStyle(context.state.stopsRemaining < 0 ? .redc :  .purplec)
-                            .padding(.trailing, 4)
-                        
-                        Text(Int(context.state.stopsRemaining) >= 0 ? "정류장 전" : "정류장 지났어요.")
-                            .font(.pretendard(.semibold, size: 20))
-                            .foregroundStyle(.gray700)
+                        if let distance = context.state.distanceMeters {
+                            // 정류장 알람: 남은 정류장 수 대신 거리로 안내
+                            Text(distance >= 1000 ? String(format: "%.1fkm", Double(distance) / 1000) : "\(distance)m")
+                                .font(.pretendard(.semibold, size: 20))
+                                .foregroundStyle(.purplec)
+                                .padding(.trailing, 4)
+                            
+                            Text("남았어요")
+                                .font(.pretendard(.semibold, size: 20))
+                                .foregroundStyle(.gray700)
+                        } else {
+                            Text("\(abs(context.state.stopsRemaining))")
+                                .font(.pretendard(.semibold, size: 20))
+                                .foregroundStyle(context.state.stopsRemaining < 0 ? .redc :  .purplec)
+                                .padding(.trailing, 4)
+                            
+                            Text(Int(context.state.stopsRemaining) >= 0 ? "정류장 전" : "정류장 지났어요.")
+                                .font(.pretendard(.semibold, size: 20))
+                                .foregroundStyle(.gray700)
+                        }
                         
                         Spacer()
                     }

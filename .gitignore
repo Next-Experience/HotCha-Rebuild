@@ -134,7 +134,13 @@ iOSInjectionProject/
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 # API_KEY
-*.xcconfig
+Secrets.xcconfig
 
 # End of https://www.toptal.com/developers/gitignore/api/swift,xcode,macos
 BlueberrySmoothie/BlueBerrySmoothie/Resource/Blue Ribbons - TrackTribe.mp3
+
+# 검증 스탬프 — 커밋 게이트가 읽는 로컬 상태
+.claude/.verify-stamp
+
+# 검증용 빌드 산출물
+.build/

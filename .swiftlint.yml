@@ -1,0 +1,70 @@
+# SwiftLint 설정 — 설치돼 있으면 verify.sh 가 자동으로 씁니다.
+#   brew install swiftlint
+
+included:
+  - HotCha/HotCha
+  - HotCha/HotchaLive
+  - HotChaKit/Sources
+  - HotChaKit/Tests
+excluded:
+  - .build
+  - HotChaKit/.build
+
+file_length:
+  warning: 500
+  error: 600
+  ignore_comment_only_lines: true
+
+type_body_length:
+  warning: 500
+  error: 600
+
+function_body_length:
+  warning: 80
+  error: 120
+
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
+identifier_name:
+  min_length: 1
+  excluded: [id, x, y]
+  # 테스트 이름과 도메인 용어를 한글로 쓴다. 한글에는 대소문자가 없어
+  # "소문자로 시작하라"는 검사가 언제나 걸린다.
+  validates_start_with_lowercase: off
+  # 한글 이름은 띄어쓰기 대신 밑줄로 끊는다 (가장_가까운_정류장에서_출발한다).
+  allowed_symbols: ["_"]
+
+type_name:
+  allowed_symbols: ["_"]
+  validates_start_with_lowercase: off
+
+function_parameter_count:
+  # SwiftData 모델의 생성자가 API 응답 필드를 그대로 받는다 (Bus_info_seoul 15개).
+  warning: 16
+  error: 20
+
+# 예전 코드가 수백 군데에서 어기는 **모양** 규칙은 꺼 둔다.
+# 지금 켜면 지적 800건에 진짜 문제가 묻히고, 고치려면 거의 모든 파일을 건드려야 해서
+# 리뷰할 수 없는 변경이 된다. 포맷만 한 번에 정리하는 작업을 따로 한 뒤 하나씩 켠다.
+disabled_rules:
+  - trailing_whitespace
+  - vertical_whitespace
+  - opening_brace
+  - comment_spacing
+  - colon
+  - comma
+  - statement_position
+  - trailing_newline
+  - trailing_comma
+  - leading_whitespace
+  - no_space_in_method_call
+  - control_statement
+  - multiple_closures_with_trailing_closure
+  - empty_parentheses_with_trailing_closure
+  - implicit_optional_initialization
+  - unused_closure_parameter
+  - todo
+  - line_length
+  - for_where

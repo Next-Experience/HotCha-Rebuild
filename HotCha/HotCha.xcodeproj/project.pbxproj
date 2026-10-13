@@ -10,6 +10,7 @@
 		9D86EE9F2DC9F907003E6FED /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E37F922DA955EF009A5719 /* WidgetKit.framework */; };
 		9D86EEA02DC9F907003E6FED /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E37F942DA955EF009A5719 /* SwiftUI.framework */; };
 		9D86EEAD2DC9F908003E6FED /* HotchaLiveExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9D86EE9E2DC9F907003E6FED /* HotchaLiveExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AA0000022EA0000100C0FFEE /* HotChaKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000032EA0000100C0FFEE /* HotChaKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +40,7 @@
 /* Begin PBXFileReference section */
 		9D86EE9E2DC9F907003E6FED /* HotchaLiveExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HotchaLiveExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DD91FA92D522CB600789318 /* HotCha.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotCha.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000012EA0000100C0FFEE /* HotCha.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = HotCha.xcconfig; path = Config/HotCha.xcconfig; sourceTree = "<group>"; };
 		D9E37F922DA955EF009A5719 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		D9E37F942DA955EF009A5719 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -93,6 +95,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0000022EA0000100C0FFEE /* HotChaKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,6 +107,7 @@
 			children = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
 				9D86EEA12DC9F907003E6FED /* HotchaLive */,
+				AA0000012EA0000100C0FFEE /* HotCha.xcconfig */,
 				D9E37F912DA955EF009A5719 /* Frameworks */,
 				9DD91FAA2D522CB600789318 /* Products */,
 			);
@@ -171,6 +175,7 @@
 			);
 			name = HotCha;
 			packageProductDependencies = (
+				AA0000032EA0000100C0FFEE /* HotChaKit */,
 			);
 			productName = HotCha;
 			productReference = 9DD91FA92D522CB600789318 /* HotCha.app */;
@@ -203,6 +208,9 @@
 			);
 			mainGroup = 9DD91FA02D522CB600789318;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA0000042EA0000100C0FFEE /* XCLocalSwiftPackageReference "../HotChaKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9DD91FAA2D522CB600789318 /* Products */;
 			projectDirPath = "";
@@ -321,7 +329,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
@@ -359,7 +367,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotchaLive/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
@@ -391,7 +399,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotchaLive/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
@@ -423,7 +431,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotchaLive/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HotchaLive;
@@ -569,13 +577,14 @@
 		};
 		9DD91FB82D522CB700789318 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0000012EA0000100C0FFEE /* HotCha.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
@@ -608,6 +617,7 @@
 		};
 		9DD91FB92D522CB700789318 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0000012EA0000100C0FFEE /* HotCha.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -615,7 +625,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"HotCha/Preview Content\"";
-				DEVELOPMENT_TEAM = H54Z863265;
+				DEVELOPMENT_TEAM = UW9295Z57Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HotCha/Info.plist;
@@ -681,6 +691,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AA0000042EA0000100C0FFEE /* XCLocalSwiftPackageReference "../HotChaKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../HotChaKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA0000032EA0000100C0FFEE /* HotChaKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HotChaKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9DD91FA12D522CB600789318 /* Project object */;
 }
