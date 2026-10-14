@@ -92,6 +92,8 @@ struct AlarmRingingView: View {
                         .frame(height: 50)
                 }
             }
+            // 넓은 화면(펼친 아이폰 듀오)에서도 버튼을 가로 가득 늘이지 않는다.
+            .frame(maxWidth: 420)
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
         }

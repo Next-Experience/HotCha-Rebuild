@@ -12,6 +12,7 @@ struct HomeScreen: View {
     @EnvironmentObject private var session: RouteAlarmSession
     @EnvironmentObject private var stopAlarm: StopAlarmViewModel
     @StateObject private var locationViewModel = LocationViewModel()
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var homeSearchQuery = ""
     @State private var isSearchPresented = false
@@ -39,36 +40,23 @@ struct HomeScreen: View {
                     .simultaneousGesture(edgeSwipeToCloseSearch)
                 } else {
                     ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: 30) {
-                            HomeStatusBanner(status: bannerStatus, action: openBanner)
-                                .staggeredAppear(order: 0, state: appear)
-
-                            HistorySection(
-                                entries: Array(recentEntries.prefix(3)),
-                                hasMore: recentEntries.count > 3,
-                                onSelect: { searchDestination = $0.destination },
-                                onShowAll: onShowHistory
-                            )
-                            .staggeredAppear(order: 1, state: appear)
-
-                            FavoriteSection(
-                                bookmarks: bookmarks,
-                                onAdd: { type in
-                                    bookmarkSearch = BookmarkSearchRequest(type: type)
-                                },
-                                onSelect: { bookmark in
-                                    // 정류장 즐겨찾기는 어느 버스든 타면 되는 정류장 알람이다.
-                                    if let stop = bookmark.stopRecord {
-                                        searchDestination = .stopAlarm(stop)
-                                    } else {
-                                        searchDestination = .route(
-                                            Bus_info_seoul(from: bookmark.bus),
-                                            startingAt: bookmark.destination_stop_id
-                                        )
+                        Group {
+                            // 가로가 넓으면(펼친 아이폰 듀오) 두 칸이다. 왼쪽에 배너 · 이용 기록, 오른쪽에 즐겨찾기.
+                            if horizontalSizeClass == .regular {
+                                HStack(alignment: .top, spacing: 32) {
+                                    VStack(alignment: .leading, spacing: 30) {
+                                        banner
+                                        history
                                     }
+                                    favorites
                                 }
-                            )
-                            .staggeredAppear(order: 2, state: appear)
+                            } else {
+                                VStack(alignment: .leading, spacing: 30) {
+                                    banner
+                                    history
+                                    favorites
+                                }
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 8)
@@ -127,6 +115,44 @@ struct HomeScreen: View {
         // 한 프레임 미룬다. 나타나는 그 프레임에 세우면 SwiftUI 는 처음부터 제자리에 있던 것으로 보고
         // 아무것도 그리지 않는다.
         Task { @MainActor in appear.isSettled = true }
+    }
+
+    // MARK: - 홈 내용
+
+    private var banner: some View {
+        HomeStatusBanner(status: bannerStatus, action: openBanner)
+            .staggeredAppear(order: 0, state: appear)
+    }
+
+    private var history: some View {
+        HistorySection(
+            entries: Array(recentEntries.prefix(3)),
+            hasMore: recentEntries.count > 3,
+            onSelect: { searchDestination = $0.destination },
+            onShowAll: onShowHistory
+        )
+        .staggeredAppear(order: 1, state: appear)
+    }
+
+    private var favorites: some View {
+        FavoriteSection(
+            bookmarks: bookmarks,
+            onAdd: { type in
+                bookmarkSearch = BookmarkSearchRequest(type: type)
+            },
+            onSelect: { bookmark in
+                // 정류장 즐겨찾기는 어느 버스든 타면 되는 정류장 알람이다.
+                if let stop = bookmark.stopRecord {
+                    searchDestination = .stopAlarm(stop)
+                } else {
+                    searchDestination = .route(
+                        Bus_info_seoul(from: bookmark.bus),
+                        startingAt: bookmark.destination_stop_id
+                    )
+                }
+            }
+        )
+        .staggeredAppear(order: 2, state: appear)
     }
 
     private var recentEntries: [HistoryEntry] {
