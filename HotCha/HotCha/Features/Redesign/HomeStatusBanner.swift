@@ -3,7 +3,7 @@
 //  HotCha
 //
 //  홈 맨 위의 상태 배너. 지금 상황에 맞는 것 하나만 보여 준다.
-//  안내 중의 단계와 문구는 잠금 화면과 같은 HotChaGuidance 에서 오고, 모양은 여기서 따로 그린다.
+//  안내 중의 단계와 문구는 HotChaGuidance, 모양은 잠금 화면과 같은 HotChaGuidanceCard 다. 바탕색만 다르다.
 //
 
 import SwiftUI
@@ -12,8 +12,9 @@ struct HomeStatusBanner: View {
     enum Status: Equatable {
         /// 진행 중인 안내가 없다. 누르면 목적지 검색이 열린다.
         case idle
-        /// 안내 중이다. image 는 노선 유형에 맞는 버스 그림이나 정류장 그림이다.
-        case guiding(HotChaGuidance, image: String)
+        /// 안내 중이다. currentStop 은 지금 정류장 이름(정류장 알림은 빈 값),
+        /// marker 는 막대의 버스 자리에 둘 노선 유형 버스 그림(정류장 알림은 nil)이다.
+        case guiding(HotChaGuidance, currentStop: String, marker: String?)
     }
 
     let status: Status
@@ -25,8 +26,8 @@ struct HomeStatusBanner: View {
                 switch status {
                 case .idle:
                     IdleBannerCard()
-                case .guiding(let guidance, let image):
-                    GuidingBannerCard(guidance: guidance, image: image)
+                case .guiding(let guidance, let currentStop, let marker):
+                    GuidingBannerCard(guidance: guidance, currentStop: currentStop, marker: marker)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: HotChaRadius.card, style: .continuous))
@@ -60,48 +61,21 @@ private struct IdleBannerCard: View {
     }
 }
 
-/// 안내 중. 버스 번호 → 남은 정류장 수 → 내릴 정류장 순으로 읽힌다.
-/// 움직임은 남은 수가 실제로 바뀔 때의 숫자 전환뿐이다.
+/// 안내 중. 잠금 화면 Live Activity 와 같은 HotChaGuidanceCard 를 mainpurple 바탕 위에 흰색으로 그린다 —
+/// 버스 번호 → 남은 정류장 수(숫자만 크게) → 정류장 막대 → 지금 · 내릴 정류장.
+/// 움직임은 남은 수가 실제로 바뀔 때의 숫자 전환과 막대의 점이 하나 줄어드는 것뿐이다.
 private struct GuidingBannerCard: View {
     let guidance: HotChaGuidance
-    let image: String
+    let currentStop: String
+    let marker: String?
 
     var body: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(guidance.label)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.9))
-                    if let tag = guidance.phaseTag {
-                        Text(tag)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Color("mainpurple"))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(.white, in: RoundedRectangle(cornerRadius: HotChaRadius.badge, style: .continuous))
-                    }
-                }
-                Text(guidance.headline)
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(.white)
-                    .contentTransition(.numericText())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                Text(guidance.detail)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 0)
-            BannerArt(name: guidance.showsStopBell ? "HotChaStopBell" : image)
-        }
-        .padding(.leading, 20)
-        .padding(.trailing, 12)
-        .padding(.vertical, 18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("mainpurple"))
-        .animation(.smooth, value: guidance)
+        HotChaGuidanceCard(guidance: guidance, currentStop: currentStop, markerImage: marker, style: .onPurple)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color("mainpurple"))
+            .animation(.smooth, value: guidance)
     }
 }
 
