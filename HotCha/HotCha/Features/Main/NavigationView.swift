@@ -10,8 +10,6 @@ import SwiftUI
 
 struct NavigationView: View {
     @State private var selectedTab = 0
-    /// 탭 바의 검색을 누른 횟수. 검색은 화면이 아니라 홈 위쪽 검색창을 여는 버튼이다.
-    @State private var searchRequest = 0
     /// 노선 알람은 화면을 벗어나도 이어져야 해서 탭 전체가 하나를 나눠 쓴다.
     @StateObject private var routeAlarmSession = RouteAlarmSession()
     @StateObject private var stopAlarmSession = StopAlarmViewModel()
@@ -107,56 +105,41 @@ struct NavigationView: View {
 
     @available(iOS 26.0, *)
     private var liquidGlassTabView: some View {
-        TabView(selection: tabSelection) {
+        TabView(selection: $selectedTab) {
             Tab("홈", systemImage: "house", value: 0) {
-                HomeScreen(searchRequest: searchRequest) { selectedTab = Self.historyTab }
+                HomeScreen(searchRequest: 0) { selectedTab = Self.historyTab }
             }
             Tab("이용 기록", systemImage: "clock", value: 1) {
                 UsageHistoryScreen()
             }
+            Tab("지도", systemImage: "map", value: Self.mapTab) {
+                StopMapScreen()
+            }
             Tab("나의 핫챠", systemImage: "person.crop.circle", value: Self.myTab) {
                 MyHotChaScreen()
-            }
-            Tab("검색", systemImage: "magnifyingglass", value: Self.searchTab) {
-                Color.clear
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
     }
 
-    /// 검색 탭은 고르는 대신 홈으로 돌아가 검색창을 연다.
-    private var tabSelection: Binding<Int> {
-        Binding(
-            get: { selectedTab },
-            set: { newValue in
-                if newValue == Self.searchTab {
-                    selectedTab = 0
-                    searchRequest += 1
-                } else {
-                    selectedTab = newValue
-                }
-            }
-        )
-    }
-
     private static let historyTab = 1
-    private static let myTab = 2
-    private static let searchTab = 3
+    private static let mapTab = 2
+    private static let myTab = 3
 
     private var fallbackTabView: some View {
-        TabView(selection: tabSelection) {
-            HomeScreen(searchRequest: searchRequest) { selectedTab = Self.historyTab }
+        TabView(selection: $selectedTab) {
+            HomeScreen(searchRequest: 0) { selectedTab = Self.historyTab }
                 .tabItem { Label("홈", systemImage: "house") }
                 .tag(0)
             UsageHistoryScreen()
                 .tabItem { Label("이용 기록", systemImage: "clock") }
                 .tag(1)
+            StopMapScreen()
+                .tabItem { Label("지도", systemImage: "map") }
+                .tag(Self.mapTab)
             MyHotChaScreen()
                 .tabItem { Label("나의 핫챠", systemImage: "person.crop.circle") }
                 .tag(Self.myTab)
-            Color.clear
-                .tabItem { Label("검색", systemImage: "magnifyingglass") }
-                .tag(Self.searchTab)
         }
     }
 }
@@ -192,7 +175,6 @@ struct HotChaContentBackground: View {
 }
 
 // 아직 프로젝트에 남아 있는 이전 홈 화면과의 컴파일 호환용 이름이다.
-// 현재 탭 바 검색은 GlobalSearchScreen으로 직접 전환한다.
 extension Notification.Name {
     static let openGlobalSearch = Notification.Name("OpenGlobalSearch")
 }
