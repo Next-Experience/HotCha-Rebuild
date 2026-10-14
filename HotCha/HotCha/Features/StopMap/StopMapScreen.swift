@@ -3,6 +3,7 @@
 //  HotCha
 //
 //  지금 보이는 지도 영역의 정류장을 핀으로 보고, 정류장이나 장소를 찾아 그리로 옮겨 가는 화면.
+//  버스를 찾아 고르면 그 노선 화면에서 내릴 정류장을 고른다.
 //  핀을 누르면 아래에 그 정류장 카드가 지도 위에 뜬다. 지도는 움직이지 않는다. 목록은 없다.
 //
 
@@ -16,13 +17,15 @@ struct StopMapScreen: View {
 
     @State private var query = ""
     @State private var isSearchPresented = false
-    /// 검색 제안으로 보여 줄 결과
+    /// 검색 결과 — 버스와 정류장
+    @State private var buses: [Bus_info_seoul] = []
     @State private var results: [BusStopRecord] = []
     @State private var isSearching = false
     /// 지금 보이는 영역의 정류장
     @State private var stops: [BusStopRecord] = []
     @State private var selectedStop: BusStopRecord?
     @State private var destinationStop: BusStopRecord?
+    @State private var destinationBus: Bus_info_seoul?
     /// 검색에서 고른 장소. 지도에 표시를 꽂는다.
     @State private var place: PlaceResult?
     /// 너무 넓게 보고 있어 핀을 그리지 않는다.
@@ -41,6 +44,7 @@ struct StopMapScreen: View {
     /// 보이는 영역의 세로가 이보다 길면 핀을 그리지 않는다. 정류장이 너무 많아 한가운데만 뭉쳐 보인다.
     private static let maxVisibleSpan: CLLocationDistance = 5_000
     private static let regionLimit = 150
+    private static let busLimit = 3
     private static let searchLimit = 3
     private static let placeLimit = 5
 
@@ -62,12 +66,15 @@ struct StopMapScreen: View {
                     text: $query,
                     isPresented: $isSearchPresented,
                     placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: "정류장 이름 · 번호"
+                    prompt: "버스 · 정류장 · 장소"
                 )
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .navigationDestination(item: $destinationStop) { stop in
                     StopAlarmView(stop: stop)
+                }
+                .navigationDestination(item: $destinationBus) { bus in
+                    RouteAlarmScreen(bus: bus, mode: .alarm(startingAt: nil))
                 }
                 .onAppear {
                     locationViewModel.requestLocation()
@@ -214,10 +221,22 @@ struct StopMapScreen: View {
 
     private var searchRows: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if results.isEmpty, placeResults.isEmpty {
+            if buses.isEmpty, results.isEmpty, placeResults.isEmpty {
                 Text(isSearching ? "찾는 중…" : "검색 결과가 없어요")
                     .foregroundStyle(.secondary)
                     .padding(16)
+            }
+            if !buses.isEmpty {
+                searchSectionTitle("버스")
+                ForEach(buses) { bus in
+                    searchRow(
+                        icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
+                        title: bus.busRouteNm,
+                        detail: "\(BusDatabase.shared.cityName(for: bus.city_code)) · \(bus.stStationNm) ↔︎ \(bus.edStationNm)"
+                    ) {
+                        choose(bus)
+                    }
+                }
             }
             if !results.isEmpty {
                 searchSectionTitle("정류장")
@@ -292,6 +311,7 @@ struct StopMapScreen: View {
         searchTask?.cancel()
         let trimmed = text.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else {
+            buses = []
             results = []
             isSearching = false
             placeCompleter.search("", near: nil)
@@ -304,13 +324,17 @@ struct StopMapScreen: View {
         searchTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(250))
             guard !Task.isCancelled else { return }
-            let found = await BusDatabase.shared.searchStops(
-                trimmed,
-                near: locationViewModel.location,
-                limit: Self.searchLimit
-            )
+            let location = locationViewModel.location
+            async let routeRecords = BusDatabase.shared.searchRoutes(trimmed, near: location, limit: Self.busLimit)
+            async let stopRecords = BusDatabase.shared.searchStops(trimmed, near: location, limit: Self.searchLimit)
+            let (foundRoutes, foundStops) = await (routeRecords, stopRecords)
             guard !Task.isCancelled, trimmedQuery == trimmed else { return }
-            results = found
+            var foundBuses = foundRoutes.map { Bus_info_seoul(record: $0) }
+            #if DEBUG
+            if DevBus.matches(trimmed) { foundBuses.insert(DevBus.info, at: 0) }
+            #endif
+            buses = Array(foundBuses.prefix(Self.busLimit))
+            results = foundStops
             isSearching = false
         }
     }
@@ -323,6 +347,12 @@ struct StopMapScreen: View {
             selectedStop = stop
             camera = Self.camera(around: stop.coordinate, meters: Self.chosenSpan)
         }
+    }
+
+    /// 검색에서 버스를 고르면 검색을 닫고 그 노선 화면으로 간다. 내릴 정류장은 거기서 고른다.
+    private func choose(_ bus: Bus_info_seoul) {
+        closeSearch()
+        destinationBus = bus
     }
 
     /// 검색에서 장소를 고르면 그 장소로 가서 표시를 꽂는다. 주변 정류장은 지도가 옮겨 간 뒤에 뜬다.
