@@ -27,6 +27,7 @@ struct RouteAlarmScreen: View {
     @EnvironmentObject private var stopAlarm: StopAlarmViewModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var camera: MapCameraPosition = .automatic
     @State private var showsSheet = false
@@ -36,36 +37,31 @@ struct RouteAlarmScreen: View {
     @State private var openedAt: CLLocation?
 
     var body: some View {
-        GeometryReader { proxy in
-            map
-                // 시트가 덮는 만큼 지도의 안쪽 여백을 둔다. 지도는 그 위로 보이는 영역을 기준으로 가운데를 잡는다.
-                .safeAreaPadding(.bottom, sheetCover(in: proxy.size.height))
-                .animation(.smooth, value: detent)
+        HStack(spacing: 0) {
+            // 가로가 넓으면(펼친 아이폰 듀오) 시트 대신 지도 왼쪽에 같은 내용을 둔다.
+            if usesSidePanel && showsSheet {
+                sheetContent
+                    .frame(width: Self.sidePanelWidth)
+                Divider()
+                    .ignoresSafeArea()
+            }
+            GeometryReader { proxy in
+                map
+                    // 시트가 덮는 만큼 지도의 안쪽 여백을 둔다. 지도는 그 위로 보이는 영역을 기준으로 가운데를 잡는다.
+                    .safeAreaPadding(.bottom, sheetCover(in: proxy.size.height))
+                    .animation(.smooth, value: detent)
+            }
         }
         .navigationTitle("\(bus.busRouteNm)번")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
-        .sheet(isPresented: $showsSheet) {
-            RouteAlarmSheet(
-                bus: bus,
-                mode: mode,
-                detent: $detent,
-                onFinish: {
-                    showsSheet = false
-                    dismiss()
-                },
-                onBookmarkSaved: {
-                    showsSheet = false
-                    onBookmarkSaved()
-                }
-            )
-            .environmentObject(session)
-            .environmentObject(stopAlarm)
-            .presentationDetents([Self.peekDetent, .medium, Self.tallDetent], selection: $detent)
-            // 끝까지 올려도 뒤의 지도가 어두워지거나 하얗게 바뀌지 않게, 어느 높이에서든 뒤를 그대로 둔다.
-            .presentationBackgroundInteraction(.enabled)
-            .presentationDragIndicator(.visible)
-            .interactiveDismissDisabled()
+        .sheet(isPresented: sheetIsPresented) {
+            sheetContent
+                .presentationDetents([Self.peekDetent, .medium, Self.tallDetent], selection: $detent)
+                // 끝까지 올려도 뒤의 지도가 어두워지거나 하얗게 바뀌지 않게, 어느 높이에서든 뒤를 그대로 둔다.
+                .presentationBackgroundInteraction(.enabled)
+                .presentationDragIndicator(.visible)
+                .interactiveDismissDisabled()
         }
         .confirmationDialog(
             "다른 버스의 안내가 진행 중이에요",
@@ -106,6 +102,35 @@ struct RouteAlarmScreen: View {
         }
     }
 
+    /// `showsSheet` 는 시트든 패널이든 내용을 보여 줄지다. 시트로 띄우는 것은 좁은 화면에서만이다.
+    /// 시스템이 넘기는 값은 받지 않는다. 펼칠 때 시트를 내리며 false 를 넘기는데, 패널로 옮겨 갔을 뿐이다.
+    /// 시트는 끌어 내릴 수 없고(`interactiveDismissDisabled`), 닫는 곳은 모두 `showsSheet` 를 직접 바꾼다.
+    private var sheetIsPresented: Binding<Bool> {
+        Binding(get: { showsSheet && !usesSidePanel }, set: { _ in })
+    }
+
+    private var usesSidePanel: Bool { horizontalSizeClass == .regular }
+
+    private static let sidePanelWidth: CGFloat = 380
+
+    private var sheetContent: some View {
+        RouteAlarmSheet(
+            bus: bus,
+            mode: mode,
+            detent: $detent,
+            onFinish: {
+                showsSheet = false
+                dismiss()
+            },
+            onBookmarkSaved: {
+                showsSheet = false
+                onBookmarkSaved()
+            }
+        )
+        .environmentObject(session)
+        .environmentObject(stopAlarm)
+    }
+
     /// 가장 낮게 내린 시트. 남은 정류장 수만 보인다.
     static let peekDetent = PresentationDetent.height(150)
     /// 가장 높이 올린 시트. `.large` 는 뒤 화면을 바꿔 버려서 화면 끝까지 올리지 않는다.
@@ -113,6 +138,7 @@ struct RouteAlarmScreen: View {
 
     /// 시트가 지도 아래쪽을 덮는 높이
     private func sheetCover(in height: CGFloat) -> CGFloat {
+        if usesSidePanel { return 0 }
         if detent == Self.peekDetent { return 150 }
         // 중간 높이 시트는 화면의 절반쯤을 덮는다. 지도 영역은 내비게이션 바 아래부터라 조금 더 덮인다.
         return height * 0.55

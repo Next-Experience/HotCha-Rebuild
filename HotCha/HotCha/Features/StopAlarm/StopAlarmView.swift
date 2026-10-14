@@ -19,6 +19,7 @@ struct StopAlarmView: View {
 
     /// 정류장 알람은 화면을 벗어나도 이어진다. 앱 전체가 하나를 나눠 쓴다.
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var viewModel: StopAlarmViewModel
     @EnvironmentObject private var routeAlarm: RouteAlarmSession
     @AppStorage("stopAlarmRadius") private var alarmRadius: Double = 500
@@ -57,6 +58,25 @@ struct StopAlarmView: View {
             MKCoordinateRegion(center: coordinate, latitudinalMeters: span, longitudinalMeters: span))
     }
 
+    /// `showsSheet` 는 시트든 패널이든 카드를 보여 줄지다. 시트로 띄우는 것은 좁은 화면에서만이다.
+    /// 시스템이 넘기는 값은 받지 않는다. 펼칠 때 시트를 내리며 false 를 넘기는데, 패널로 옮겨 갔을 뿐이다.
+    /// 시트는 끌어 내릴 수 없고(`interactiveDismissDisabled`), 닫는 곳은 모두 `showsSheet` 를 직접 바꾼다.
+    private var sheetIsPresented: Binding<Bool> {
+        Binding(get: { showsSheet && !usesSidePanel }, set: { _ in })
+    }
+
+    private var usesSidePanel: Bool { horizontalSizeClass == .regular }
+
+    private static let sidePanelWidth: CGFloat = 380
+
+    private var cardScroll: some View {
+        ScrollView {
+            bottomCard
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollIndicators(.hidden)
+    }
+
     /// 고른 정류장을 맨 뒤에 둔 후보 목록. 지도는 뒤에 그린 것을 위에 올린다.
     private var orderedCandidates: [BusStopRecord] {
         candidates.filter { $0.id != selectedStopID } + (selectedStop.map { [$0] } ?? [])
@@ -67,63 +87,68 @@ struct StopAlarmView: View {
     }
 
     var body: some View {
-        map
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .tabBar)
-            .sheet(isPresented: $showsSheet) {
-                ScrollView {
-                    bottomCard
-                }
-                .scrollBounceBehavior(.basedOnSize)
-                .scrollIndicators(.hidden)
+        HStack(spacing: 0) {
+            // 가로가 넓으면(펼친 아이폰 듀오) 시트 대신 지도 왼쪽에 같은 카드를 둔다.
+            if usesSidePanel && showsSheet {
+                cardScroll
+                    .frame(width: Self.sidePanelWidth)
+                Divider()
+                    .ignoresSafeArea()
+            }
+            map
+        }
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
+        .sheet(isPresented: sheetIsPresented) {
+            cardScroll
                 .presentationDetents([.height(300)])
                 .presentationBackgroundInteraction(.enabled)
                 .presentationDragIndicator(.hidden)
                 .interactiveDismissDisabled()
                 .tint(Color("mainpurple"))
+        }
+        .onAppear {
+            showsSheet = true
+            viewModel.beginPreview()
+        }
+        // 알람 화면이 전체를 덮는 동안에는 시트를 내려 둔다.
+        .onChange(of: viewModel.isRinging) { _, ringing in
+            showsSheet = !ringing
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .alarmGuidanceFinished)) { _ in
+            showsSheet = false
+            dismiss()
+        }
+        .task {
+            let nearby = await BusDatabase.shared.stops(near: center, radius: Self.candidateRadius)
+            // 미리 고른 정류장이 반경 계산에서 빠지는 일이 없도록 합친다.
+            candidates = (initialStop.map { [$0] } ?? []) + nearby.filter { $0.id != initialStop?.id }
+            if let running = viewModel.runningStop {
+                // 이미 안내 중이면 다른 정류장을 열어도 안내 중인 정류장을 보여 준다.
+                candidates = [running] + candidates.filter { $0.id != running.id }
+                selectedStopID = running.id
+            } else if selectedStopID == nil {
+                selectedStopID = candidates.first?.id
             }
-            .onAppear {
-                showsSheet = true
-                viewModel.beginPreview()
+            viewModel.select(selectedStop)
+            if let stop = selectedStop {
+                camera = Self.camera(for: stop.coordinate, radius: alarmRadius)
             }
-            // 알람 화면이 전체를 덮는 동안에는 시트를 내려 둔다.
-            .onChange(of: viewModel.isRinging) { _, ringing in
-                showsSheet = !ringing
+            // 이미 알람 거리 안이거나 버스 안내가 진행 중이면 시작하지 않고 화면만 연다.
+            if startsImmediately, let stop = selectedStop, !viewModel.isRunning, !routeAlarm.isRunning,
+                !isAlreadyInside
+            {
+                viewModel.start(stop: stop, radius: alarmRadius)
             }
-            .onReceive(NotificationCenter.default.publisher(for: .alarmGuidanceFinished)) { _ in
-                showsSheet = false
-                dismiss()
-            }
-            .task {
-                let nearby = await BusDatabase.shared.stops(near: center, radius: Self.candidateRadius)
-                // 미리 고른 정류장이 반경 계산에서 빠지는 일이 없도록 합친다.
-                candidates = (initialStop.map { [$0] } ?? []) + nearby.filter { $0.id != initialStop?.id }
-                if let running = viewModel.runningStop {
-                    // 이미 안내 중이면 다른 정류장을 열어도 안내 중인 정류장을 보여 준다.
-                    candidates = [running] + candidates.filter { $0.id != running.id }
-                    selectedStopID = running.id
-                } else if selectedStopID == nil {
-                    selectedStopID = candidates.first?.id
-                }
-                viewModel.select(selectedStop)
-                if let stop = selectedStop {
-                    camera = Self.camera(for: stop.coordinate, radius: alarmRadius)
-                }
-                // 이미 알람 거리 안이거나 버스 안내가 진행 중이면 시작하지 않고 화면만 연다.
-                if startsImmediately, let stop = selectedStop, !viewModel.isRunning, !routeAlarm.isRunning,
-                    !isAlreadyInside
-                {
-                    viewModel.start(stop: stop, radius: alarmRadius)
-                }
-            }
-            .onChange(of: selectedStopID) { _, _ in
-                viewModel.select(selectedStop)
-            }
-            .onDisappear {
-                showsSheet = false
-                viewModel.endPreview()
-            }
+        }
+        .onChange(of: selectedStopID) { _, _ in
+            viewModel.select(selectedStop)
+        }
+        .onDisappear {
+            showsSheet = false
+            viewModel.endPreview()
+        }
     }
 
     // MARK: - 지도

@@ -20,7 +20,10 @@ struct OnBoarding2View: View {
             }
             Spacer()
             Image("Onboarding3")
-//                .resizable()
+                // 그림은 원래 크기(333×470pt)를 넘지 않게, 남는 자리에 맞춰 줄인다. 키가 작은 화면(접은 아이폰 듀오)에서 제목을 밀어내지 않는다.
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 333, maxHeight: 470)
                 .padding(.bottom, 48)
                 .padding(.top, 0)
         }

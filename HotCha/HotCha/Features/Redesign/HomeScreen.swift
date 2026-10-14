@@ -12,6 +12,7 @@ struct HomeScreen: View {
     @EnvironmentObject private var session: RouteAlarmSession
     @EnvironmentObject private var stopAlarm: StopAlarmViewModel
     @StateObject private var locationViewModel = LocationViewModel()
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var homeSearchQuery = ""
     @State private var isSearchPresented = false
@@ -37,33 +38,23 @@ struct HomeScreen: View {
                     .simultaneousGesture(edgeSwipeToCloseSearch)
                 } else {
                     ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: 30) {
-                            HomeStatusBanner(status: bannerStatus, action: openBanner)
-
-                            HistorySection(
-                                entries: Array(recentEntries.prefix(3)),
-                                hasMore: recentEntries.count > 3,
-                                onSelect: { searchDestination = $0.destination },
-                                onShowAll: onShowHistory
-                            )
-
-                            FavoriteSection(
-                                bookmarks: bookmarks,
-                                onAdd: { type in
-                                    bookmarkSearch = BookmarkSearchRequest(type: type)
-                                },
-                                onSelect: { bookmark in
-                                    // 정류장 즐겨찾기는 어느 버스든 타면 되는 정류장 알람이다.
-                                    if let stop = bookmark.stopRecord {
-                                        searchDestination = .stopAlarm(stop)
-                                    } else {
-                                        searchDestination = .route(
-                                            Bus_info_seoul(from: bookmark.bus),
-                                            startingAt: bookmark.destination_stop_id
-                                        )
+                        Group {
+                            // 가로가 넓으면(펼친 아이폰 듀오) 두 칸이다. 왼쪽에 배너 · 이용 기록, 오른쪽에 즐겨찾기.
+                            if horizontalSizeClass == .regular {
+                                HStack(alignment: .top, spacing: 32) {
+                                    VStack(alignment: .leading, spacing: 30) {
+                                        banner
+                                        history
                                     }
+                                    favorites
                                 }
-                            )
+                            } else {
+                                VStack(alignment: .leading, spacing: 30) {
+                                    banner
+                                    history
+                                    favorites
+                                }
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 8)
@@ -112,6 +103,41 @@ struct HomeScreen: View {
                 locationViewModel.requestLocation()
             }
         }
+    }
+
+    // MARK: - 홈 내용
+
+    private var banner: some View {
+        HomeStatusBanner(status: bannerStatus, action: openBanner)
+    }
+
+    private var history: some View {
+        HistorySection(
+            entries: Array(recentEntries.prefix(3)),
+            hasMore: recentEntries.count > 3,
+            onSelect: { searchDestination = $0.destination },
+            onShowAll: onShowHistory
+        )
+    }
+
+    private var favorites: some View {
+        FavoriteSection(
+            bookmarks: bookmarks,
+            onAdd: { type in
+                bookmarkSearch = BookmarkSearchRequest(type: type)
+            },
+            onSelect: { bookmark in
+                // 정류장 즐겨찾기는 어느 버스든 타면 되는 정류장 알람이다.
+                if let stop = bookmark.stopRecord {
+                    searchDestination = .stopAlarm(stop)
+                } else {
+                    searchDestination = .route(
+                        Bus_info_seoul(from: bookmark.bus),
+                        startingAt: bookmark.destination_stop_id
+                    )
+                }
+            }
+        )
     }
 
     private var recentEntries: [HistoryEntry] {
