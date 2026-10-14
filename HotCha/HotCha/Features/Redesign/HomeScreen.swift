@@ -146,7 +146,11 @@ struct HomeScreen: View {
                 remainingMeters: nil,
                 hasAlarmFired: session.hasAlarmFired
             )
-            return .guiding(guidance, image: BusArt.imageName(for: bus))
+            return .guiding(
+                guidance,
+                currentStop: session.currentStop?.stationNm ?? "",
+                marker: BusArt.imageName(for: bus)
+            )
         }
         if let stop = stopAlarm.runningStop {
             let guidance = HotChaGuidance(
@@ -157,7 +161,7 @@ struct HomeScreen: View {
                 remainingMeters: stopAlarm.distance.map { Int($0) },
                 hasAlarmFired: stopAlarm.didFire
             )
-            return .guiding(guidance, image: Clay.busStop.rawValue)
+            return .guiding(guidance, currentStop: "", marker: nil)
         }
         return .idle
     }
