@@ -382,6 +382,9 @@ struct SearchView: View {
         guard !Task.isCancelled else { return }
 
         buses = foundRoutes.map { Bus_info_seoul(record: $0) }
+        #if DEBUG
+        if DevBus.matches(searchText) { buses.insert(DevBus.info, at: 0) }
+        #endif
         stops = foundStops
         // 버스 번호로 찾은 게 없으면 정류장 탭을 먼저 보여준다.
         if !scopes.contains(scope) || count(of: scope) == 0 {

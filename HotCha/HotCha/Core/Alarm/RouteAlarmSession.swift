@@ -122,6 +122,19 @@ final class RouteAlarmSession: ObservableObject {
         isLoading = true
         loadFailed = false
 
+        #if DEBUG
+        // 개발자 버스는 API 를 부르지 않는다. 정류장은 지금 위치를 재윤이집으로 두고 만든다.
+        if DevBus.isDevBus(routeId: bus.busRouteId) {
+            isLoading = false
+            stops = DevBus.stops(around: CLLocationManager().location)
+            if let destinationId {
+                destinationIndex = stops.firstIndex { $0.station == destinationId }
+            }
+            completion?()
+            return
+        }
+        #endif
+
         BusAPI.fetchRouteStops(cityCode: bus.city_code, routeId: bus.busRouteId) { [weak self] fetched, error in
             DispatchQueue.main.async {
                 guard let self, self.bus?.busRouteId == bus.busRouteId, !self.isRunning else { return }
