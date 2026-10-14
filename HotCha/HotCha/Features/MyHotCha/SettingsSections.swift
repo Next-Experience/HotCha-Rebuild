@@ -2,9 +2,7 @@ import SwiftUI
 
 /// 설정 항목들. 「나의 핫챠」 목록 안에 섹션으로 들어간다.
 struct SettingsSections: View {
-    @AppStorage(AlarmSound.storageKey) private var soundName = AlarmSound.classic.rawValue
-    @AppStorage("soundToggle") private var soundOn = true
-    @AppStorage("vibrationToggle") private var vibrationOn = true
+    @ObservedObject private var ringer = AlarmRinger.shared
     @AppStorage("alarmStopDistanceFromDestination") private var stopsBefore = 2
     @AppStorage("stopAlarmRadius") private var stopAlarmRadius: Double = 500
 
@@ -14,17 +12,11 @@ struct SettingsSections: View {
 
     var body: some View {
         Section {
-            NavigationLink {
-                AlarmSoundPicker(selection: $soundName)
-            } label: {
-                LabeledContent("알림음", value: (AlarmSound(rawValue: soundName) ?? .classic).title)
-            }
-            Toggle("소리", isOn: $soundOn)
-            Toggle("진동", isOn: $vibrationOn)
+            AlarmPermissionRow(ringer: ringer)
         } header: {
-            Text("알림 소리")
+            Text("알람")
         } footer: {
-            Text("소리를 켜면 무음 모드에서도 알림음이 울려요.")
+            Text("핫챠 알람은 시계 앱 알람과 같은 시스템 알람이라 무음 모드 · 집중 모드에서도 울려요.")
         }
 
         Section {
@@ -86,7 +78,7 @@ struct SettingsSections: View {
             } header: {
                 Text("개발자")
             } footer: {
-                Text("실제 알람처럼 소리·진동과 함께 알람 화면이 떠요. 버전을 다섯 번 누르면 이 메뉴가 열리고 닫혀요.")
+                Text("실제처럼 시스템 알람과 함께 알람 화면이 떠요. 버전을 다섯 번 누르면 이 메뉴가 열리고 닫혀요.")
             }
         }
     }
@@ -139,46 +131,29 @@ private struct PrivacyScreen: View {
     }
 }
 
-/// 알림음 고르기. 누르면 잠깐 들려준다.
-private struct AlarmSoundPicker: View {
-    @Binding var selection: String
+/// 알람 권한 상태. 꺼져 있으면 알람이 울리지 않으므로 바로 고칠 길을 둔다.
+struct AlarmPermissionRow: View {
+    @ObservedObject var ringer: AlarmRinger
 
     var body: some View {
-        List {
-            Section {
-                ForEach(AlarmSound.allCases) { sound in
-                    Button {
-                        selection = sound.rawValue
-                        preview(sound)
-                    } label: {
-                        HStack {
-                            Text(sound.title)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            if selection == sound.rawValue {
-                                Image(systemName: "checkmark")
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
+        switch ringer.authorization {
+        case .authorized:
+            LabeledContent("알람 권한", value: "켜짐")
+        case .notDetermined:
+            Button("알람 권한 허용하기") { ringer.requestAuthorizationIfNeeded() }
+        case .denied:
+            VStack(alignment: .leading, spacing: 4) {
+                Label("알람 권한이 꺼져 있어 알람이 울리지 않아요", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.red)
+                    .font(.subheadline.weight(.semibold))
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    Link("설정에서 켜기", destination: url)
+                        .font(.subheadline.weight(.semibold))
                 }
-            } footer: {
-                Text("누르면 미리 들을 수 있어요. 알림음은 앞으로 더 추가될 예정이에요.")
             }
-        }
-        .scrollContentBackground(.hidden)
-        .background(HotChaContentBackground())
-        .navigationTitle("알림음")
-        .navigationBarTitleDisplayMode(.inline)
-        .onDisappear { SoundManager.shared.stopSound() }
-    }
-
-    private func preview(_ sound: AlarmSound) {
-        SoundManager.shared.playSound(fileName: sound.fileName)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            SoundManager.shared.stopSound()
+            .padding(.vertical, 2)
+        @unknown default:
+            EmptyView()
         }
     }
 }
@@ -193,7 +168,7 @@ private struct FAQScreen: View {
     private let items = [
         Item(
             question: "알림이 안 울려요",
-            answer: "아이폰 설정 > 핫챠에서 위치를 ‘항상’으로, 알림을 ‘허용’으로 바꿔 주세요. 위치가 ‘앱을 사용하는 동안’이면 화면을 껐을 때 버스를 따라가지 못해요. 안내 중에는 앱을 완전히 종료하지 마세요."
+            answer: "아이폰 설정 > 핫챠에서 위치를 ‘항상’으로, 알람을 켜 주세요. 위치가 ‘앱을 사용하는 동안’이면 화면을 껐을 때 버스를 따라가지 못해요. 안내 중에는 앱을 완전히 종료하지 마세요."
         ),
         Item(
             question: "버스 알림과 정류장 알림은 뭐가 달라요?",
@@ -205,7 +180,7 @@ private struct FAQScreen: View {
         ),
         Item(
             question: "무음 모드에서도 울리나요?",
-            answer: "설정에서 ‘소리’를 켜 두면 무음 모드에서도 알림음이 스피커로 울려요. 조용히 받고 싶다면 소리를 끄고 진동만 켜 주세요."
+            answer: "네. 핫챠 알람은 시계 앱 알람과 같은 시스템 알람이라 무음 모드와 집중 모드에서도 울려요. 아이폰 설정 > 핫챠에서 알람이 켜져 있어야 해요."
         ),
         Item(
             question: "찾는 버스나 정류장이 안 나와요",

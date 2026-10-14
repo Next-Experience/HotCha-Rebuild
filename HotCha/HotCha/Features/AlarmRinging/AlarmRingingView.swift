@@ -27,7 +27,7 @@ extension Notification.Name {
 
 struct AlarmRingingView: View {
     let content: AlarmRingingContent
-    /// 소리만 끄고 안내는 이어 간다.
+    /// 알람만 끄고 안내는 이어 간다.
     let onConfirm: () -> Void
     /// 안내를 끝낸다.
     let onFinish: () -> Void
@@ -79,7 +79,7 @@ struct AlarmRingingView: View {
                         .frame(height: 56)
                         .background(.white, in: RoundedRectangle(cornerRadius: HotChaRadius.card, style: .continuous))
                 }
-                Text("소리만 끄고 안내는 계속돼요")
+                Text("알람만 끄고 안내는 계속돼요")
                     .font(.footnote)
                     .foregroundStyle(.white.opacity(0.75))
                     .padding(.bottom, 12)

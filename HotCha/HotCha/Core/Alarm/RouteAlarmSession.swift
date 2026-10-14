@@ -27,6 +27,11 @@ final class RouteAlarmSession: ObservableObject {
         engine.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+        // 시스템 알람 화면에서 알람을 끄면 앱의 알람 화면도 닫는다. 안내는 계속된다.
+        NotificationCenter.default.publisher(for: .systemAlarmStopped)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.alarmIsRinging = false }
+            .store(in: &cancellables)
     }
 
     // MARK: - 읽기
@@ -121,6 +126,8 @@ final class RouteAlarmSession: ObservableObject {
     @discardableResult
     func start() -> Bool {
         guard let bus, let destinationIndex else { return false }
+        // 알람은 AlarmKit 시스템 알람이다. 처음이면 여기서 권한을 묻는다.
+        Task { @MainActor in AlarmRinger.shared.requestAuthorizationIfNeeded() }
         startedAt = Date()
         return engine.start(
             stops: stops,
@@ -134,7 +141,7 @@ final class RouteAlarmSession: ObservableObject {
 
     /// 울리는 알람만 끈다. 안내는 계속된다.
     func silence() {
-        startAlarmToggle(isOn: false, title: "", body: "", useSound: false, useVibration: false)
+        Task { @MainActor in AlarmRinger.shared.stop() }
         alarmIsRinging = false
     }
 

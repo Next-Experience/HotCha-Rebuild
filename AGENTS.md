@@ -1,6 +1,6 @@
 # 핫챠 (HotCha) — 작업 규칙
 
-버스에서 **내릴 정류장을 놓치지 않게** 알려 주는 iOS 앱. SwiftUI · iOS 18.1+.
+버스에서 **내릴 정류장을 놓치지 않게** 알려 주는 iOS 앱. SwiftUI · iOS 26.1+ (AlarmKit, 결정 0005).
 
 > 제품이 무엇이고 무엇을 만들기로 했는지는 문서 허브 `hotcha/` 에 있다 (작업공간에서 이 저장소의 형제 폴더).
 > 어느 프로젝트에나 통하는 개발 규약은 `playbook/` 에 있다.
@@ -115,6 +115,7 @@ HotCha-Rebuild/
 | 무엇 | 어디 |
 | --- | --- |
 | 노선 알람이 언제 울리나 | `HotChaKit/Sources/HotChaKit/RouteTracker.swift` |
+| 알람을 어떻게 울리나 | `Core/Alarm/AlarmRinger.swift` — AlarmKit 시스템 알람 하나. 로컬 알림 · 앱 소리는 쓰지 않는다 |
 | 버스·정류장 검색 | `Data/Local/BusDatabase.swift` → `Resources/BusData.sqlite` |
 | 노선의 정류장 순서 | API. `Data/Network/BusAPI.swift` 가 서울/지방을 가른다 |
 | 즐겨찾기·이용 기록 | SwiftData (`Data/Models/`) |

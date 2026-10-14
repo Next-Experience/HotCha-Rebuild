@@ -53,13 +53,11 @@ struct NavigationView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .previewAlarmRinging)) { _ in
             isPreviewingAlarm = true
-            startAlarmToggle(
-                isOn: true,
-                title: "핫챠! 내릴 준비를 해주세요",
-                body: "알람 미리 보기예요",
-                useSound: UserDefaults.standard.object(forKey: "soundToggle") as? Bool ?? true,
-                useVibration: UserDefaults.standard.object(forKey: "vibrationToggle") as? Bool ?? true
-            )
+            AlarmRinger.shared.ring(title: "알람 미리 보기예요")
+        }
+        // 미리 보기 알람을 시스템 화면에서 끄면 앱의 알람 화면도 닫는다.
+        .onReceive(NotificationCenter.default.publisher(for: .systemAlarmStopped)) { _ in
+            isPreviewingAlarm = false
         }
     }
 
@@ -87,10 +85,10 @@ struct NavigationView: View {
         return .preview
     }
 
-    /// 소리만 끄고 안내는 이어 간다.
+    /// 알람만 끄고 안내는 이어 간다.
     private func confirmAlarm() {
         if isPreviewingAlarm {
-            startAlarmToggle(isOn: false, title: "", body: "", useSound: false, useVibration: false)
+            AlarmRinger.shared.stop()
             isPreviewingAlarm = false
         }
         if routeAlarmSession.alarmIsRinging { routeAlarmSession.silence() }

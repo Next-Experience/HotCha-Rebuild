@@ -43,10 +43,11 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>내릴 정류장에 가까워지면 무음 모드에서도 알람으로 깨워 드려요.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
-		<string>audio</string>
 		<string>fetch</string>
 	</array>
 </dict>

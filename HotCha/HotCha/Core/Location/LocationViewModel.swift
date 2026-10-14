@@ -6,16 +6,16 @@
 
 import CoreLocation
 import Combine
+import MapKit
 
 class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager() // 위치 관리 객체
-    private let geocoder = CLGeocoder() // 지오코더 객체
     @Published var location: CLLocation? // 현재 위치 저장
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined // 권한 상태 저장
-    @Published var administrativeArea: String? // 행정구역 저장
-    @Published var address: String?
-    @Published var locality: String? // 시·군 (예: 양산시)
+    /// "서울특별시" · "경상남도 양산시" 처럼 시까지 적은 지금 지역. 아직 모르면 nil 이다.
+    @Published private(set) var regionName: String?
     private var lastGeocodedLocation: CLLocation?
+    private var geocoding: MKReverseGeocodingRequest?
 
     override init() {
         super.init()
@@ -84,25 +84,16 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         // 주소는 멀리 움직였을 때만 다시 묻는다. 위치가 올 때마다 물으면 금방 한도에 걸린다.
         if let last = lastGeocodedLocation, currentLocation.distance(from: last) < 1_000 { return }
-        guard !geocoder.isGeocoding else { return }
-
-        geocoder.reverseGeocodeLocation(currentLocation) { [weak self] placemarks, _ in
-            // 실패하면 기록하지 않는다. 다음 위치에서 다시 묻는다.
-            guard let placemark = placemarks?.first else { return }
-            DispatchQueue.main.async {
-                self?.lastGeocodedLocation = currentLocation
-                self?.administrativeArea = placemark.administrativeArea
-                self?.locality = placemark.locality
-                self?.address = placemark.subLocality ?? ""
-            }
+        guard geocoding?.isLoading != true, let request = MKReverseGeocodingRequest(location: currentLocation) else {
+            return
         }
-    }
-
-    /// "서울특별시" · "부산광역시" · "경상남도 양산시" 처럼 시까지 적은 지금 지역.
-    /// 특별시·광역시는 도와 시의 이름이 같아 한 번만 적는다.
-    var regionName: String? {
-        guard let area = administrativeArea else { return locality }
-        guard let locality, locality != area else { return area }
-        return "\(area) \(locality)"
+        geocoding = request
+        request.getMapItems { [weak self] items, _ in
+            // 실패하면 기록하지 않는다. 다음 위치에서 다시 묻는다.
+            // cityWithContext 는 "서울특별시" · "경상남도 양산시" 처럼 특별시 · 광역시는 한 번만 적어 준다.
+            guard let name = items?.first?.addressRepresentations?.cityWithContext else { return }
+            self?.lastGeocodedLocation = currentLocation
+            self?.regionName = name
+        }
     }
 }

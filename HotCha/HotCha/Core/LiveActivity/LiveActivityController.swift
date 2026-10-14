@@ -33,31 +33,12 @@ final class LiveActivityController {
     }
 
     /// 남은 정류장·거리를 갱신한다. 값이 그대로면 아무것도 하지 않는다.
+    /// 알람 소리는 AlarmKit 시스템 알람이 낸다(결정 0005). 여기서는 경고음 없이 화면만 바꾼다.
     func update(_ state: HotChaActivityAttributes.ContentState) {
         guard let activity, state != lastState else { return }
-        // 알람이 막 울린 순간에는 아일랜드가 펼쳐지며 알린다.
-        let justFired = state.hasAlarmFired && lastState?.hasAlarmFired != true
         lastState = state
         let content = ActivityContent(state: state, staleDate: nil)
-        Task {
-            if justFired {
-                await activity.update(content, alertConfiguration: AlertConfiguration(
-                    title: "내릴 준비를 해주세요",
-                    body: "\(Self.alertBody(attributes: activity.attributes, state: state))",
-                    sound: .default
-                ))
-            } else {
-                await activity.update(content)
-            }
-        }
-    }
-
-    /// "152번 · 1정류장 남았어요 · OO에서 내려요"
-    private static func alertBody(
-        attributes: HotChaActivityAttributes, state: HotChaActivityAttributes.ContentState
-    ) -> String {
-        let guidance = HotChaGuidance(attributes: attributes, state: state)
-        return "\(guidance.label) · \(guidance.headline) · \(guidance.detail)"
+        Task { await activity.update(content) }
     }
 
     func end() {

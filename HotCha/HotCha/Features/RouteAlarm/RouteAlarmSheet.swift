@@ -21,8 +21,7 @@ struct RouteAlarmSheet: View {
     @Query private var bookmarks: [Bookmarkmodel]
 
     @AppStorage("alarmStopDistanceFromDestination") private var stopsBefore = 2
-    @AppStorage("soundToggle") private var soundOn = true
-    @AppStorage("vibrationToggle") private var vibrationOn = true
+    @ObservedObject private var ringer = AlarmRinger.shared
 
     @State private var query = ""
     @State private var bookmarkName = ""
@@ -90,8 +89,10 @@ struct RouteAlarmSheet: View {
                         if let stop = session.alarmStop {
                             LabeledContent("알림 정류장", value: stop.stationNm)
                         }
-                        Toggle("소리", isOn: $soundOn)
-                        Toggle("진동", isOn: $vibrationOn)
+                        // 알람 권한이 꺼져 있으면 알람이 울리지 않는다. 그때만 보여 준다.
+                        if ringer.authorization == .denied {
+                            AlarmPermissionRow(ringer: ringer)
+                        }
                     }
                     .id(Self.alarmSectionID)
                 }
@@ -230,9 +231,10 @@ struct RouteAlarmSheet: View {
                 }
             }
 
-            Section {
-                Toggle("소리", isOn: $soundOn)
-                Toggle("진동", isOn: $vibrationOn)
+            if ringer.authorization == .denied {
+                Section {
+                    AlarmPermissionRow(ringer: ringer)
+                }
             }
 
             Section {

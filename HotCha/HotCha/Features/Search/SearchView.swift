@@ -72,7 +72,7 @@ final class PlaceSearchCompleter: NSObject, ObservableObject, MKLocalSearchCompl
     static func resolve(_ completion: MKLocalSearchCompletion) async -> PlaceResult? {
         let request = MKLocalSearch.Request(completion: completion)
         guard let item = try? await MKLocalSearch(request: request).start().mapItems.first else { return nil }
-        let coordinate = item.placemark.coordinate
+        let coordinate = item.location.coordinate
         return PlaceResult(name: completion.title, latitude: coordinate.latitude, longitude: coordinate.longitude)
     }
 

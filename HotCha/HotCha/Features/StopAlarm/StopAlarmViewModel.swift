@@ -18,8 +18,6 @@ final class StopAlarmViewModel: ObservableObject {
     /// 목적지 정류장까지 남은 거리(m). 위치를 아직 못 받았으면 nil
     @Published private(set) var distance: CLLocationDistance?
 
-    @AppStorage("soundToggle") private var soundToggle: Bool = true
-    @AppStorage("vibrationToggle") private var vibrationToggle: Bool = true
 
     private let locationViewModel = LocationViewModel()
     private var cancellables = Set<AnyCancellable>()
@@ -38,6 +36,11 @@ final class StopAlarmViewModel: ObservableObject {
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.handle($0) }
+            .store(in: &cancellables)
+        // 시스템 알람 화면에서 알람을 끄면 앱의 알람 화면도 닫는다. 안내는 계속된다.
+        NotificationCenter.default.publisher(for: .systemAlarmStopped)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.isRinging = false }
             .store(in: &cancellables)
     }
 
@@ -78,6 +81,8 @@ final class StopAlarmViewModel: ObservableObject {
         lastReportedDistance = nil
         startedAt = Date()
         startDistance = distance
+        // 알람은 AlarmKit 시스템 알람이다. 처음이면 여기서 권한을 묻는다.
+        Task { @MainActor in AlarmRinger.shared.requestAuthorizationIfNeeded() }
 
         locationViewModel.requestalwaysPermission()
         locationViewModel.startTrackingLocation()
@@ -98,9 +103,9 @@ final class StopAlarmViewModel: ObservableObject {
         }
     }
 
-    /// 알람 소리만 끈다. 안내(위치 추적)는 계속된다.
+    /// 알람만 끈다. 안내(위치 추적)는 계속된다.
     func silence() {
-        startAlarmToggle(isOn: false, title: "", body: "", useSound: false, useVibration: false)
+        Task { @MainActor in AlarmRinger.shared.stop() }
         isRinging = false
     }
 
@@ -132,13 +137,8 @@ final class StopAlarmViewModel: ObservableObject {
         if meters <= radius && !didFire {
             didFire = true
             isRinging = true
-            startAlarmToggle(
-                isOn: true,
-                title: "핫챠! 내릴 준비를 해주세요",
-                body: "\(target.name)까지 약 \(Self.format(meters)) 남았어요!",
-                useSound: soundToggle,
-                useVibration: vibrationToggle
-            )
+            let title = "\(target.name)에서 내려요"
+            Task { @MainActor in AlarmRinger.shared.ring(title: title) }
         }
 
         // 50m 단위로 달라질 때만 갱신한다. 알람이 울린 것은 controller 가 상태 차이로 알아챈다.

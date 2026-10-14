@@ -11,11 +11,11 @@ struct OnBoarding2View: View {
     var body: some View {
         VStack {
             HStack {
-                Text("상황에 맞는")
+                Text("무음 모드에서도")
                 Spacer()
             }
             HStack {
-                Text("알림 소리를 설정해요")
+                Text("알람으로 깨워 드려요")
                 Spacer()
             }
             Spacer()

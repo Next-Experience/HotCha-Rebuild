@@ -32,21 +32,11 @@ struct HotChaApp: App {
 }
 
 
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-
-        UNUserNotificationCenter.current().delegate = self
-        requestNotificationPermission()
         // 안내 중에 앱이 꺼졌으면 주인 없는 Live Activity 가 남아 있다. 새로 시작할 때 치운다.
         LiveActivityController.shared.endAll()
-
         return true
-    }
-
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.banner, .sound])
     }
 }

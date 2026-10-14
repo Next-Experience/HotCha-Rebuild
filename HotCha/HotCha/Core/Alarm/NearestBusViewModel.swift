@@ -28,8 +28,6 @@ class NearestBusViewModel: ObservableObject {
     var busRouteId: String = ""
 
     @AppStorage("alarmStopDistanceFromDestination") var alarmStopDistanceFromDestination: Int = 2
-    @AppStorage("soundToggle") var soundToggle: Bool = true
-    @AppStorage("vibrationToggle") var vibrationToggle: Bool = true
 
     private var cancellables = Set<AnyCancellable>()
     private var busNumber: String?
@@ -97,13 +95,7 @@ class NearestBusViewModel: ObservableObject {
     }
 
     func stop() {
-        startAlarmToggle(
-            isOn: false,
-            title: "",
-            body: "",
-            useSound: false,
-            useVibration: false
-        )
+        Task { @MainActor in AlarmRinger.shared.stop() }
 
         isCalculating = false
         tracker = nil
@@ -167,15 +159,10 @@ class NearestBusViewModel: ObservableObject {
         }
     }
 
+    /// 앱 안 알람 화면을 띄우고 시스템 알람(AlarmKit)을 울린다.
     private func triggerAlarm(remaining: Int) {
         navigateToAlarmEndView = true
-
-        startAlarmToggle(
-            isOn: true,
-            title: "핫챠! 내릴 준비를 해주세요",
-            body: remaining > 0 ? "도착까지 \(remaining)정류장 남았어요!" : "곧 도착 정류장이에요!",
-            useSound: soundToggle,
-            useVibration: vibrationToggle
-        )
+        let title = "\(destinationStop?.stationNm ?? "내릴 정류장")에서 내려요"
+        Task { @MainActor in AlarmRinger.shared.ring(title: title) }
     }
 }
