@@ -120,6 +120,7 @@ HotCha-Rebuild/
 | 즐겨찾기·이용 기록 | SwiftData (`Data/Models/`) |
 | 진행 중인 안내 | `RouteAlarmSession`(버스) · `StopAlarmViewModel`(정류장). 탭 전체가 하나씩 나눠 쓴다 |
 | Live Activity 데이터 모양 | `HotCha/LiveActivityShared/HotChaActivityAttributes.swift` |
+| 안내 단계와 문구(홈 배너 · 잠금 화면 · 시트) | `HotCha/LiveActivityShared/HotChaGuidance.swift` |
 
 ---
 
