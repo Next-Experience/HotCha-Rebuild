@@ -189,20 +189,6 @@ struct RouteAlarmSheet: View {
     // MARK: 안내 중
 
     private var runningList: some View {
-        // 안내 종료는 목록 아래 시트 안쪽 맨 끝에 고정한다. 목록은 그 위에서 끝나서 버튼 뒤로 비치지 않는다.
-        // 시트를 가장 낮게 내렸을 때는 숨긴다.
-        VStack(spacing: 0) {
-            runningRows
-            if detent != RouteAlarmScreen.peekDetent {
-                FinishGuidanceButton(action: finish)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                    .padding(.bottom, 4)
-            }
-        }
-    }
-
-    private var runningRows: some View {
         List {
             Section {
                 statusHeader
@@ -261,6 +247,13 @@ struct RouteAlarmSheet: View {
                 if bookmarks.count >= Self.maxBookmarks {
                     Text("즐겨찾기는 \(Self.maxBookmarks)개까지 저장할 수 있어요.")
                 }
+            }
+
+            // 안내 종료는 목록 맨 끝에 있다. 끝까지 내려야 보여서 실수로 누르지 않는다.
+            Section {
+                FinishGuidanceButton(action: finish)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
             }
         }
         .listStyle(.insetGrouped)
