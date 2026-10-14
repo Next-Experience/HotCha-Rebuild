@@ -38,9 +38,10 @@ struct RouteAlarmScreen: View {
     var body: some View {
         GeometryReader { proxy in
             map
-                // 시트가 덮는 만큼 지도의 안쪽 여백을 둔다. 지도는 그 위로 보이는 영역을 기준으로 가운데를 잡는다.
-                .safeAreaPadding(.bottom, sheetCover(in: proxy.size.height))
-                .animation(.smooth, value: detent)
+                // 지도는 늘 화면 전체를 덮고 시트만 움직인다. 안쪽 여백은 중간 높이 시트가 덮는 만큼으로 **고정**한다 —
+                // 시트 높이를 따라가게 두면 시트를 끌 때마다 지도 가운데와 Apple 표시가 함께 오르내리며 지도가 다시 그려진다.
+                // 지도는 이 여백 위로 보이는 영역을 기준으로 가운데를 잡는다.
+                .safeAreaPadding(.bottom, Self.mediumSheetCover(in: proxy.size.height))
         }
         .navigationTitle("\(bus.busRouteNm)번")
         .navigationBarTitleDisplayMode(.inline)
@@ -111,11 +112,9 @@ struct RouteAlarmScreen: View {
     /// 가장 높이 올린 시트. `.large` 는 뒤 화면을 바꿔 버려서 화면 끝까지 올리지 않는다.
     private static let tallDetent = PresentationDetent.fraction(0.92)
 
-    /// 시트가 지도 아래쪽을 덮는 높이
-    private func sheetCover(in height: CGFloat) -> CGFloat {
-        if detent == Self.peekDetent { return 150 }
-        // 중간 높이 시트는 화면의 절반쯤을 덮는다. 지도 영역은 내비게이션 바 아래부터라 조금 더 덮인다.
-        return height * 0.55
+    /// 중간 높이 시트가 지도 아래쪽을 덮는 높이. 시트는 화면의 절반쯤인데, 지도 영역은 내비게이션 바 아래부터라 조금 더 덮인다.
+    private static func mediumSheetCover(in height: CGFloat) -> CGFloat {
+        height * 0.55
     }
 
     // MARK: - 지도

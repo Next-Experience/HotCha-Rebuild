@@ -66,8 +66,13 @@ struct StopAlarmView: View {
         candidates.first { $0.id == selectedStopID }
     }
 
+    /// 시트 높이. 바뀌지 않으므로 지도의 안쪽 여백도 이 값으로 고정한다.
+    private static let sheetHeight: CGFloat = 300
+
     var body: some View {
         map
+            // 지도는 화면 전체를 덮는다. 시트가 덮는 만큼 안쪽 여백을 둬서 고른 정류장이 시트 위로 보이는 영역 가운데에 온다.
+            .safeAreaPadding(.bottom, Self.sheetHeight)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .tabBar)
@@ -77,7 +82,7 @@ struct StopAlarmView: View {
                 }
                 .scrollBounceBehavior(.basedOnSize)
                 .scrollIndicators(.hidden)
-                .presentationDetents([.height(300)])
+                .presentationDetents([.height(Self.sheetHeight)])
                 .presentationBackgroundInteraction(.enabled)
                 .presentationDragIndicator(.hidden)
                 .interactiveDismissDisabled()
