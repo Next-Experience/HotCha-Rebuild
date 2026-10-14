@@ -38,8 +38,8 @@ struct SplashView: View {
                     .frame(width: 220)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 40)
-                    .padding(.bottom, 70)
                     .accessibilityHidden(true)
+                Spacer()
             }
             .font(.pretendard(.bold, size: 36))
             .lineLimit(1)
