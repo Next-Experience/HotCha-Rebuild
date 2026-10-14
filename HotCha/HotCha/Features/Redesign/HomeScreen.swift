@@ -30,6 +30,11 @@ struct HomeScreen: View {
                         destination: $searchDestination,
                         location: locationViewModel.location
                     )
+                    // 결과 바깥의 빈 곳을 누르거나 왼쪽 가장자리에서 밀면 검색을 닫는다.
+                    // 결과 줄과 분할 컨트롤은 자기 동작이 먼저라 여기에 걸리지 않는다.
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: closeSearch)
+                    .simultaneousGesture(edgeSwipeToCloseSearch)
                 } else {
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 30) {
@@ -137,6 +142,22 @@ struct HomeScreen: View {
         } else {
             isSearchPresented = true
         }
+    }
+
+    private func closeSearch() {
+        homeSearchQuery = ""
+        isSearchPresented = false
+    }
+
+    /// 뒤로 가기처럼 왼쪽 가장자리에서 오른쪽으로 밀어 검색을 닫는다.
+    private var edgeSwipeToCloseSearch: some Gesture {
+        DragGesture(minimumDistance: 20)
+            .onEnded { value in
+                guard value.startLocation.x < 40, value.translation.width > 80,
+                    abs(value.translation.height) < value.translation.width
+                else { return }
+                closeSearch()
+            }
     }
 
     private var currentRegion: String {

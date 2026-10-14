@@ -74,7 +74,9 @@ final class BusDatabase {
         cityNames[code] ?? "알 수 없음"
     }
 
-    /// 버스 번호로 노선을 찾는다. 정확히 일치 → 앞부분 일치 → 포함 순, 같은 순위면 내 주변 도시 먼저.
+    /// 버스 번호로 노선을 찾는다. 내 위치에 가까운 노선이 먼저다 —
+    /// 기점 · 종점이 내 주변 5km 안 → 내 주변 도시 → 그 밖 순이고, 각 무리 안에서는 정확히 일치 → 앞부분 일치 → 포함 순이다.
+    /// 가까움은 기점 · 종점 중 가까운 쪽까지의 거리로 잰다. 내장 DB 에는 노선이 지나는 정류장이 없어 양 끝만 알 수 있다.
     func searchRoutes(_ text: String, near location: CLLocation? = nil, limit: Int = 120) async
         -> [BusRouteRecord]
     {
@@ -91,14 +93,14 @@ final class BusDatabase {
                        first_time, last_time, corp, term, length
                 FROM routes
                 WHERE route_no LIKE ? ESCAPE '\\'
-                ORDER BY (route_no = ?) DESC, (route_no LIKE ? ESCAPE '\\') DESC,
-                         \(nearbyClause) DESC, length(route_no), route_no, city_code
+                ORDER BY \(nearbyClause) DESC, (route_no = ?) DESC, (route_no LIKE ? ESCAPE '\\') DESC,
+                         length(route_no), route_no, city_code
                 LIMIT ?
                 """
             let escaped = Self.escapeLike(query)
-            let args: [Any] = ["%\(escaped)%", query, "\(escaped)%"] + nearby + [limit]
+            let args: [Any] = ["%\(escaped)%"] + nearby + [query, "\(escaped)%", limit]
             var seen = Set<String>()
-            return self.rows(sql, args).map { row in
+            let found = self.rows(sql, args).map { row in
                 BusRouteRecord(
                     cityCode: row.text(0), routeId: row.text(1), routeNo: row.text(2), abrv: row.text(3),
                     routeType: row.text(4), startName: row.text(5), endName: row.text(6),
@@ -108,7 +110,81 @@ final class BusDatabase {
             }
             // TAGO 는 출발 시각만 다른 같은 노선을 여러 건으로 준다. 화면에서는 한 줄이면 된다.
             .filter { seen.insert("\($0.cityCode)|\($0.routeNo)|\($0.startName)|\($0.endName)").inserted }
+            return self.sortedByNearness(found, query: query, near: location, nearbyCities: Set(nearby))
         }
+    }
+
+    /// 기점 · 종점이 내 주변 5km 안인 노선 → 내 주변 도시의 노선 → 그 밖 순으로 세운다.
+    /// 각 무리 안에서는 일치 순위(정확히 · 앞부분 · 포함)가 먼저고, 첫 무리는 같은 순위끼리 가까운 순이다.
+    private func sortedByNearness(
+        _ routes: [BusRouteRecord], query: String, near location: CLLocation?, nearbyCities: Set<String>
+    ) -> [BusRouteRecord] {
+        let nearby = nearbyStopDistances(around: location)
+        guard !nearby.isEmpty else { return routes }
+        let lowered = query.lowercased()
+
+        func rank(_ route: BusRouteRecord) -> Int {
+            let number = route.routeNo.lowercased()
+            if number == lowered { return 0 }
+            return number.hasPrefix(lowered) ? 1 : 2
+        }
+        func terminalDistance(_ route: BusRouteRecord) -> Double? {
+            [route.startName, route.endName]
+                .compactMap { nearby["\(route.cityCode)|\(Self.normalized($0))"] }
+                .min()
+        }
+
+        func group(_ route: BusRouteRecord, meters: Double?) -> Int {
+            if meters != nil { return 0 }
+            return nearbyCities.contains(route.cityCode) ? 1 : 2
+        }
+
+        struct Ranked {
+            let offset: Int
+            let route: BusRouteRecord
+            let group: Int
+            let rank: Int
+            let meters: Double
+        }
+
+        return routes.enumerated()
+            .map { item in
+                let meters = terminalDistance(item.element)
+                return Ranked(
+                    offset: item.offset, route: item.element, group: group(item.element, meters: meters),
+                    rank: rank(item.element), meters: meters ?? 0)
+            }
+            .sorted { a, b in
+                if a.group != b.group { return a.group < b.group }
+                if a.rank != b.rank { return a.rank < b.rank }
+                if a.meters != b.meters { return a.meters < b.meters }
+                return a.offset < b.offset
+            }
+            .map(\.route)
+    }
+
+    /// 내 주변 5km 안 정류장의 이름별 가장 가까운 거리(m). 열쇠는 "노선 도시 코드|이름" 이다.
+    private func nearbyStopDistances(around location: CLLocation?) -> [String: Double] {
+        guard let location else { return [:] }
+        let c = location.coordinate
+        let sql = """
+            SELECT name, lat, lon, city_code FROM stops
+            WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
+            """
+        let box: [Any] = [c.latitude - 0.045, c.latitude + 0.045, c.longitude - 0.056, c.longitude + 0.056]
+        var result: [String: Double] = [:]
+        for row in rows(sql, box) {
+            let meters = location.distance(from: CLLocation(latitude: row.double(1), longitude: row.double(2)))
+            guard meters <= 5_000 else { continue }
+            let key = "\(Self.routeCityCode(row.text(3)))|\(Self.normalized(row.text(0)))"
+            result[key] = min(result[key] ?? .infinity, meters)
+        }
+        return result
+    }
+
+    /// 노선의 기점 · 종점 이름과 정류장 이름을 맞춰 보려고 띄어쓰기와 점을 뺀다.
+    private static func normalized(_ name: String) -> String {
+        name.filter { !$0.isWhitespace && $0 != "." && $0 != "·" }
     }
 
     /// 정류장 이름이나 정류장 번호로 찾는다. 위치를 알면 가까운 순으로 돌려준다.
@@ -196,9 +272,13 @@ final class BusDatabase {
             WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
             """
         return rows(sql, [c.latitude - 0.045, c.latitude + 0.045, c.longitude - 0.056, c.longitude + 0.056])
-            .map { $0.text(0) }
-            // 정류장 파일은 서울이 11, 노선은 서울시 API 를 쓰는 1 이다.
-            .map { $0 == "11" ? BusAPI.seoulCityCode : $0 }
+            .map { Self.routeCityCode($0.text(0)) }
+    }
+
+    /// 정류장 파일의 도시 코드를 노선 테이블의 도시 코드로 바꾼다.
+    /// 정류장 파일은 서울이 11, 노선은 서울시 API 를 쓰는 1 이다. 나머지 도시는 같다.
+    private static func routeCityCode(_ stopCityCode: String) -> String {
+        stopCityCode == "11" ? BusAPI.seoulCityCode : stopCityCode
     }
 
     private func run<T>(_ work: @escaping () -> T) async -> T {
