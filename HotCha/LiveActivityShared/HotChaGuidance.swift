@@ -71,6 +71,23 @@ struct HotChaGuidance: Equatable {
         }
     }
 
+    /// 큰 글자의 숫자 부분. 잠금 화면은 이것만 더 크게 그린다. "3" · "540m". 숫자가 없는 단계는 nil
+    var headlineNumber: String? {
+        switch phase {
+        case .locating, .arrived: return nil
+        case .passed: return "\(-(remainingStops ?? 0))"
+        case .travelling, .preparing:
+            if let stops = remainingStops { return "\(stops)" }
+            return Self.format(meters: remainingMeters ?? 0)
+        }
+    }
+
+    /// 큰 글자에서 숫자를 뺀 나머지. "정류장 남았어요" · "남았어요" · "이번 정류장이에요"
+    var headlineRest: String {
+        guard let number = headlineNumber else { return headline }
+        return String(headline.dropFirst(number.count)).trimmingCharacters(in: .whitespaces)
+    }
+
     /// 아래 한 줄. "두산위브아파트입구에서 내려요" · "미아초교를 지났어요"
     var detail: String {
         phase == .passed ? "\(destination)\(Self.objectParticle(after: destination)) 지났어요" : "\(destination)에서 내려요"
