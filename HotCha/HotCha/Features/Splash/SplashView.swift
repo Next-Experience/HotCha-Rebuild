@@ -10,13 +10,19 @@ import SwiftUI
 struct SplashView: View {
     @State private var isSplashActive = false
     @AppStorage("OnBoarding_True") var OnBoardingTrue: Bool = false
+    @StateObject private var onboardingLocation = LocationViewModel()
+    @ObservedObject private var alarmRinger = AlarmRinger.shared
     
     var body: some View {
         if isSplashActive {
-            if OnBoardingTrue {
+            if OnBoardingTrue && requiredPermissionsAreGranted {
                 NavigationView()
             } else {
-                OnBoardingView()
+                OnBoardingView(
+                    locationViewModel: onboardingLocation,
+                    alarmRinger: alarmRinger,
+                    startsAtPermissions: OnBoardingTrue
+                )
             }
             
         } else {
@@ -52,6 +58,11 @@ struct SplashView: View {
         }
         
         
+    }
+
+    private var requiredPermissionsAreGranted: Bool {
+        onboardingLocation.authorizationStatus == .authorizedAlways
+            && alarmRinger.authorization == .authorized
     }
 }
 

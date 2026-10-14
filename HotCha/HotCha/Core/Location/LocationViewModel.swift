@@ -20,6 +20,7 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     override init() {
         super.init()
         manager.delegate = self
+        authorizationStatus = manager.authorizationStatus
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         manager.distanceFilter = 20 // 50미터 이상 이동 시에만 업데이트
         manager.allowsBackgroundLocationUpdates = true
