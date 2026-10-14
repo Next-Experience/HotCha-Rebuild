@@ -17,12 +17,12 @@ struct OnboardingButtonview: View {
             Text("바로 시작하기")
                 .padding(.vertical, 15)
                 .font(.pretendard(.semibold, size: 20))
-                .foregroundStyle(Color("gray900"))
+                .foregroundStyle(.white)
             Spacer()
             
         }
         .background(isTapped ? Color("purplec") : Color("mainpurple"))
-        .cornerRadius(8)
+        .clipShape(RoundedRectangle(cornerRadius: HotChaRadius.card, style: .continuous))
         
         .onTapGesture {
             withAnimation {

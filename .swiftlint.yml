@@ -4,6 +4,7 @@
 included:
   - HotCha/HotCha
   - HotCha/HotchaLive
+  - HotCha/LiveActivityShared
   - HotChaKit/Sources
   - HotChaKit/Tests
 excluded:

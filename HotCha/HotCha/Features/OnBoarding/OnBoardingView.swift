@@ -43,7 +43,7 @@ struct OnBoardingView: View {
            
         }
         
-        .background(Color("gray900"))
+        .background(HotChaContentBackground())
         
     }
 }

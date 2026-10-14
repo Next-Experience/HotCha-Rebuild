@@ -29,7 +29,7 @@ struct OnBoarding3View: View {
                 .padding(.top, 0)
         }
         .font(.pretendard(.bold, size: 24))
-        .foregroundStyle(Color("gray50"))
+        .foregroundStyle(.primary)
         .padding(.horizontal, 30)
     }
 }

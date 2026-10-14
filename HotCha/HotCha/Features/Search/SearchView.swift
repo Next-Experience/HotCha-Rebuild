@@ -4,6 +4,7 @@
 //
 //  Created by 문재윤 on 2/24/25.
 //
+import SwiftData
 import SwiftUI
 import MapKit
 import CoreLocation
@@ -88,12 +89,15 @@ final class PlaceSearchCompleter: NSObject, ObservableObject, MKLocalSearchCompl
 /// 결과 줄은 검색이 닫히면 사라지므로, 이동은 사라지지 않는 MainView 가 맡는다.
 enum SearchDestination: Hashable, Identifiable {
     case bus(Bus_info_seoul)
+    /// 이용 기록처럼 도착 정류장이 이미 정해진 노선. 고르지 않고 바로 안내를 시작한다.
+    case route(Bus_info_seoul, startingAt: String)
     case stop(BusStopRecord)
     case place(PlaceResult)
 
     var id: String {
         switch self {
         case .bus(let bus): return "bus-\(bus.city_code)-\(bus.busRouteId)"
+        case .route(let bus, let stationId): return "route-\(bus.city_code)-\(bus.busRouteId)-\(stationId)"
         case .stop(let stop): return "stop-\(stop.id)"
         case .place(let place): return "place-\(place.name)-\(place.latitude)-\(place.longitude)"
         }
@@ -104,12 +108,11 @@ struct SearchView: View {
     @Binding var textfiledValue: String
     @Binding var searchActivate: Bool
     @Binding var destination: SearchDestination?
-    @Binding var isBookmark: Bool
-    @Binding var type_name: String
-    @ObservedObject var modalStateViewModel: AlarmModalViewModel
-    @ObservedObject var busStopSeoulViewModel: BusStopSeoulViewModel
-    @ObservedObject var nearestBusViewModel: NearestBusViewModel
-    @ObservedObject var sheetManager: AlarmSettingModalSheetManager
+    /// 즐겨찾기에 넣을 버스를 고르는 중인가. 그때는 버스만 보여 준다.
+    var isBookmark: Bool = false
+    /// 내 위치. 가까운 지역의 버스와 가까운 정류장을 먼저 보여 주는 기준이다.
+    var location: CLLocation?
+    @Query(sort: \Usage_history.get_off_timestamp, order: .reverse) private var histories: [Usage_history]
 
     // 검색 결과 상태 관리
     @State private var buses: [Bus_info_seoul] = []
@@ -127,10 +130,11 @@ struct SearchView: View {
     var body: some View {
         VStack(spacing: 0) {
             if textfiledValue.isEmpty {
-                if !isBookmark {
-                    RecentStopsView(destination: $destination)
+                if isBookmark {
+                    BookmarkBusSearchPrompt()
+                } else {
+                    recentList
                 }
-                SearchHistoryView(isBookmark: $isBookmark, modalStateViewModel: modalStateViewModel, busStopSeoulViewModel: busStopSeoulViewModel, nearestBusViewModel: nearestBusViewModel, sheetManager: sheetManager)
             } else {
                 if scopes.count > 1 {
                     scopeBar
@@ -141,15 +145,15 @@ struct SearchView: View {
                         ProgressView()
                             .padding(.top, 100)
                         Text("검색 중...")
-                            .font(.pretendard(.medium, size: 14))
-                            .foregroundStyle(Color("gray500"))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                         Spacer()
                     }
                 } else if count(of: scope) == 0 {
                     VStack {
                         Text("검색 결과가 없습니다")
-                            .font(.pretendard(.medium, size: 16))
-                            .foregroundStyle(Color("gray500"))
+                            .font(.body)
+                            .foregroundStyle(.secondary)
                         Spacer()
                     }
                     .padding(.top, 100)
@@ -168,7 +172,6 @@ struct SearchView: View {
             }
         }
         .onAppear {
-            busStopSeoulViewModel.returnToRootView = false
             if !textfiledValue.isEmpty && buses.isEmpty && stops.isEmpty && placeCompleter.results.isEmpty {
                 scheduleSearch(textfiledValue)
             }
@@ -176,26 +179,55 @@ struct SearchView: View {
         .onChange(of: textfiledValue) { _, newValue in
             scheduleSearch(newValue)
         }
-        .background(Color("gray50"))
+        // 최근 기록 · 탭 · 결과 줄이 같은 왼쪽 선에 선다.
+        .padding(.horizontal, 20)
+        .background(.clear)
+    }
+
+    // MARK: - 검색어가 비었을 때
+
+    /// 최근 이용 기록. 누르면 같은 곳으로 바로 이어진다.
+    private var recentList: some View {
+        let entries = HistoryEntry.merged(buses: histories, stops: StopAlarmHistory.load()).prefix(6)
+        return ScrollView {
+            LazyVStack(spacing: 0) {
+                if entries.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(Clay.magnifier.rawValue)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 120, height: 120)
+                        Text("버스 번호나 정류장을 검색하세요")
+                            .font(.title3.weight(.bold))
+                        Text("장소 이름으로도 찾을 수 있어요.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 60)
+                }
+                ForEach(Array(entries)) { entry in
+                    VStack(spacing: 0) {
+                        HistoryRow(entry: entry)
+                            .padding(.vertical, 12)
+                        Divider()
+                    }
+                    .onTapGesture { destination = entry.destination }
+                }
+            }
+        }
+        .scrollDismissesKeyboard(.immediately)
     }
 
     // MARK: - 탭
 
     private var scopeBar: some View {
-        HStack(spacing: 8) {
+        Picker("검색 범위", selection: $scope) {
             ForEach(scopes) { item in
-                let isSelected = item == scope
-                Text(isSearching ? item.rawValue : "\(item.rawValue) \(count(of: item))")
-                    .font(.pretendard(.semibold, size: 14))
-                    .foregroundStyle(isSelected ? Color("gray50") : Color("gray500"))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background(Capsule().fill(isSelected ? Color("mainpurple") : Color("gray150")))
-                    .contentShape(Capsule())
-                    .onTapGesture { scope = item }
+                Text(isSearching ? item.rawValue : "\(item.rawValue) \(count(of: item))").tag(item)
             }
-            Spacer()
         }
+        .pickerStyle(.segmented)
         .padding(.bottom, 8)
     }
 
@@ -225,10 +257,13 @@ struct SearchView: View {
         ForEach(stops) { stop in
             resultRow(
                 icon: "bus.fill",
+                clay: .busStop,
                 title: stop.name,
                 detail: stop.arsNumber.isEmpty ? stop.cityName : "\(stop.cityName) · \(stop.arsNumber)"
             )
-            .onTapGesture { destination = .stop(stop) }
+            .onTapGesture {
+                destination = .stop(stop)
+            }
         }
     }
 
@@ -248,60 +283,65 @@ struct SearchView: View {
 
     func formatBusRoute(_ route: Bus_info_seoul) -> some View {
         return VStack(spacing: 0) {
-            HStack {
-                SearchBusUtil.CustomBusNoView(busNo: route.busRouteNm, routeType: route.routeType)
-                Text(BusDatabase.shared.cityName(for: route.city_code))
-                    .font(.pretendard(.semibold, size: 14))
-                    .foregroundStyle(Color("gray300"))
-                BusTypeLabelView(busNo: route.busRouteAbrv, routeType: route.routeType)
-
+            HStack(spacing: 12) {
+                ClayIcon(imageName: BusArt.imageName(for: route), size: 40)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        SearchBusUtil.CustomBusNoView(busNo: route.busRouteNm, routeType: route.routeType)
+                        Text(BusDatabase.shared.cityName(for: route.city_code))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        BusTypeLabelView(busNo: route.busRouteAbrv, routeType: route.routeType)
+                    }
+                    Text("\(route.stStationNm) ↔︎ \(route.edStationNm)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
                 Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
             }
-            .padding(.top, 8)
+            .padding(.vertical, 15)
 
-            HStack {
-                Text("\(route.stStationNm) ↔︎ \(route.edStationNm)")
-                    .font(.pretendard(.semibold, size: 14))
-                    .foregroundStyle(Color("gray900"))
-                Spacer()
-            }
-            .padding(.top, 10)
-            .padding(.bottom)
-
-            Rectangle()
-                .foregroundStyle(Color("gray100"))
-                .frame(height: 1)
+            Divider()
 
         }
         .contentShape(Rectangle())
     }
 
-    private func resultRow(icon: String, title: String, detail: String) -> some View {
+    private func resultRow(icon: String, clay: Clay? = nil, title: String, detail: String) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color("mainpurple"))
-                    .frame(width: 32, height: 32)
-                    .background(Circle().fill(Color("mainpurple").opacity(0.15)))
+                if let clay {
+                    ClayIcon(clay: clay, size: 40)
+                } else {
+                    Image(systemName: icon)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color("mainpurple"))
+                        .frame(width: 40, height: 40)
+                        .background(
+                            Color("mainpurple").opacity(0.10),
+                            in: RoundedRectangle(cornerRadius: HotChaRadius.tile, style: .continuous)
+                        )
+                }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.pretendard(.semibold, size: 16))
-                        .foregroundStyle(Color("gray900"))
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                     Text(detail)
-                        .font(.pretendard(.medium, size: 13))
-                        .foregroundStyle(Color("gray400"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
                 Spacer()
             }
             .padding(.vertical, 12)
 
-            Rectangle()
-                .foregroundStyle(Color("gray100"))
-                .frame(height: 1)
+            Divider()
         }
         .contentShape(Rectangle())
     }
@@ -330,8 +370,8 @@ struct SearchView: View {
 
     @MainActor
     private func performSearch(searchText: String) async {
-        // 마지막으로 알려진 위치만 쓴다. 권한이 없으면 nil 이고, 그러면 이름순으로 나온다.
-        let location = CLLocationManager().location
+        // 화면이 알려 준 위치가 없으면 마지막으로 알려진 위치를 쓴다. 그것도 없으면 이름순이다.
+        let location = self.location ?? CLLocationManager().location
 
         async let routeRecords = BusDatabase.shared.searchRoutes(searchText, near: location)
         async let stopRecords = isBookmark ? [] : BusDatabase.shared.searchStops(searchText, near: location)
@@ -353,42 +393,14 @@ struct SearchView: View {
     }
 }
 
-/// 검색어가 비어 있을 때 보여주는, 최근에 알람을 맞춘 정류장
-struct RecentStopsView: View {
-    @Binding var destination: SearchDestination?
-    @State private var stops: [BusStopRecord] = []
-
+private struct BookmarkBusSearchPrompt: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if !stops.isEmpty {
-                Text("최근 정류장")
-                    .font(.pretendard(.medium, size: 16))
-                    .foregroundColor(Color("gray300"))
-                    .padding(.top, 6)
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(stops) { stop in
-                            HStack(spacing: 6) {
-                                Image(systemName: "bus.fill")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(Color("mainpurple"))
-                                Text(stop.name)
-                                    .font(.pretendard(.semibold, size: 14))
-                                    .foregroundStyle(Color("gray900"))
-                                    .lineLimit(1)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Capsule().fill(Color("gray150")))
-                            .onTapGesture { destination = .stop(stop) }
-                        }
-                    }
-                }
-                .padding(.bottom, 8)
-            }
+        ContentUnavailableView {
+            Label("버스 번호를 검색하세요", systemImage: "bus")
+        } description: {
+            Text("예: 100, 320, 9401\n선택한 버스의 도착 알림을 추가할 수 있어요.")
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .onAppear { stops = RecentStops.load() }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.bottom, 72)
     }
 }

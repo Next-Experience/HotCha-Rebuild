@@ -26,7 +26,7 @@ bad()  { printf '%s  ✕ %s%s\n' "$RED" "$1" "$OFF"; fail=1; }
 skip() { printf '%s  – %s (미설치)%s\n' "$DIM" "$1" "$OFF"; skipped+=("$2"); }
 
 # 포맷은 새로 쓰는 코드가 모이는 곳만 본다. 예전 화면 코드는 한 번에 정리하기 전까지 지적이 수백 건이다.
-FORMAT_DIRS="HotChaKit/Sources HotChaKit/Tests HotCha/HotCha/Data/Local HotCha/HotCha/Features/StopAlarm"
+FORMAT_DIRS="HotChaKit/Sources HotChaKit/Tests HotCha/LiveActivityShared HotCha/HotCha/Data/Local HotCha/HotCha/Features/RouteAlarm HotCha/HotCha/Features/StopAlarm"
 
 # ── 1. 프로젝트 전용 규칙 ────────────────────────────────────
 step "프로젝트 규칙"

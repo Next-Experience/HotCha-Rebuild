@@ -21,3 +21,11 @@ public struct GeoPoint: Equatable, Sendable {
         return earthRadius * 2 * atan2(sqrt(a), sqrt(1 - a))
     }
 }
+
+public extension Array where Element == GeoPoint {
+    /// 정류장을 순서대로 이은 길이(m). 자리가 뒤집혔거나 범위를 벗어나면 0 이다.
+    func pathLength(from start: Int, to end: Int) -> Double {
+        guard indices.contains(start), indices.contains(end), start < end else { return 0 }
+        return (start..<end).reduce(0) { $0 + self[$1].distance(to: self[$1 + 1]) }
+    }
+}

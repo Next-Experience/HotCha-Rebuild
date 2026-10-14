@@ -7,6 +7,7 @@
 import SwiftUI
 
 extension Font {
+    /// 기존 호출부를 유지하면서 모든 화면을 SF Pro 시스템 폰트로 전환한다.
     enum PretendardWeight {
         case black
         case bold
@@ -18,34 +19,31 @@ extension Font {
         case semibold
         case thin
         
-        var value: String {
+        var systemWeight: Font.Weight {
             switch self {
             case .black:
-                return "Black"
+                return .black
             case .bold:
-                return "Bold"
+                return .bold
             case .heavy:
-                return "ExtraBold"
+                return .heavy
             case .ultraLight:
-                return "ExtraLight"
+                return .ultraLight
             case .light:
-                return "Light"
+                return .light
             case .medium:
-                return "Medium"
+                return .medium
             case .regular:
-                return "Regular"
+                return .regular
             case .semibold:
-                return "SemiBold"
+                return .semibold
             case .thin:
-                return "Thin"
+                return .thin
             }
         }
     }
 
     static func pretendard(_ weight: PretendardWeight, size fontSize: CGFloat) -> Font {
-        let familyName = "Pretendard"
-        let weightString = weight.value
-
-        return Font.custom("\(familyName)-\(weightString)", size: fontSize)
+        .system(size: fontSize, weight: weight.systemWeight)
     }
 }

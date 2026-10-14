@@ -64,13 +64,16 @@ public struct RouteTracker: Sendable {
         if shouldFire {
             alarmFired = true
         }
-        return Update(currentIndex: index, remaining: remaining, isFirstFix: isFirstFix, shouldFireAlarm: shouldFire)
+        return Update(
+            currentIndex: index, remaining: remaining, isFirstFix: isFirstFix, shouldFireAlarm: shouldFire)
     }
 
     /// 내 위치에서 가장 가까운 정류장을 출발 정류장으로 본다.
     /// 목적지를 이미 지난 정류장은 후보가 아니고, 거의 같은 거리의 후보가 여럿이면 목적지 쪽을 고른다.
     private func startingIndex(from location: GeoPoint) -> Int {
-        let candidates = (0...destinationIndex).map { (index: $0, distance: location.distance(to: stops[$0])) }
+        let candidates = (0...destinationIndex).map {
+            (index: $0, distance: location.distance(to: stops[$0]))
+        }
         let nearest = candidates.map(\.distance).min() ?? 0
         return candidates.last { $0.distance <= nearest + Self.sameSpotMargin }?.index ?? 0
     }
@@ -78,7 +81,8 @@ public struct RouteTracker: Sendable {
     /// 지금 정류장보다 앞에 있는 정류장 중, 도착 반경 안에 들어온 가장 가까운 정류장
     private func advancedIndex(from current: Int, location: GeoPoint) -> Int? {
         let ahead = stops.indices.dropFirst(current + 1).prefix(Self.lookahead)
-        return ahead
+        return
+            ahead
             .map { (index: $0, distance: location.distance(to: stops[$0])) }
             .filter { $0.distance <= Self.detectionRadius }
             .min { $0.distance < $1.distance }?

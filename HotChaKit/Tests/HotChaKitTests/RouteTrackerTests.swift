@@ -1,4 +1,5 @@
 import Testing
+
 @testable import HotChaKit
 
 /// 남북으로 곧게 뻗은 노선. 정류장 간격은 약 400m (위도 0.0036도).
@@ -122,5 +123,19 @@ private func 직선_노선(_ count: Int) -> [GeoPoint] {
         let a = GeoPoint(latitude: 37.5, longitude: 127.0)
         let b = GeoPoint(latitude: 37.5036, longitude: 127.0)
         #expect(abs(a.distance(to: b) - 400) < 2)
+    }
+}
+
+@Suite struct 이동_거리 {
+    @Test func 정류장_사이를_순서대로_더한다() {
+        // 400m 간격의 정류장 넷을 지나면 약 1.2km 다.
+        #expect(abs(직선_노선(10).pathLength(from: 2, to: 5) - 1200) < 6)
+    }
+
+    @Test func 움직이지_않았거나_뒤로_가면_0이다() {
+        let stops = 직선_노선(10)
+        #expect(stops.pathLength(from: 3, to: 3) == 0)
+        #expect(stops.pathLength(from: 5, to: 2) == 0)
+        #expect(stops.pathLength(from: 0, to: 99) == 0)
     }
 }

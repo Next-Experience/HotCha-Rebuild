@@ -6,17 +6,17 @@
 //  파일은 Tools/build_bus_db.py 로 만든다.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 import SQLite3
 
 /// 내장 DB 의 정류장 한 곳
 struct BusStopRecord: Identifiable, Hashable, Codable {
-    let id: String          // 정류장 ID (예: DGB7011025300)
+    let id: String  // 정류장 ID (예: DGB7011025300)
     let name: String
     let latitude: Double
     let longitude: Double
-    let arsNumber: String   // 정류장에 적힌 모바일 단축번호
+    let arsNumber: String  // 정류장에 적힌 모바일 단축번호
     let cityName: String
 
     var coordinate: CLLocationCoordinate2D {
@@ -55,7 +55,8 @@ final class BusDatabase {
     private init() {
         guard let path = Bundle.main.path(forResource: "BusData", ofType: "sqlite") else { return }
         // 번들 파일은 쓸 수 없으니 읽기 전용 + immutable 로 연다.
-        let uri = "file:\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? path)?immutable=1"
+        let uri =
+            "file:\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? path)?immutable=1"
         if sqlite3_open_v2(uri, &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_URI, nil) != SQLITE_OK {
             sqlite3_close(db)
             db = nil
@@ -74,12 +75,15 @@ final class BusDatabase {
     }
 
     /// 버스 번호로 노선을 찾는다. 정확히 일치 → 앞부분 일치 → 포함 순, 같은 순위면 내 주변 도시 먼저.
-    func searchRoutes(_ text: String, near location: CLLocation? = nil, limit: Int = 120) async -> [BusRouteRecord] {
+    func searchRoutes(_ text: String, near location: CLLocation? = nil, limit: Int = 120) async
+        -> [BusRouteRecord]
+    {
         let query = text.trimmingCharacters(in: .whitespaces)
         guard !query.isEmpty else { return [] }
         return await run {
             let nearby = self.routeCityCodes(near: location)
-            let nearbyClause = nearby.isEmpty
+            let nearbyClause =
+                nearby.isEmpty
                 ? "0"
                 : "city_code IN (\(nearby.map { _ in "?" }.joined(separator: ",")))"
             let sql = """
@@ -108,7 +112,9 @@ final class BusDatabase {
     }
 
     /// 정류장 이름이나 정류장 번호로 찾는다. 위치를 알면 가까운 순으로 돌려준다.
-    func searchStops(_ text: String, near location: CLLocation? = nil, limit: Int = 60) async -> [BusStopRecord] {
+    func searchStops(_ text: String, near location: CLLocation? = nil, limit: Int = 60) async
+        -> [BusStopRecord]
+    {
         let query = text.trimmingCharacters(in: .whitespaces)
         guard !query.isEmpty else { return [] }
         return await run {
@@ -135,7 +141,9 @@ final class BusDatabase {
     }
 
     /// 좌표 주변의 정류장을 가까운 순으로 돌려준다.
-    func stops(near coordinate: CLLocationCoordinate2D, radius: CLLocationDistance, limit: Int = 40) async -> [BusStopRecord] {
+    func stops(near coordinate: CLLocationCoordinate2D, radius: CLLocationDistance, limit: Int = 40) async
+        -> [BusStopRecord]
+    {
         await run {
             let latDelta = radius / 111_000
             let lonDelta = radius / (111_000 * max(cos(coordinate.latitude * .pi / 180), 0.1))
@@ -145,10 +153,11 @@ final class BusDatabase {
                 ORDER BY \(Self.distanceOrder)
                 LIMIT ?
                 """
-            let args: [Any] = [
-                coordinate.latitude - latDelta, coordinate.latitude + latDelta,
-                coordinate.longitude - lonDelta, coordinate.longitude + lonDelta,
-            ] + Self.distanceArgs(coordinate) + [limit]
+            let args: [Any] =
+                [
+                    coordinate.latitude - latDelta, coordinate.latitude + latDelta,
+                    coordinate.longitude - lonDelta, coordinate.longitude + lonDelta,
+                ] + Self.distanceArgs(coordinate) + [limit]
             let center = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
             var seen = Set<String>()
             return self.rows(sql, args).map(self.stop)

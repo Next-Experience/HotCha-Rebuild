@@ -76,6 +76,6 @@ struct SearchBusUtil {
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(color.opacity(0.2))
-                .cornerRadius(4)
+                .clipShape(RoundedRectangle(cornerRadius: HotChaRadius.badge, style: .continuous))
         }
     }

@@ -104,26 +104,23 @@ fi
 
 # ── 규칙 6 · 검색 결과 줄에서 NavigationLink 를 쓰지 않는다 ────
 # 검색이 닫히면 결과 줄이 사라지고, 그 안의 NavigationLink 는 이동하지 못한 채 같이 사라진다.
-# 이동은 사라지지 않는 MainView 가 SearchDestination 으로 맡는다.
-hits=$(grep -rn 'NavigationLink' "$APP/Features/Search" --include='*.swift' | grep -v 'SearchHistoryView.swift' | strip_comments)
+# 이동은 사라지지 않는 HomeScreen 이 SearchDestination 으로 맡는다.
+hits=$(grep -rn 'NavigationLink' "$APP/Features/Search" --include='*.swift' | strip_comments)
 [ -z "$hits" ] || report error "규칙 6 · 검색 결과의 NavigationLink" "함정: 검색 결과 이동" \
   "destination = .bus(...) 처럼 SearchDestination 을 설정합니다.
 $(printf '%s\n' "$hits" | cut -c1-120 | sed 's/^/      /')"
 
-# ── 규칙 7 · Live Activity 상태 정의는 앱과 위젯이 같다 ────────
-# HotchaLiveAttributes 는 두 타깃에 각각 적혀 있다. 한쪽만 바꾸면 컴파일은 되고 잠금 화면만 조용히 안 뜬다.
-state_fields() {
-  awk '/struct ContentState/{f=1;next} f&&/^[[:space:]]*}/{exit} f' "$1" \
-    | grep -E '^[[:space:]]*var ' | sed -E 's/[[:space:]]*\/\/.*$//; s/^[[:space:]]+//; s/[[:space:]]+/ /g'
-}
-app_state=$(state_fields "$APP/Core/LiveActivity/LiveActivityManager.swift" 2>/dev/null)
-live_state=$(state_fields "$LIVE/HotchaLiveLiveActivity.swift" 2>/dev/null)
-if [ -z "$app_state" ] || [ -z "$live_state" ]; then
-  report error "규칙 7 · ContentState 를 찾지 못함" "자기 검사" "검사가 빈손입니다."
-elif [ "$app_state" != "$live_state" ]; then
-  report error "규칙 7 · Live Activity 상태 정의가 어긋남" "함정: Live Activity" \
-    "LiveActivityManager.swift 와 HotchaLiveLiveActivity.swift 의 ContentState 를 똑같이 맞춥니다."
+# ── 규칙 7 · Live Activity 데이터 모양은 한 곳에만 적는다 ───────
+# 예전에는 앱과 위젯에 따로 적혀 있었다. 한쪽만 바꾸면 컴파일은 되고 잠금 화면만 조용히 안 뜬다.
+# 지금은 두 타깃이 LiveActivityShared 폴더를 함께 컴파일한다.
+SHARED="HotCha/LiveActivityShared"
+defs=$(grep -rln 'ActivityAttributes {' "$APP" "$LIVE" "$SHARED" --include='*.swift' 2>/dev/null)
+if [ "$defs" != "$SHARED/HotChaActivityAttributes.swift" ]; then
+  report error "규칙 7 · Live Activity 데이터 모양이 한 곳이 아님" "함정: Live Activity" \
+    "ActivityAttributes 는 $SHARED/HotChaActivityAttributes.swift 에만 둡니다. 찾은 곳: ${defs:-없음}"
 fi
+grep -q "LiveActivityShared" HotCha/HotCha.xcodeproj/project.pbxproj || report error "규칙 7 · 공유 폴더가 프로젝트에 없음" \
+  "함정: Live Activity" "LiveActivityShared 가 두 타깃의 동기화 폴더에 들어 있어야 합니다."
 
 # ── 규칙 8 · 내장 DB 가 있고 비어 있지 않다 ───────────────────
 # 검색 전체가 이 파일 하나에 달려 있다. 없으면 빌드는 되고 검색만 0건이 된다.
@@ -141,6 +138,13 @@ fi
 hits=$(grep -rn '"http://' "$APP" "$LIVE" "$KIT" --include='*.swift' | grep -v 'ws\.bus\.go\.kr' | strip_comments)
 [ -z "$hits" ] || report error "규칙 9 · 평문 HTTP 주소" "함정: 평문 통신" \
   "$(printf '%s\n' "$hits" | cut -c1-120)"
+
+# ── 규칙 10 · 모서리 반경은 HotChaRadius 로만 쓴다 ─────────────
+# 화면마다 24 · 20 · 11 · 8 로 제각각이라 앱이 둥글둥글하고 어수선했다. 값은 세 가지뿐이다.
+hits=$(grep -rnE 'cornerRadius: *[0-9]|\.cornerRadius\( *[0-9]|presentationCornerRadius' "$APP" "$LIVE" "$SHARED" --include='*.swift' | strip_comments)
+[ -z "$hits" ] || report error "규칙 10 · 반경을 숫자로 적음" "디자인: 모서리" \
+  "HotChaRadius.card · .tile · .badge 중 하나를 씁니다.
+$(printf '%s\n' "$hits" | cut -c1-120 | sed 's/^/      /')"
 
 [ "$fail" = "0" ] && printf '  ✓ 프로젝트 규칙 통과 (스위프트 파일 %s개)\n' "$scanned"
 exit $fail

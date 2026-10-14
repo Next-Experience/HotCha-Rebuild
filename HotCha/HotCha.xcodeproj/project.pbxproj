@@ -79,6 +79,11 @@
 			path = HotCha;
 			sourceTree = "<group>";
 		};
+		AA0000052EA0000100C0FFEE /* LiveActivityShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LiveActivityShared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +112,7 @@
 			children = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
 				9D86EEA12DC9F907003E6FED /* HotchaLive */,
+				AA0000052EA0000100C0FFEE /* LiveActivityShared */,
 				AA0000012EA0000100C0FFEE /* HotCha.xcconfig */,
 				D9E37F912DA955EF009A5719 /* Frameworks */,
 				9DD91FAA2D522CB600789318 /* Products */,
@@ -148,6 +154,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				9D86EEA12DC9F907003E6FED /* HotchaLive */,
+				AA0000052EA0000100C0FFEE /* LiveActivityShared */,
 			);
 			name = HotchaLiveExtension;
 			packageProductDependencies = (
@@ -172,6 +179,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				9DD91FAB2D522CB600789318 /* HotCha */,
+				AA0000052EA0000100C0FFEE /* LiveActivityShared */,
 			);
 			name = HotCha;
 			packageProductDependencies = (

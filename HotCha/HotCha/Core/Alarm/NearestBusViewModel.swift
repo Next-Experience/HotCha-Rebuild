@@ -33,50 +33,67 @@ class NearestBusViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private var busNumber: String?
+    private var busImage = "HotChaClayBus"
     private var routeType: String?
     /// 정류장을 따라가고 알람 시점을 정하는 규칙은 HotChaKit 에 있다. 여기서는 결과를 화면·알림으로 옮기기만 한다.
     private var tracker: RouteTracker?
+    /// 첫 위치를 받았을 때의 정류장 자리. 이동 거리를 재는 기준이다.
+    private(set) var startStopIndex: Int?
 
-    func start(stationId: String, routeId: String, cityCode: String, busNumber: String? = nil, routeType: String? = nil) {
-        guard !isCalculating else { return }
+    /// 이미 받아 둔 정류장 목록으로 안내를 시작한다. 정류장은 노선 순서대로여야 한다.
+    /// 시작하지 못하면(목적지가 목록 밖) false 를 돌려준다.
+    @discardableResult
+    func start(
+        stops: [BusStop],
+        destinationIndex: Int,
+        routeId: String,
+        busNumber: String? = nil,
+        routeType: String? = nil,
+        busImage: String = "HotChaClayBus"
+    ) -> Bool {
+        guard !isCalculating,
+              let tracker = RouteTracker(
+                  stops: stops.map { GeoPoint(latitude: $0.gpsY, longitude: $0.gpsX) },
+                  destinationIndex: destinationIndex,
+                  alarmStopsBefore: alarmStopDistanceFromDestination
+              ) else {
+            return false
+        }
 
-        self.stationIdInput = stationId
+        self.stationIdInput = stops[destinationIndex].station
         self.busRouteId = routeId
         self.busNumber = busNumber
         self.routeType = routeType
+        self.busImage = busImage
         self.isCalculating = true
-        self.tracker = nil
         self.currBusStop = nil
-        self.destinationStop = nil
         self.remainingStop = nil
+        self.busStops = stops
+        self.destinationStop = stops[destinationIndex]
+        self.tracker = tracker
+        self.startStopIndex = nil
+
         locationviewModel.requestPermission()
         locationviewModel.startTrackingLocation()
         locationviewModel.requestalwaysPermission()
+        subscribeToLocationUpdates()
+        return true
+    }
 
-        BusAPI.fetchRouteStops(cityCode: cityCode, routeId: routeId) { [weak self] stops, error in
-            DispatchQueue.main.async {
-                guard let self, self.isCalculating else { return }
+    /// 안내를 시작한 정류장부터 지금 정류장까지 노선을 따라 온 거리(m)
+    var travelledMeters: Double {
+        guard let start = startStopIndex, let current = tracker?.currentIndex else { return 0 }
+        return (tracker?.stops ?? []).pathLength(from: start, to: current)
+    }
 
-                let sorted = stops.sorted { $0.seq < $1.seq }
-                guard error == nil,
-                      let destinationIndex = sorted.firstIndex(where: { $0.station == stationId }),
-                      let tracker = RouteTracker(
-                          stops: sorted.map { GeoPoint(latitude: $0.gpsY, longitude: $0.gpsX) },
-                          destinationIndex: destinationIndex,
-                          alarmStopsBefore: self.alarmStopDistanceFromDestination
-                      ) else {
-                    // 다시 시작할 수 있도록 상태를 되돌린다.
-                    self.isCalculating = false
-                    self.locationviewModel.stopTrackingLocation()
-                    return
-                }
+    /// 이번 안내에서 알람이 이미 울렸는가
+    var alarmHasFired: Bool {
+        tracker?.alarmFired ?? false
+    }
 
-                self.busStops = sorted
-                self.destinationStop = sorted[destinationIndex]
-                self.tracker = tracker
-                self.subscribeToLocationUpdates()
-            }
-        }
+    /// 알람 정류장의 자리. 안내 중이 아니면 nil 이다.
+    var alarmStopIndex: Int? {
+        tracker?.alarmStopIndex
     }
 
     func stop() {
@@ -92,7 +109,7 @@ class NearestBusViewModel: ObservableObject {
         tracker = nil
         cancellables.removeAll()
         locationviewModel.stopTrackingLocation()
-        LiveActivityManager.shared.endLiveActivity()
+        LiveActivityController.shared.end()
     }
 
     private func subscribeToLocationUpdates() {
@@ -120,31 +137,29 @@ class NearestBusViewModel: ObservableObject {
             currBusStop = current
         }
         remainingStop = update.remaining
-        let alarmStopName = busStops[tracker.alarmStopIndex].stationNm
+        // 이번 갱신에서 울리는 것까지 포함해, 알람이 이미 울린 뒤인지 Live Activity 에 알린다.
+        let state = HotChaActivityAttributes.ContentState(
+            remainingStops: update.remaining,
+            remainingMeters: nil,
+            currentStop: current.stationNm,
+            hasAlarmFired: tracker.alarmFired
+        )
 
         if update.isFirstFix {
+            startStopIndex = update.currentIndex
             let displayBusName = (current.busRouteNm == "알 수 없음" && busNumber != nil) ? busNumber! : current.busRouteNm
-            LiveActivityManager.shared.startLiveActivity(
-                title: "핫챠",
-                description: busRouteId,
-                progress: 0.9,
-                busname: displayBusName,
-                routeType: routeType,
-                currentStop: current.stationNm,
-                stopsRemaining: update.remaining,
-                alarmstop: alarmStopName,
-                destinationStation: destination.stationNm,
-                Updatetime: formattedTime(from: Date())
+            LiveActivityController.shared.start(
+                attributes: HotChaActivityAttributes(
+                    kind: .route,
+                    busNumber: displayBusName,
+                    destination: destination.stationNm,
+                    alarmPoint: busStops[tracker.alarmStopIndex].stationNm,
+                    imageName: busImage
+                ),
+                state: state
             )
         } else {
-            LiveActivityManager.shared.updateLiveActivity(
-                progress: 1.0,
-                currentStop: current.stationNm,
-                stopsRemaining: update.remaining,
-                alarmstop: alarmStopName,
-                destinationStation: destination.stationNm,
-                Updatetime: formattedTime(from: Date())
-            )
+            LiveActivityController.shared.update(state)
         }
 
         if update.shouldFireAlarm {

@@ -2,176 +2,115 @@
 //  HotchaLiveLiveActivity.swift
 //  HotchaLive
 //
-//  Created by 문재윤 on 5/6/25.
+//  안내 중에 잠금 화면과 다이내믹 아일랜드에 뜨는 화면.
+//  데이터 모양은 LiveActivityShared/HotChaActivityAttributes.swift 에 있다.
 //
 
 import ActivityKit
-import WidgetKit
 import SwiftUI
-
-struct HotchaLiveAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-            var progress: Double       // 진행 상태 (0.0 ~ 1.0)
-            var currentStop: String    // 현재 정류장
-            var stopsRemaining: Int    // 남은 정류장 수
-            var alarmstop: String       // 알람 정류장
-            var destinationStation: String // 도착 정류장
-            var Updatetime: String // 업데이트 시간
-            var distanceMeters: Int? = nil // 정류장 알람일 때 목적지까지 남은 거리
-        }
-
-        var title: String         // 라이브 액티비티 제목
-        var description: String   // 설명
-        var busname: String         // 버스 이름
-        var routeType: String?      // 버스 타입
-    }
-
+import WidgetKit
 
 struct HotchaLiveLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: HotchaLiveAttributes.self) { context in
-            // Lock screen/banner UI 만 사용
-            
-            VStack(spacing: 0) {
-                VStack(spacing: 0) {
-                    HStack {
-                        // 버스 번호 및 정류장 정보
-                        HStack {
-                            let busColor = getBusColor(for: context.attributes.routeType ?? "")
-                            
-                            Text("\(context.attributes.busname)")
-                                .font(.pretendard(.semibold, size: 14))
-                                .foregroundStyle(busColor)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(busColor.opacity(0.2))
-                                .cornerRadius(4)
-                            
-                            Text("\(context.state.destinationStation)")
-                                .font(.pretendard(.semibold, size: 14))
-                                .foregroundStyle(.gray800)
-                        }
-                        
-                        Spacer()
-                        
-                        HStack {
-                            Image("WidgetAppIcon")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            
-                            Text("핫챠")
-                                .font(.pretendard(.semibold, size: 14))
-                                .foregroundStyle(.gray400)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 30)
-                    
-                    HStack {
-                        if let distance = context.state.distanceMeters {
-                            // 정류장 알람: 남은 정류장 수 대신 거리로 안내
-                            Text(distance >= 1000 ? String(format: "%.1fkm", Double(distance) / 1000) : "\(distance)m")
-                                .font(.pretendard(.semibold, size: 20))
-                                .foregroundStyle(.purplec)
-                                .padding(.trailing, 4)
-                            
-                            Text("남았어요")
-                                .font(.pretendard(.semibold, size: 20))
-                                .foregroundStyle(.gray700)
-                        } else {
-                            Text("\(abs(context.state.stopsRemaining))")
-                                .font(.pretendard(.semibold, size: 20))
-                                .foregroundStyle(context.state.stopsRemaining < 0 ? .redc :  .purplec)
-                                .padding(.trailing, 4)
-                            
-                            Text(Int(context.state.stopsRemaining) >= 0 ? "정류장 전" : "정류장 지났어요.")
-                                .font(.pretendard(.semibold, size: 20))
-                                .foregroundStyle(.gray700)
-                        }
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 15)
-                    .padding(.bottom)
-                }
-                .background(.white)
-                
-                VStack(spacing: 0) {
-                    // 정류장 및 방향 정보
-                    HStack {
-                        Text("\(context.state.currentStop)")
-                            .font(.pretendard(.semibold, size: 16))
-                            .foregroundStyle(.gray800)
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.pretendard(.semibold, size: 16))
-                            .foregroundStyle(.gray800)
-                            .padding(.horizontal, 4)
-                        
-                        
-                        Image("bell_live")
-                        Text("\(context.state.alarmstop)")
-                            .font(.pretendard(.medium, size: 12))
-                            .foregroundColor(.gray600)
-                        
-                        Spacer()
-                        Text("\(context.state.Updatetime)")
-                            .font(.pretendard(.medium, size: 4))
-                            .background(.gray100)
-                            
-                    }
-                    .padding(20)
-                }
-                .background(.gray150)
-            }
-            .frame(width: .infinity, height: .infinity)
-            
+        ActivityConfiguration(for: HotChaActivityAttributes.self) { context in
+            LockScreenView(attributes: context.attributes, state: context.state)
+                .activityBackgroundTint(Color("mainpurple"))
+                .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
-            DynamicIsland {
+            let tint = context.state.hasAlarmFired ? Color.orange : Color("mainpurple")
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    EmptyView()
+                    Label(badgeText(context.attributes), systemImage: symbolName(context.attributes))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(tint)
+                        .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    EmptyView()
+                    Text(context.state.shortRemaining)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(tint)
+                        .contentTransition(.numericText())
+                }
+                DynamicIslandExpandedRegion(.center) {
+                    Text(context.attributes.destination)
+                        .font(.headline)
+                        .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    EmptyView()
+                    JourneyLine(attributes: context.attributes, state: context.state)
+                        .padding(.top, 4)
                 }
             } compactLeading: {
-                EmptyView()
+                Image(systemName: context.state.hasAlarmFired ? "bell.fill" : symbolName(context.attributes))
+                    .foregroundStyle(tint)
             } compactTrailing: {
-                EmptyView()
+                Text(context.state.shortRemaining)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(tint)
+                    .contentTransition(.numericText())
             } minimal: {
-                EmptyView()
+                Image(systemName: context.state.hasAlarmFired ? "bell.fill" : symbolName(context.attributes))
+                    .foregroundStyle(tint)
             }
-        }
-    }
-    
-    private func getBusColor(for routeType: String) -> Color {
-        switch routeType {
-        case "1": // 공항
-            return Color("bluec")
-        case "2": // 마을
-            return Color("olivec")
-        case "3": // 간선
-            return Color("skybluec")
-        case "4": // 지선
-            return Color("greenc")
-        case "5": // 순환
-            return Color("purplec")
-        case "6": // 광역
-            return Color("orangec")
-        case "7": // 인천
-            return Color("bluec")
-        case "8": // 경기
-            return Color("brownc")
-        default:
-            return Color("bluec")
+            .keylineTint(tint)
         }
     }
 }
 
+private func badgeText(_ attributes: HotChaActivityAttributes) -> String {
+    attributes.kind == .route ? "\(attributes.busNumber)번" : "정류장"
+}
 
+private func symbolName(_ attributes: HotChaActivityAttributes) -> String {
+    attributes.kind == .route ? "bus.fill" : "mappin.and.ellipse"
+}
 
+/// 잠금 화면과 알림 배너에 뜨는 모양. 홈의 상태 배너와 같은 카드를 쓴다.
+private struct LockScreenView: View {
+    let attributes: HotChaActivityAttributes
+    let state: HotChaActivityAttributes.ContentState
 
+    var body: some View {
+        HotChaBannerCard(
+            title: state.hasAlarmFired ? "곧 내릴 정류장이에요" : "지금 목적지를 향해 가는 중이에요",
+            detail: detail,
+            symbol: state.hasAlarmFired ? "figure.walk.departure" : symbolName(attributes),
+            image: state.hasAlarmFired ? "HotChaStopBell" : attributes.imageName
+        )
+    }
+
+    /// 홈 배너와 같은 문장. "152번 버스 · OO역까지 3정류장 남음" / "OO역까지 540m 남음"
+    private var detail: String {
+        let name = attributes.destination
+        if let stops = state.remainingStops {
+            let prefix = "\(attributes.busNumber)번 버스 · "
+            if stops > 0 { return "\(prefix)\(name)까지 \(stops)정류장 남음" }
+            return stops == 0 ? "\(prefix)\(name)에 도착했어요" : "\(prefix)\(name)을 \(-stops)정류장 지났어요"
+        }
+        if let meters = state.remainingMeters {
+            return "\(name)까지 \(HotChaActivityAttributes.ContentState.format(meters: meters)) 남음"
+        }
+        return name
+    }
+}
+
+/// "지금 있는 곳 → 알람이 울리는 곳" 한 줄
+private struct JourneyLine: View {
+    let attributes: HotChaActivityAttributes
+    let state: HotChaActivityAttributes.ContentState
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(state.currentStop.isEmpty ? "이동 중" : state.currentStop)
+                .lineLimit(1)
+            Image(systemName: "chevron.right")
+                .font(.caption2.weight(.semibold))
+            Image(systemName: state.hasAlarmFired ? "bell.fill" : "bell")
+            Text(attributes.alarmPoint)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+}

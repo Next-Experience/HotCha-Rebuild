@@ -14,6 +14,8 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined // 권한 상태 저장
     @Published var administrativeArea: String? // 행정구역 저장
     @Published var address: String?
+    @Published var locality: String? // 시·군 (예: 양산시)
+    private var lastGeocodedLocation: CLLocation?
 
     override init() {
         super.init()
@@ -80,17 +82,27 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             self.location = currentLocation
         }
 
-        geocoder.reverseGeocodeLocation(currentLocation) { [weak self] placemarks, error in
-            if let error = error {
-                print("지오코딩 실패: \(error.localizedDescription)")
-                return
-            }
-            
-            if let placemark = placemarks?.first {
+        // 주소는 멀리 움직였을 때만 다시 묻는다. 위치가 올 때마다 물으면 금방 한도에 걸린다.
+        if let last = lastGeocodedLocation, currentLocation.distance(from: last) < 1_000 { return }
+        guard !geocoder.isGeocoding else { return }
+
+        geocoder.reverseGeocodeLocation(currentLocation) { [weak self] placemarks, _ in
+            // 실패하면 기록하지 않는다. 다음 위치에서 다시 묻는다.
+            guard let placemark = placemarks?.first else { return }
+            DispatchQueue.main.async {
+                self?.lastGeocodedLocation = currentLocation
                 self?.administrativeArea = placemark.administrativeArea
+                self?.locality = placemark.locality
                 self?.address = placemark.subLocality ?? ""
             }
-            print("위치 업데이트됨: \(currentLocation.coordinate.latitude), \(currentLocation.coordinate.longitude)")
         }
+    }
+
+    /// "서울특별시" · "부산광역시" · "경상남도 양산시" 처럼 시까지 적은 지금 지역.
+    /// 특별시·광역시는 도와 시의 이름이 같아 한 번만 적는다.
+    var regionName: String? {
+        guard let area = administrativeArea else { return locality }
+        guard let locality, locality != area else { return area }
+        return "\(area) \(locality)"
     }
 }

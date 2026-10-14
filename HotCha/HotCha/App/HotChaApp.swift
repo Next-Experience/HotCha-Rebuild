@@ -38,6 +38,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         UNUserNotificationCenter.current().delegate = self
         requestNotificationPermission()
+        // 안내 중에 앱이 꺼졌으면 주인 없는 Live Activity 가 남아 있다. 새로 시작할 때 치운다.
+        LiveActivityController.shared.endAll()
 
         return true
     }

@@ -13,7 +13,7 @@ import AudioToolbox
 var alarmTimer: Timer? // 전역 또는 클래스 내부 프로퍼티로 선언
 
 func startAlarm(title: String, body: String, useSound: Bool, useVibration: Bool) {
-    let soundFileName = "AlarmSound"
+    let soundFileName = AlarmSound.current.fileName
 
     var notificationSound: String
     if useSound {
@@ -63,5 +63,26 @@ func startAlarmToggle(isOn: Bool, title: String, body: String, useSound: Bool, u
         alarmTimer?.invalidate()
         alarmTimer = nil
         print("⏹ 알람 정지됨")
+    }
+}
+
+/// 고를 수 있는 알림음. 파일은 Resources 에 mp3 로 둔다.
+enum AlarmSound: String, CaseIterable, Identifiable {
+    case classic = "AlarmSound"
+
+    static let storageKey = "alarmSoundName"
+
+    var id: String { rawValue }
+    var fileName: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .classic: return "기본 알림음"
+        }
+    }
+
+    /// 설정에서 고른 알림음. 저장된 값이 없거나 파일이 빠졌으면 기본 알림음이다.
+    static var current: AlarmSound {
+        UserDefaults.standard.string(forKey: storageKey).flatMap(AlarmSound.init(rawValue:)) ?? .classic
     }
 }

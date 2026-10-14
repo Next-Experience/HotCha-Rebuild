@@ -44,7 +44,6 @@ struct BusStop: Codable, Identifiable, Hashable {
     
     
     // 앱 내부 로직에서 필요한 변수
-    var busStopCase: BusStopElementCase = [.ableStop] // 정류장 종류
     var alarmStation: Bool = false // 알람정류장
     var arrivalStation: Bool = false // 도착정류장
     var filtered: Bool = false
