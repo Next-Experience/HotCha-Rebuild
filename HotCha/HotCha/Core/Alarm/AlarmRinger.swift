@@ -48,6 +48,16 @@ final class AlarmRinger: ObservableObject {
         }
     }
 
+    /// 알람 권한이 있는가. 온보딩 문은 이것으로 연다.
+    /// 시뮬레이터는 AlarmKit 권한 요청이 화면 없이 바로 거절되어 줄 수가 없다. 그래서 시뮬레이터에서만 있는 것으로 본다.
+    var isAuthorized: Bool {
+        #if targetEnvironment(simulator)
+        true
+        #else
+        authorization == .authorized
+        #endif
+    }
+
     /// 아직 묻지 않았으면 알람 권한을 묻는다. 안내를 시작할 때 부른다.
     func requestAuthorizationIfNeeded() {
         guard authorization == .notDetermined else { return }
