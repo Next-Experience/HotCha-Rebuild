@@ -26,28 +26,26 @@ struct SplashView: View {
             }
             
         } else {
-            VStack {
+            VStack(alignment: .leading, spacing: 0) {
                 Spacer()
-                HStack {
-                    Text("안전하게")
-                        .font(.pretendard(.bold, size: 36))
-                        .foregroundStyle(.primary)
-                    Spacer()
-                }
-                .padding(.horizontal, 30)
-                HStack {
-                    Text("핫챠")
-                        .font(.pretendard(.bold, size: 36))
-                        .foregroundStyle(Color("mainpurple"))
-                    Text("하세요")
-                        .font(.pretendard(.bold, size: 36))
-                        .foregroundStyle(.primary)
-                    Spacer()
-                }
-                .padding(.horizontal, 30)
-                Image("splashbus")
+                Text("내릴 때는")
+                    .foregroundStyle(.primary)
+                Text("\(Text("핫챠").foregroundStyle(Color("mainpurple")))가 알려드려요")
+                    .foregroundStyle(.primary)
+                Image(Clay.bus.rawValue)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 220)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 40)
                     .padding(.bottom, 70)
+                    .accessibilityHidden(true)
             }
+            .font(.pretendard(.bold, size: 36))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .padding(.horizontal, 30)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(HotChaContentBackground())
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
