@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 /// 즐겨찾기에 넣을 버스나 정류장을 고르는 시트.
-/// 버스를 고르면 노선 화면에서 내릴 정류장까지 정하고, 정류장을 고르면 바로 저장한다(어느 버스든 타면 되는 즐겨찾기).
+/// 버스를 고르면 노선 화면에서 내릴 정류장까지 정하고, 정류장을 고르면 지도에서 확인한 뒤 저장한다(어느 버스든 타면 되는 즐겨찾기).
 struct BookmarkSearchSheet: View {
     /// "집" · "회사" · 그 밖의 값(직접 이름 붙임)
     let bookmarkType: String
@@ -12,16 +12,13 @@ struct BookmarkSearchSheet: View {
     @State private var query = ""
     @State private var destination: SearchDestination?
     @State private var isSearchPresented = true
-    /// 이름을 물어보는 중인 정류장
-    @State private var namingStop: BusStopRecord?
-    @State private var bookmarkName = ""
 
     var body: some View {
         NavigationStack {
             SearchView(
                 textfiledValue: $query,
                 searchActivate: .constant(true),
-                destination: choice,
+                destination: $destination,
                 isBookmark: true
             )
             .background(HotChaContentBackground())
@@ -41,56 +38,37 @@ struct BookmarkSearchSheet: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
             .navigationDestination(item: $destination) { destination in
-                if case .bus(let route) = destination {
+                switch destination {
+                case .bus(let route):
                     RouteAlarmScreen(bus: route, mode: .saveBookmark(type: bookmarkType)) {
                         dismiss()
                     }
+                case .stop(let stop):
+                    // 같은 이름의 정류장이 길 양쪽에 있다. 지도에서 보고 고른 뒤 저장한다.
+                    StopAlarmView(
+                        stop: stop,
+                        asksBookmarkName: !["집", "회사"].contains(bookmarkType),
+                        onSaveBookmark: save
+                    )
+                default:
+                    EmptyView()
                 }
-            }
-            .alert(
-                "즐겨찾기 이름",
-                isPresented: Binding(get: { namingStop != nil }, set: { if !$0 { namingStop = nil } })
-            ) {
-                TextField(namingStop?.name ?? "이름", text: $bookmarkName)
-                Button("저장") {
-                    if let stop = namingStop { save(stop, type: 0, label: bookmarkName) }
-                }
-                Button("취소", role: .cancel) {}
-            } message: {
-                Text("정류장 · \(namingStop?.name ?? "")")
             }
         }
         .tint(Color("mainpurple"))
         .scrollIndicators(.hidden)
     }
 
-    /// 검색 결과를 고른 것. 버스는 노선 화면으로 넘어가고, 정류장은 여기서 저장한다.
-    private var choice: Binding<SearchDestination?> {
-        Binding(
-            get: { destination },
-            set: { picked in
-                if case .stop(let stop) = picked {
-                    pick(stop)
-                } else {
-                    destination = picked
-                }
-            }
-        )
-    }
-
-    private func pick(_ stop: BusStopRecord) {
+    /// 지도에서 확인한 정류장을 저장한다. 집 · 회사는 그 이름으로, 나머지는 붙인 이름(비우면 정류장 이름)으로.
+    private func save(_ stop: BusStopRecord, name: String) {
+        let type: Int
+        let label: String
         switch bookmarkType {
-        case "집": save(stop, type: 1, label: "집")
-        case "회사": save(stop, type: 2, label: "회사")
-        default:
-            bookmarkName = ""
-            namingStop = stop
+        case "집": (type, label) = (1, "집")
+        case "회사": (type, label) = (2, "회사")
+        default: (type, label) = (0, name.trimmingCharacters(in: .whitespaces))
         }
-    }
-
-    private func save(_ stop: BusStopRecord, type: Int, label: String) {
-        let name = label.trimmingCharacters(in: .whitespaces)
-        modelContext.insert(Bookmarkmodel(stop: stop, label: name.isEmpty ? stop.name : name, type: type))
+        modelContext.insert(Bookmarkmodel(stop: stop, label: label.isEmpty ? stop.name : label, type: type))
         dismiss()
     }
 

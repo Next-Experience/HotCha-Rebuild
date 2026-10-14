@@ -27,6 +27,8 @@ struct RouteAlarmScreen: View {
     @EnvironmentObject private var stopAlarm: StopAlarmViewModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    /// 뒤로 가기를 누르는 순간 false 가 된다. onDisappear 는 화면이 다 빠진 뒤에야 불려 시트가 늦게 내려간다.
+    @Environment(\.isPresented) private var isPresented
 
     @State private var camera: MapCameraPosition = .automatic
     @State private var showsSheet = false
@@ -34,13 +36,17 @@ struct RouteAlarmScreen: View {
     @State private var asksToReplaceRunningAlarm = false
     /// 화면을 열 때의 내 위치. 정류장을 고르는 동안 「탑승」 정류장을 미리 보여 주는 데 쓴다.
     @State private var openedAt: CLLocation?
+    /// 지도에서 누른 곳에 겹쳐 있는 정류장들. 길 양쪽의 같은 이름 정류장이라 시트에서 방향을 보고 고른다.
+    @State private var overlapChoices: [Int] = []
 
     var body: some View {
         GeometryReader { proxy in
             map
-                // 시트가 덮는 만큼 지도의 안쪽 여백을 둔다. 지도는 그 위로 보이는 영역을 기준으로 가운데를 잡는다.
-                .safeAreaPadding(.bottom, sheetCover(in: proxy.size.height))
-                .animation(.smooth, value: detent)
+                // 지도는 늘 화면 전체를 덮고 시트만 움직인다. 안쪽 여백은 시트를 끄는 높이를 따라가지 않는다 —
+                // 따라가게 두면 시트를 끌 때마다 지도 가운데와 Apple 표시가 함께 오르내리며 지도가 다시 그려진다.
+                // 고를 때는 시트가 낮게 시작하니 가장 낮은 시트만큼, 안내 중에는 중간 높이 시트만큼 둔다.
+                // 지도는 이 여백 위로 보이는 영역을 기준으로 가운데를 잡는다.
+                .safeAreaPadding(.bottom, mapBottomInset(in: proxy.size.height))
         }
         .navigationTitle("\(bus.busRouteNm)번")
         .navigationBarTitleDisplayMode(.inline)
@@ -50,6 +56,7 @@ struct RouteAlarmScreen: View {
                 bus: bus,
                 mode: mode,
                 detent: $detent,
+                overlapChoices: $overlapChoices,
                 onFinish: {
                     showsSheet = false
                     dismiss()
@@ -85,6 +92,9 @@ struct RouteAlarmScreen: View {
                 prepare()
             }
         }
+        .onChange(of: isPresented) { _, presented in
+            if !presented { showsSheet = false }
+        }
         .onDisappear {
             showsSheet = false
             session.discardIfIdle()
@@ -111,10 +121,11 @@ struct RouteAlarmScreen: View {
     /// 가장 높이 올린 시트. `.large` 는 뒤 화면을 바꿔 버려서 화면 끝까지 올리지 않는다.
     private static let tallDetent = PresentationDetent.fraction(0.92)
 
-    /// 시트가 지도 아래쪽을 덮는 높이
-    private func sheetCover(in height: CGFloat) -> CGFloat {
-        if detent == Self.peekDetent { return 150 }
-        // 중간 높이 시트는 화면의 절반쯤을 덮는다. 지도 영역은 내비게이션 바 아래부터라 조금 더 덮인다.
+    /// 지도 아래쪽 안쪽 여백. 시트 높이가 아니라 화면의 모습(고르기 · 안내 중)에 따라서만 바뀐다.
+    private func mapBottomInset(in height: CGFloat) -> CGFloat {
+        // 가장 낮은 시트 높이
+        guard session.isRunning else { return 150 }
+        // 중간 높이 시트는 화면의 절반쯤인데, 지도 영역은 내비게이션 바 아래부터라 조금 더 덮인다.
         return height * 0.55
     }
 
@@ -306,8 +317,22 @@ struct RouteAlarmScreen: View {
     // MARK: - 동작
 
     /// 지도에서 정류장을 눌러 내릴 정류장으로 고른다. 안내 중에는 바꾸지 않는다.
+    /// 같은 이름의 정류장이 길 양쪽에 겹쳐 있으면 위에 그려진 쪽만 눌린다. 그때는 바로 고르지 않고
+    /// 둘을 시트에 올려 버스가 가는 방향을 보고 고르게 한다.
     private func select(_ index: Int) {
         guard !session.isRunning, RouteAlarmSession.isSelectable(session.stops[index]) else { return }
+        let overlapping = RouteAlarmSession.overlappingStops(at: index, in: session.stops)
+        if overlapping.count > 1 {
+            overlapChoices = overlapping
+            detent = .medium
+            // 시트가 중간까지 올라와 지도 아래쪽을 덮는다. 두 정류장이 시트 위로 보이게 가운데를 남쪽으로 내린다.
+            withAnimation {
+                camera = Self.region(
+                    around: overlapping.map { session.stops[$0] }, minimumMeters: 600, shiftedSouthBy: 0.3)
+            }
+            return
+        }
+        overlapChoices = []
         session.destinationIndex = index
         detent = .medium
     }
@@ -315,7 +340,8 @@ struct RouteAlarmScreen: View {
     /// 정류장 목록을 받고 시트를 올린다. 안내 중인 노선이면 받지 않고 그대로 이어서 보여 준다.
     private func prepare() {
         showsSheet = true
-        detent = .medium
+        // 고를 때는 지도에서 고른다. 시트는 낮게 두고, 정류장을 누르면 올라온다.
+        detent = session.isRunning(for: bus) ? .medium : Self.peekDetent
         openedAt = CLLocationManager().location
         guard !session.isRunning(for: bus) else {
             followUser()
@@ -366,7 +392,10 @@ struct RouteAlarmScreen: View {
     }
 
     /// 정류장들이 모두 보이는 영역. 시트에 가리는 부분은 지도의 안쪽 여백(safeAreaPadding)이 뺀다.
-    private static func region(around stops: [BusStop], minimumMeters: CLLocationDistance) -> MapCameraPosition {
+    /// shiftedSouthBy 는 높이에 대한 비율이다. 시트가 안쪽 여백보다 더 덮을 때 정류장을 화면 위쪽에 둔다.
+    private static func region(
+        around stops: [BusStop], minimumMeters: CLLocationDistance, shiftedSouthBy shift: Double = 0
+    ) -> MapCameraPosition {
         let coordinates = stops.map(coordinate)
         guard let first = coordinates.first else { return .automatic }
         var minLat = first.latitude, maxLat = first.latitude
@@ -383,7 +412,9 @@ struct RouteAlarmScreen: View {
         let height = max((maxLat - minLat) * metersPerDegree * 1.6, minimumMeters)
         let width = max(
             (maxLon - minLon) * metersPerDegree * cos(center.latitude * .pi / 180) * 1.4, minimumMeters)
-        return .region(MKCoordinateRegion(center: center, latitudinalMeters: height, longitudinalMeters: width))
+        let shifted = CLLocationCoordinate2D(
+            latitude: center.latitude - height * shift / metersPerDegree, longitude: center.longitude)
+        return .region(MKCoordinateRegion(center: shifted, latitudinalMeters: height, longitudinalMeters: width))
     }
 }
 
