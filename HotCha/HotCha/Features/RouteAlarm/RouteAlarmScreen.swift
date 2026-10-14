@@ -106,7 +106,8 @@ struct RouteAlarmScreen: View {
         }
     }
 
-    private static let peekDetent = PresentationDetent.height(150)
+    /// 가장 낮게 내린 시트. 남은 정류장 수만 보인다.
+    static let peekDetent = PresentationDetent.height(150)
     /// 가장 높이 올린 시트. `.large` 는 뒤 화면을 바꿔 버려서 화면 끝까지 올리지 않는다.
     private static let tallDetent = PresentationDetent.fraction(0.92)
 

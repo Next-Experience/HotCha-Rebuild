@@ -245,16 +245,8 @@ struct StopAlarmView: View {
                 .foregroundStyle(.secondary)
                 .padding(.top, 6)
 
-            Button(role: .destructive) {
-                viewModel.stop()
-            } label: {
-                Text("안내 종료")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
+            // 노선 시트와 같은 시스템 글라스 버튼
+            FinishGuidanceButton { viewModel.stop() }
             .padding(.top, 16)
         }
     }

@@ -189,6 +189,20 @@ struct RouteAlarmSheet: View {
     // MARK: 안내 중
 
     private var runningList: some View {
+        // 안내 종료는 목록 아래 시트 안쪽 맨 끝에 고정한다. 목록은 그 위에서 끝나서 버튼 뒤로 비치지 않는다.
+        // 시트를 가장 낮게 내렸을 때는 숨긴다.
+        VStack(spacing: 0) {
+            runningRows
+            if detent != RouteAlarmScreen.peekDetent {
+                FinishGuidanceButton(action: finish)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 4)
+            }
+        }
+    }
+
+    private var runningRows: some View {
         List {
             Section {
                 statusHeader
@@ -243,12 +257,6 @@ struct RouteAlarmSheet: View {
                     Label("즐겨찾기에 추가", systemImage: "star")
                 }
                 .disabled(bookmarks.count >= Self.maxBookmarks)
-
-                Button(role: .destructive) {
-                    finish()
-                } label: {
-                    Label("안내 종료", systemImage: "xmark.circle")
-                }
             } footer: {
                 if bookmarks.count >= Self.maxBookmarks {
                     Text("즐겨찾기는 \(Self.maxBookmarks)개까지 저장할 수 있어요.")
@@ -437,6 +445,28 @@ private struct RouteTimelineRow: View {
         case .alarm: return "알림"
         case .destination: return "하차"
         case .normal: return nil
+        }
+    }
+}
+
+/// 안내 종료. iOS 26 부터는 시스템 글라스 버튼, 그 전에는 같은 캡슐 모양의 기본 버튼이다.
+/// 노선 시트와 정류장 시트가 함께 쓴다.
+struct FinishGuidanceButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        let button = Button(role: .destructive, action: action) {
+            Text("안내 종료")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+        }
+        .controlSize(.large)
+        .tint(.red)
+
+        if #available(iOS 26.0, *) {
+            button.buttonStyle(.glassProminent)
+        } else {
+            button.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
         }
     }
 }
