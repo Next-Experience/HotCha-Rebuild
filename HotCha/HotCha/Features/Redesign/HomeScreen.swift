@@ -18,6 +18,8 @@ struct HomeScreen: View {
     @State private var searchDestination: SearchDestination?
     /// 즐겨찾기를 추가하려고 연 검색. 값은 종류("집" · "회사" · "0")다.
     @State private var bookmarkSearch: BookmarkSearchRequest?
+    /// 켤 때 배너 → 이용 기록 → 즐겨찾기가 차례로 올라오는 일.
+    @State private var appear = AppearState()
 
     var body: some View {
         NavigationStack {
@@ -39,6 +41,7 @@ struct HomeScreen: View {
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 30) {
                             HomeStatusBanner(status: bannerStatus, action: openBanner)
+                                .staggeredAppear(order: 0, state: appear)
 
                             HistorySection(
                                 entries: Array(recentEntries.prefix(3)),
@@ -46,6 +49,7 @@ struct HomeScreen: View {
                                 onSelect: { searchDestination = $0.destination },
                                 onShowAll: onShowHistory
                             )
+                            .staggeredAppear(order: 1, state: appear)
 
                             FavoriteSection(
                                 bookmarks: bookmarks,
@@ -64,6 +68,7 @@ struct HomeScreen: View {
                                     }
                                 }
                             )
+                            .staggeredAppear(order: 2, state: appear)
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 8)
@@ -110,8 +115,18 @@ struct HomeScreen: View {
                 locationViewModel.requestPermission()
                 locationViewModel.requestalwaysPermission()
                 locationViewModel.requestLocation()
+                assemble()
             }
         }
+    }
+
+    /// 켤 때 한 번뿐이다. 탭을 오가거나 안내 화면에서 돌아올 때는 이미 앉아 있어 그대로다.
+    private func assemble() {
+        guard !appear.isSettled else { return }
+        appear.animates = true
+        // 한 프레임 미룬다. 나타나는 그 프레임에 세우면 SwiftUI 는 처음부터 제자리에 있던 것으로 보고
+        // 아무것도 그리지 않는다.
+        Task { @MainActor in appear.isSettled = true }
     }
 
     private var recentEntries: [HistoryEntry] {
