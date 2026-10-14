@@ -85,7 +85,7 @@ struct OnBoardingView: View {
 
     private var permissionsAreReady: Bool {
         locationViewModel.authorizationStatus == .authorizedAlways
-            && alarmRinger.authorization == .authorized
+            && alarmRinger.isAuthorized
     }
 
     private var primaryButtonTitle: String {
@@ -196,7 +196,7 @@ private struct PermissionOnboardingView: View {
                     symbol: "alarm.fill",
                     title: "알람 권한",
                     detail: "무음 모드에서도 하차 알람을 울려요.",
-                    isAuthorized: alarmRinger.authorization == .authorized,
+                    isAuthorized: alarmRinger.isAuthorized,
                     actionTitle: alarmActionTitle,
                     action: requestAlarmPermission
                 )

@@ -29,6 +29,8 @@ final class AlarmRinger: ObservableObject {
     private var ringingID: Alarm.ID?
     /// 시스템 알람 목록에서 그 알람을 한 번이라도 봤는가. 건 직후 목록에 아직 없을 때를 꺼진 것으로 읽지 않는다.
     private var seenInSystem = false
+    /// 알람을 지금보다 이만큼 뒤로 건다. AlarmKit 은 지난 시각의 `.fixed` 알람을 받지 않는다.
+    private static let scheduleLead: TimeInterval = 2
 
     private init() {
         authorization = manager.authorizationState
@@ -44,6 +46,16 @@ final class AlarmRinger: ObservableObject {
                 self?.handle(alarms)
             }
         }
+    }
+
+    /// 알람 권한이 있는가. 온보딩 문은 이것으로 연다.
+    /// 시뮬레이터는 AlarmKit 권한 요청이 화면 없이 바로 거절되어 줄 수가 없다. 그래서 시뮬레이터에서만 있는 것으로 본다.
+    var isAuthorized: Bool {
+        #if targetEnvironment(simulator)
+        true
+        #else
+        authorization == .authorized
+        #endif
     }
 
     /// 아직 묻지 않았으면 알람 권한을 묻는다. 안내를 시작할 때 부른다.
@@ -74,9 +86,11 @@ final class AlarmRinger: ObservableObject {
                 if manager.authorizationState == .notDetermined {
                     authorization = try await manager.requestAuthorization()
                 }
+                // 지금 시각으로 걸면 시스템에 닿을 때는 이미 지난 시각이라 거절된다(invalidInput). 조금 뒤로 건다.
                 _ = try await manager.schedule(
                     id: id,
-                    configuration: .alarm(schedule: .fixed(Date()), attributes: attributes)
+                    configuration: .alarm(
+                        schedule: .fixed(Date().addingTimeInterval(Self.scheduleLead)), attributes: attributes)
                 )
             } catch {
                 // 권한이 없거나 한도에 걸리면 시스템 알람은 못 울린다. 앱 안 알람 화면은 그대로 뜬다.

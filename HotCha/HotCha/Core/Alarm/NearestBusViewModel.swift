@@ -106,6 +106,15 @@ class NearestBusViewModel: ObservableObject {
 
     private func subscribeToLocationUpdates() {
         cancellables.removeAll()
+        #if DEBUG
+        // 개발자 버스는 가짜 위치로 정류장을 밟는다. 실제 위치 추적은 켜 둔 채라 잠금 화면에서도 앱이 살아 있다.
+        if DevBus.isDevBus(routeId: busRouteId) {
+            DevBus.ride(along: busStops)
+                .sink { [weak self] location in self?.handleLocationUpdate(location) }
+                .store(in: &cancellables)
+            return
+        }
+        #endif
         locationviewModel.$location
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)

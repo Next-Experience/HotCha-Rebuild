@@ -62,7 +62,7 @@ struct SplashView: View {
 
     private var requiredPermissionsAreGranted: Bool {
         onboardingLocation.authorizationStatus == .authorizedAlways
-            && alarmRinger.authorization == .authorized
+            && alarmRinger.isAuthorized
     }
 }
 
