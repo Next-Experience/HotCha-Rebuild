@@ -43,13 +43,21 @@ final class LiveActivityController {
             if justFired {
                 await activity.update(content, alertConfiguration: AlertConfiguration(
                     title: "내릴 준비를 해주세요",
-                    body: "\(activity.attributes.destination) · \(state.remainingText)",
+                    body: "\(Self.alertBody(attributes: activity.attributes, state: state))",
                     sound: .default
                 ))
             } else {
                 await activity.update(content)
             }
         }
+    }
+
+    /// "152번 · 1정류장 남았어요 · OO에서 내려요"
+    private static func alertBody(
+        attributes: HotChaActivityAttributes, state: HotChaActivityAttributes.ContentState
+    ) -> String {
+        let guidance = HotChaGuidance(attributes: attributes, state: state)
+        return "\(guidance.label) · \(guidance.headline) · \(guidance.detail)"
     }
 
     func end() {

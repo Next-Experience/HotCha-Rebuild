@@ -13,104 +13,105 @@ import WidgetKit
 struct HotchaLiveLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: HotChaActivityAttributes.self) { context in
+            // 바탕을 칠하지 않는다. 잠금 화면 바탕은 시스템이 외관(라이트 · 다크)에 맞춰 정한다.
             LockScreenView(attributes: context.attributes, state: context.state)
-                .activityBackgroundTint(Color("mainpurple"))
-                .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
-            let tint = context.state.hasAlarmFired ? Color.orange : Color("mainpurple")
+            let guidance = HotChaGuidance(attributes: context.attributes, state: context.state)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label(badgeText(context.attributes), systemImage: symbolName(context.attributes))
+                    Label(guidance.label, systemImage: symbolName(guidance))
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(tint)
+                        .foregroundStyle(Color("mainpurple"))
                         .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(context.state.shortRemaining)
+                    Text(guidance.compact)
                         .font(.title3.weight(.bold))
-                        .foregroundStyle(tint)
+                        .foregroundStyle(Color("mainpurple"))
                         .contentTransition(.numericText())
                 }
-                DynamicIslandExpandedRegion(.center) {
-                    Text(context.attributes.destination)
-                        .font(.headline)
-                        .lineLimit(1)
-                }
                 DynamicIslandExpandedRegion(.bottom) {
-                    JourneyLine(attributes: context.attributes, state: context.state)
-                        .padding(.top, 4)
+                    HStack(spacing: 6) {
+                        Text(guidance.detail)
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                        if let tag = guidance.phaseTag {
+                            Text(tag)
+                                .fontWeight(.semibold)
+                        }
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
                 }
             } compactLeading: {
-                Image(systemName: context.state.hasAlarmFired ? "bell.fill" : symbolName(context.attributes))
-                    .foregroundStyle(tint)
+                // 좁은 자리에는 버스 번호와 남은 양만 둔다.
+                if context.attributes.kind == .route && !guidance.hasAlarmFired {
+                    Text(context.attributes.busNumber)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color("mainpurple"))
+                } else {
+                    Image(systemName: symbolName(guidance))
+                        .foregroundStyle(Color("mainpurple"))
+                }
             } compactTrailing: {
-                Text(context.state.shortRemaining)
+                Text(guidance.compact)
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(tint)
+                    .foregroundStyle(Color("mainpurple"))
                     .contentTransition(.numericText())
             } minimal: {
-                Image(systemName: context.state.hasAlarmFired ? "bell.fill" : symbolName(context.attributes))
-                    .foregroundStyle(tint)
+                Image(systemName: symbolName(guidance))
+                    .foregroundStyle(Color("mainpurple"))
             }
-            .keylineTint(tint)
+            .keylineTint(Color("mainpurple"))
         }
     }
 }
 
-private func badgeText(_ attributes: HotChaActivityAttributes) -> String {
-    attributes.kind == .route ? "\(attributes.busNumber)번" : "정류장"
+/// 알람이 울린 뒤에는 종, 아니면 버스(정류장 알림은 핀)
+private func symbolName(_ guidance: HotChaGuidance) -> String {
+    if guidance.hasAlarmFired { return "bell.fill" }
+    return guidance.kind == .route ? "bus.fill" : "mappin.and.ellipse"
 }
 
-private func symbolName(_ attributes: HotChaActivityAttributes) -> String {
-    attributes.kind == .route ? "bus.fill" : "mappin.and.ellipse"
-}
-
-/// 잠금 화면과 알림 배너에 뜨는 모양. 홈의 상태 배너와 같은 카드를 쓴다.
+/// 잠금 화면과 알림 배너에 뜨는 모양. 홈 배너와 문구는 같고, 바탕은 시스템 것을 쓴다.
+/// mainpurple 은 버스 번호와 큰 수치에만 쓴다.
 private struct LockScreenView: View {
     let attributes: HotChaActivityAttributes
     let state: HotChaActivityAttributes.ContentState
 
     var body: some View {
-        HotChaBannerCard(
-            title: state.hasAlarmFired ? "곧 내릴 정류장이에요" : "지금 목적지를 향해 가는 중이에요",
-            detail: detail,
-            symbol: state.hasAlarmFired ? "figure.walk.departure" : symbolName(attributes),
-            image: state.hasAlarmFired ? "HotChaStopBell" : attributes.imageName
-        )
-    }
-
-    /// 홈 배너와 같은 문장. "152번 버스 · OO역까지 3정류장 남음" / "OO역까지 540m 남음"
-    private var detail: String {
-        let name = attributes.destination
-        if let stops = state.remainingStops {
-            let prefix = "\(attributes.busNumber)번 버스 · "
-            if stops > 0 { return "\(prefix)\(name)까지 \(stops)정류장 남음" }
-            return stops == 0 ? "\(prefix)\(name)에 도착했어요" : "\(prefix)\(name)을 \(-stops)정류장 지났어요"
-        }
-        if let meters = state.remainingMeters {
-            return "\(name)까지 \(HotChaActivityAttributes.ContentState.format(meters: meters)) 남음"
-        }
-        return name
-    }
-}
-
-/// "지금 있는 곳 → 알람이 울리는 곳" 한 줄
-private struct JourneyLine: View {
-    let attributes: HotChaActivityAttributes
-    let state: HotChaActivityAttributes.ContentState
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Text(state.currentStop.isEmpty ? "이동 중" : state.currentStop)
-                .lineLimit(1)
-            Image(systemName: "chevron.right")
-                .font(.caption2.weight(.semibold))
-            Image(systemName: state.hasAlarmFired ? "bell.fill" : "bell")
-            Text(attributes.alarmPoint)
-                .lineLimit(1)
+        let guidance = HotChaGuidance(attributes: attributes, state: state)
+        HStack(spacing: 14) {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(guidance.label)
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color("mainpurple"))
+                    if let tag = guidance.phaseTag {
+                        Text(tag)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Text(guidance.headline)
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(guidance.phase == .locating ? Color.secondary : Color("mainpurple"))
+                    .contentTransition(.numericText())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text(guidance.detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
             Spacer(minLength: 0)
+            Image(guidance.showsStopBell ? "HotChaStopBell" : attributes.imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 64, height: 64)
+                .accessibilityHidden(true)
         }
-        .font(.footnote)
-        .foregroundStyle(.secondary)
+        .padding(16)
     }
 }

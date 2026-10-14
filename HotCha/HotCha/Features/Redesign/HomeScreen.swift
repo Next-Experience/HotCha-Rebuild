@@ -113,22 +113,29 @@ struct HomeScreen: View {
 
     // MARK: - 상태 배너
 
-    /// 버스 안내 → 정류장 안내 → 없음 순으로 하나만 고른다.
+    /// 버스 안내 → 정류장 안내 → 없음 순으로 하나만 고른다. 단계와 문구는 잠금 화면과 같은 HotChaGuidance 가 정한다.
     private var bannerStatus: HomeStatusBanner.Status {
         if session.isRunning, let bus = session.bus {
-            let name = session.destinationStop?.stationNm ?? "도착 정류장"
-            let detail: String
-            switch session.remainingStops {
-            case .none: detail = "\(bus.busRouteNm)번 버스 · \(name)"
-            case .some(let n) where n > 0: detail = "\(bus.busRouteNm)번 버스 · \(name)까지 \(n)정류장 남음"
-            case .some(0): detail = "\(bus.busRouteNm)번 버스 · \(name)에 도착했어요"
-            case .some(let n): detail = "\(bus.busRouteNm)번 버스 · \(name)을 \(-n)정류장 지났어요"
-            }
-            return session.hasAlarmFired ? .arriving(detail: detail) : .travelling(detail: detail, image: BusArt.imageName(for: bus))
+            let guidance = HotChaGuidance(
+                kind: .route,
+                busNumber: bus.busRouteNm,
+                destination: session.destinationStop?.stationNm ?? "도착 정류장",
+                remainingStops: session.remainingStops,
+                remainingMeters: nil,
+                hasAlarmFired: session.hasAlarmFired
+            )
+            return .guiding(guidance, image: BusArt.imageName(for: bus))
         }
         if let stop = stopAlarm.runningStop {
-            let detail = stopAlarm.distance.map { "\(stop.name)까지 \(StopAlarmViewModel.format($0)) 남음" } ?? stop.name
-            return stopAlarm.didFire ? .arriving(detail: detail) : .travelling(detail: detail, image: Clay.busStop.rawValue)
+            let guidance = HotChaGuidance(
+                kind: .stop,
+                busNumber: "",
+                destination: stop.name,
+                remainingStops: nil,
+                remainingMeters: stopAlarm.distance.map { Int($0) },
+                hasAlarmFired: stopAlarm.didFire
+            )
+            return .guiding(guidance, image: Clay.busStop.rawValue)
         }
         return .idle
     }

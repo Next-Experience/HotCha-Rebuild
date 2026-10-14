@@ -287,11 +287,16 @@ struct RouteAlarmSheet: View {
         return "\(bus.busRouteNm)번 · \(name)까지"
     }
 
+    /// 홈 배너 · 잠금 화면과 같은 문구다.
     private var remainingText: String {
-        guard let remaining = session.remainingStops else { return "위치 확인 중" }
-        if remaining > 0 { return "\(remaining)정류장 남았어요" }
-        if remaining == 0 { return "이번 정류장에서 내려요" }
-        return "\(-remaining)정류장 지났어요"
+        HotChaGuidance(
+            kind: .route,
+            busNumber: bus.busRouteNm,
+            destination: session.destinationStop?.stationNm ?? "도착 정류장",
+            remainingStops: session.remainingStops,
+            remainingMeters: nil,
+            hasAlarmFired: session.hasAlarmFired
+        ).headline
     }
 
     private var boardedStop: BusStop? {

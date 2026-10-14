@@ -37,37 +37,6 @@ struct HotChaActivityAttributes: ActivityAttributes {
     /// 알람이 울리는 곳. "OO정류장" 또는 "500m 전"
     var alarmPoint: String
     /// 카드에 그릴 그림 이름. 노선 유형에 맞는 버스나 정류장 그림이다.
+    /// 단계와 문구는 HotChaGuidance 가 정한다.
     var imageName: String
-}
-
-extension HotChaActivityAttributes.ContentState {
-    /// "3정류장" · "540m" 처럼 짧게 쓴 남은 양. 다이내믹 아일랜드의 좁은 자리에 쓴다.
-    var shortRemaining: String {
-        if let remainingStops {
-            if remainingStops > 0 { return "\(remainingStops)정류장" }
-            return remainingStops == 0 ? "도착" : "지남"
-        }
-        if let remainingMeters {
-            return Self.format(meters: remainingMeters)
-        }
-        return "…"
-    }
-
-    /// "3정류장 전" · "540m 남음" 처럼 문장으로 쓴 남은 양
-    var remainingText: String {
-        if let remainingStops {
-            if remainingStops > 0 { return "\(remainingStops)정류장 전" }
-            return remainingStops == 0 ? "도착 정류장이에요" : "\(-remainingStops)정류장 지났어요"
-        }
-        if let remainingMeters {
-            return "\(Self.format(meters: remainingMeters)) 남음"
-        }
-        return "위치 확인 중"
-    }
-
-    static func format(meters: Int) -> String {
-        guard meters >= 1000 else { return "\(meters)m" }
-        let km = (Double(meters) / 100).rounded() / 10
-        return km == km.rounded() ? "\(Int(km))km" : String(format: "%.1fkm", km)
-    }
 }
