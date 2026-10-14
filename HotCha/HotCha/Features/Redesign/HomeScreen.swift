@@ -53,10 +53,15 @@ struct HomeScreen: View {
                                     bookmarkSearch = BookmarkSearchRequest(type: type)
                                 },
                                 onSelect: { bookmark in
-                                    searchDestination = .route(
-                                        Bus_info_seoul(from: bookmark.bus),
-                                        startingAt: bookmark.destination_stop_id
-                                    )
+                                    // 정류장 즐겨찾기는 어느 버스든 타면 되는 정류장 알람이다.
+                                    if let stop = bookmark.stopRecord {
+                                        searchDestination = .stopAlarm(stop)
+                                    } else {
+                                        searchDestination = .route(
+                                            Bus_info_seoul(from: bookmark.bus),
+                                            startingAt: bookmark.destination_stop_id
+                                        )
+                                    }
                                 }
                             )
                         }
@@ -88,6 +93,8 @@ struct HomeScreen: View {
                     RouteAlarmScreen(bus: route, mode: .alarm(startingAt: stationId))
                 case .stop(let stop):
                     StopAlarmView(stop: stop)
+                case .stopAlarm(let stop):
+                    StopAlarmView(stop: stop, startsImmediately: true)
                 case .place(let place):
                     StopAlarmView(placeName: place.name, coordinate: place.coordinate)
                 }
@@ -254,7 +261,7 @@ private struct FavoriteSection: View {
                     Button { onSelect(bookmark) } label: {
                         favoriteLabel(
                             bookmark.bookmark_label,
-                            detail: "\(bookmark.bus_no)번 · \(bookmark.destination_stop_name)",
+                            detail: bookmark.summary,
                             clay: Clay.forBookmark(type: 0, label: bookmark.bookmark_label)
                         )
                     }
@@ -289,7 +296,7 @@ private struct FavoriteSection: View {
             Button { onSelect(bookmark) } label: {
                 favoriteLabel(
                     bookmark.bookmark_label,
-                    detail: "\(bookmark.bus_no)번 · \(bookmark.destination_stop_name)",
+                    detail: bookmark.summary,
                     clay: Clay.forBookmark(type: type, label: label)
                 )
             }
@@ -299,7 +306,7 @@ private struct FavoriteSection: View {
             Button { onAdd(label) } label: {
                 favoriteLabel(
                     "\(label) 알림 추가",
-                    detail: "자주 가는 곳의 버스 알림을 등록하세요.",
+                    detail: "버스나 정류장으로 알림을 등록하세요.",
                     clay: Clay.forBookmark(type: type, label: label)
                 )
             }

@@ -92,6 +92,8 @@ enum SearchDestination: Hashable, Identifiable {
     /// 이용 기록처럼 도착 정류장이 이미 정해진 노선. 고르지 않고 바로 안내를 시작한다.
     case route(Bus_info_seoul, startingAt: String)
     case stop(BusStopRecord)
+    /// 정류장 즐겨찾기처럼 내릴 정류장이 정해져 있다. 정류장 알람을 바로 시작한다.
+    case stopAlarm(BusStopRecord)
     case place(PlaceResult)
 
     var id: String {
@@ -99,6 +101,7 @@ enum SearchDestination: Hashable, Identifiable {
         case .bus(let bus): return "bus-\(bus.city_code)-\(bus.busRouteId)"
         case .route(let bus, let stationId): return "route-\(bus.city_code)-\(bus.busRouteId)-\(stationId)"
         case .stop(let stop): return "stop-\(stop.id)"
+        case .stopAlarm(let stop): return "stop-alarm-\(stop.id)"
         case .place(let place): return "place-\(place.name)-\(place.latitude)-\(place.longitude)"
         }
     }
@@ -108,7 +111,7 @@ struct SearchView: View {
     @Binding var textfiledValue: String
     @Binding var searchActivate: Bool
     @Binding var destination: SearchDestination?
-    /// 즐겨찾기에 넣을 버스를 고르는 중인가. 그때는 버스만 보여 준다.
+    /// 즐겨찾기에 넣을 것을 고르는 중인가. 그때는 버스 · 정류장만 보여 준다.
     var isBookmark: Bool = false
     /// 내 위치. 가까운 지역의 버스와 가까운 정류장을 먼저 보여 주는 기준이다.
     var location: CLLocation?
@@ -124,14 +127,14 @@ struct SearchView: View {
 
     /// 즐겨찾기는 노선 기준으로 저장하므로 버스만 보여준다.
     private var scopes: [SearchScope] {
-        isBookmark ? [.bus] : SearchScope.allCases
+        isBookmark ? [.bus, .stop] : SearchScope.allCases
     }
 
     var body: some View {
         VStack(spacing: 0) {
             if textfiledValue.isEmpty {
                 if isBookmark {
-                    BookmarkBusSearchPrompt()
+                    BookmarkSearchPrompt()
                 } else {
                     recentList
                 }
@@ -374,7 +377,7 @@ struct SearchView: View {
         let location = self.location ?? CLLocationManager().location
 
         async let routeRecords = BusDatabase.shared.searchRoutes(searchText, near: location)
-        async let stopRecords = isBookmark ? [] : BusDatabase.shared.searchStops(searchText, near: location)
+        async let stopRecords = BusDatabase.shared.searchStops(searchText, near: location)
         let (foundRoutes, foundStops) = await (routeRecords, stopRecords)
         guard !Task.isCancelled else { return }
 
@@ -393,12 +396,12 @@ struct SearchView: View {
     }
 }
 
-private struct BookmarkBusSearchPrompt: View {
+private struct BookmarkSearchPrompt: View {
     var body: some View {
         ContentUnavailableView {
-            Label("버스 번호를 검색하세요", systemImage: "bus")
+            Label("버스나 정류장을 검색하세요", systemImage: "star")
         } description: {
-            Text("예: 100, 320, 9401\n선택한 버스의 도착 알림을 추가할 수 있어요.")
+            Text("늘 같은 버스를 타면 버스로, 오는 버스를 아무거나 타면 내릴 정류장으로 저장하세요.")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.bottom, 72)

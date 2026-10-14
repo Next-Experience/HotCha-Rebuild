@@ -75,7 +75,7 @@ struct UsageHistoryScreen: View {
                     RouteAlarmScreen(bus: bus, mode: .alarm(startingAt: stationId))
                 case .stop(let stop):
                     StopAlarmView(stop: stop)
-                case .bus, .place:
+                case .bus, .stopAlarm, .place:
                     EmptyView()
                 }
             }

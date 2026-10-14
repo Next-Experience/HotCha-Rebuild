@@ -14,6 +14,8 @@ struct StopAlarmView: View {
     let center: CLLocationCoordinate2D
     /// 정류장 검색으로 들어왔을 때 미리 골라 둘 정류장
     let initialStop: BusStopRecord?
+    /// 정류장 즐겨찾기에서 왔다. 화면을 열자마자 마지막에 고른 알람 거리로 안내를 시작한다.
+    var startsImmediately = false
 
     /// 정류장 알람은 화면을 벗어나도 이어진다. 앱 전체가 하나를 나눠 쓴다.
     @Environment(\.dismiss) private var dismiss
@@ -30,7 +32,8 @@ struct StopAlarmView: View {
     /// 길 건너편·같은 이름의 다른 정류장까지 보이도록 주변을 함께 불러온다.
     private static let candidateRadius: CLLocationDistance = 400
 
-    init(stop: BusStopRecord) {
+    init(stop: BusStopRecord, startsImmediately: Bool = false) {
+        self.startsImmediately = startsImmediately
         self.title = stop.name
         self.center = stop.coordinate
         self.initialStop = stop
@@ -106,6 +109,12 @@ struct StopAlarmView: View {
                 viewModel.select(selectedStop)
                 if let stop = selectedStop {
                     camera = Self.camera(for: stop.coordinate, radius: alarmRadius)
+                }
+                // 이미 알람 거리 안이거나 버스 안내가 진행 중이면 시작하지 않고 화면만 연다.
+                if startsImmediately, let stop = selectedStop, !viewModel.isRunning, !routeAlarm.isRunning,
+                    !isAlreadyInside
+                {
+                    viewModel.start(stop: stop, radius: alarmRadius)
                 }
             }
             .onChange(of: selectedStopID) { _, _ in
