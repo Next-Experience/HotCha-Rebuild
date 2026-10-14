@@ -70,16 +70,19 @@ struct NavigationView: View {
     }
 
     private var ringingContent: AlarmRingingContent {
+        // 문구는 홈 배너 · 잠금 화면과 같은 HotChaGuidance 에서 온다. "152번 · 2정류장 남았어요"
         if routeAlarmSession.alarmIsRinging, let bus = routeAlarmSession.bus {
-            let remaining = routeAlarmSession.remainingStops.map { $0 > 0 ? "\($0)정류장 남음" : "곧 도착" } ?? "곧 도착"
-            return AlarmRingingContent(
-                destination: routeAlarmSession.destinationStop?.stationNm ?? "",
-                detail: "\(bus.busRouteNm)번 버스 · \(remaining)"
-            )
+            let destination = routeAlarmSession.destinationStop?.stationNm ?? ""
+            let guidance = HotChaGuidance(
+                kind: .route, busNumber: bus.busRouteNm, destination: destination,
+                remainingStops: routeAlarmSession.remainingStops, remainingMeters: nil, hasAlarmFired: true)
+            return AlarmRingingContent(destination: destination, detail: "\(guidance.label) · \(guidance.headline)")
         }
         if stopAlarmSession.isRinging, let stop = stopAlarmSession.runningStop {
-            let remaining = stopAlarmSession.distance.map { "\(StopAlarmViewModel.format($0)) 남음" } ?? "곧 도착"
-            return AlarmRingingContent(destination: stop.name, detail: "정류장 알림 · \(remaining)")
+            let guidance = HotChaGuidance(
+                kind: .stop, busNumber: "", destination: stop.name, remainingStops: nil,
+                remainingMeters: stopAlarmSession.distance.map { Int($0) }, hasAlarmFired: true)
+            return AlarmRingingContent(destination: stop.name, detail: "\(guidance.label) · \(guidance.headline)")
         }
         return .preview
     }

@@ -31,18 +31,13 @@ struct HotchaLiveLiveActivity: Widget {
                         .contentTransition(.numericText())
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack(spacing: 6) {
-                        Text(guidance.detail)
-                            .lineLimit(1)
-                        Spacer(minLength: 0)
-                        if let tag = guidance.phaseTag {
-                            Text(tag)
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
+                    // 꼬리표를 오른쪽 끝에 두면 아일랜드의 둥근 모서리에 잘린다. 문장 앞에 붙인다.
+                    Text(guidance.phaseTag.map { "\($0) · \(guidance.detail)" } ?? guidance.detail)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 4)
                 }
             } compactLeading: {
                 // 좁은 자리에는 버스 번호와 남은 양만 둔다.

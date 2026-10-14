@@ -71,9 +71,15 @@ struct HotChaGuidance: Equatable {
         }
     }
 
-    /// 아래 한 줄. "두산위브아파트입구에서 내려요"
+    /// 아래 한 줄. "두산위브아파트입구에서 내려요" · "미아초교를 지났어요"
     var detail: String {
-        phase == .passed ? "\(destination)을 지났어요" : "\(destination)에서 내려요"
+        phase == .passed ? "\(destination)\(Self.objectParticle(after: destination)) 지났어요" : "\(destination)에서 내려요"
+    }
+
+    /// 마지막 글자에 받침이 있으면 "을", 없으면 "를". 한글로 끝나지 않으면 받침이 있는 것으로 본다.
+    static func objectParticle(after word: String) -> String {
+        guard let last = word.unicodeScalars.last, (0xAC00...0xD7A3).contains(last.value) else { return "을" }
+        return (last.value - 0xAC00) % 28 == 0 ? "를" : "을"
     }
 
     /// 좁은 자리의 남은 양. "3" · "540m" · "도착" · "지남"

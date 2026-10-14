@@ -11,11 +11,11 @@ import SwiftUI
 struct AlarmRingingContent: Equatable {
     /// 내릴 정류장
     let destination: String
-    /// "152번 버스 · 2정류장 남음" 같은 한 줄
+    /// "152번 · 2정류장 남았어요" 같은 한 줄
     let detail: String
 
     /// 개발자 메뉴의 「알람 화면 미리 보기」에서 쓰는 보기
-    static let preview = AlarmRingingContent(destination: "두산위브아파트입구", detail: "152번 버스 · 2정류장 남음")
+    static let preview = AlarmRingingContent(destination: "두산위브아파트입구", detail: "152번 · 2정류장 남았어요")
 }
 
 extension Notification.Name {
