@@ -185,6 +185,7 @@ HotCha-Rebuild/
 - **지도 핀 선택** — `Map(selection:)` 은 내용이 다시 그려질 때 선택이 다른 핀으로 튄다. 핀을 직접 그리고 탭으로 고른다.
 - **증분 빌드는 경고를 숨긴다** — 안 바뀐 파일의 경고는 다시 안 찍힌다. 검증은 처음부터 컴파일한다.
 - **API 호출 한도** — 키 하나의 하루 한도를 앱 사용자와 나눠 쓴다. 노선별 정류장을 한꺼번에 긁는 스크립트를 이 키로 돌리지 않는다.
+- **AlarmKit 의 `.fixed(Date())`** — 시스템(mobiletimerd)에 닿을 때는 이미 지난 시각이라 `invalidInput` 으로 거절된다. 앱 쪽 `catch` 가 삼켜서 아무 소리 없이 안 울렸다. 실기기 로그에만 남는다("Cannot schedule an alarm with a fixed date in the past"). 조금 뒤 시각으로 건다.
 
 ---
 
