@@ -16,9 +16,15 @@ struct StopAlarmView: View {
     let initialStop: BusStopRecord?
     /// 정류장 즐겨찾기에서 왔다. 화면을 열자마자 마지막에 고른 알람 거리로 안내를 시작한다.
     var startsImmediately = false
+    /// 즐겨찾기에 넣을 정류장을 지도에서 확인하는 중이다. 알람 대신 「저장」을 보여 주고, 누르면 고른 정류장과 이름을 넘긴다.
+    var onSaveBookmark: ((BusStopRecord, String) -> Void)?
+    /// 즐겨찾기 이름을 직접 붙인다(집 · 회사가 아닌 즐겨찾기). 비워 두면 정류장 이름을 쓴다.
+    var asksBookmarkName = false
 
     /// 정류장 알람은 화면을 벗어나도 이어진다. 앱 전체가 하나를 나눠 쓴다.
     @Environment(\.dismiss) private var dismiss
+    /// 뒤로 가기를 누르는 순간 false 가 된다. onDisappear 는 화면이 다 빠진 뒤에야 불려 시트가 늦게 내려간다.
+    @Environment(\.isPresented) private var isPresented
     @EnvironmentObject private var viewModel: StopAlarmViewModel
     @EnvironmentObject private var routeAlarm: RouteAlarmSession
     @AppStorage("stopAlarmRadius") private var alarmRadius: Double = 500
@@ -27,13 +33,21 @@ struct StopAlarmView: View {
     @State private var selectedStopID: String?
     @State private var camera: MapCameraPosition
     @State private var showsSheet = false
+    @State private var bookmarkName = ""
 
     private static let radiusOptions: [Double] = [300, 500, 1000]
     /// 길 건너편·같은 이름의 다른 정류장까지 보이도록 주변을 함께 불러온다.
     private static let candidateRadius: CLLocationDistance = 400
 
-    init(stop: BusStopRecord, startsImmediately: Bool = false) {
+    init(
+        stop: BusStopRecord,
+        startsImmediately: Bool = false,
+        asksBookmarkName: Bool = false,
+        onSaveBookmark: ((BusStopRecord, String) -> Void)? = nil
+    ) {
         self.startsImmediately = startsImmediately
+        self.asksBookmarkName = asksBookmarkName
+        self.onSaveBookmark = onSaveBookmark
         self.title = stop.name
         self.center = stop.coordinate
         self.initialStop = stop
@@ -104,7 +118,7 @@ struct StopAlarmView: View {
                 let nearby = await BusDatabase.shared.stops(near: center, radius: Self.candidateRadius)
                 // 미리 고른 정류장이 반경 계산에서 빠지는 일이 없도록 합친다.
                 candidates = (initialStop.map { [$0] } ?? []) + nearby.filter { $0.id != initialStop?.id }
-                if let running = viewModel.runningStop {
+                if !isSavingBookmark, let running = viewModel.runningStop {
                     // 이미 안내 중이면 다른 정류장을 열어도 안내 중인 정류장을 보여 준다.
                     candidates = [running] + candidates.filter { $0.id != running.id }
                     selectedStopID = running.id
@@ -125,6 +139,9 @@ struct StopAlarmView: View {
             .onChange(of: selectedStopID) { _, _ in
                 viewModel.select(selectedStop)
             }
+            .onChange(of: isPresented) { _, presented in
+                if !presented { showsSheet = false }
+            }
             .onDisappear {
                 showsSheet = false
                 viewModel.endPreview()
@@ -142,7 +159,7 @@ struct StopAlarmView: View {
                     .tint(.gray)
             }
 
-            if let stop = selectedStop {
+            if !isSavingBookmark, let stop = selectedStop {
                 MapCircle(center: stop.coordinate, radius: alarmRadius)
                     .foregroundStyle(Color("mainpurple").opacity(0.12))
                     .stroke(Color("mainpurple").opacity(0.6), lineWidth: 1)
@@ -154,8 +171,8 @@ struct StopAlarmView: View {
                 Annotation(stop.name, coordinate: stop.coordinate, anchor: .center) {
                     StopPin(isSelected: isSelected)
                         .onTapGesture {
-                            // 알람 중에는 목적지를 바꾸지 않는다.
-                            guard !viewModel.isRunning else { return }
+                            // 알람 중에는 목적지를 바꾸지 않는다. 즐겨찾기를 고르는 중이면 안내와 상관없다.
+                            guard isSavingBookmark || !viewModel.isRunning else { return }
                             selectedStopID = stop.id
                         }
                 }
@@ -190,7 +207,9 @@ struct StopAlarmView: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 6)
 
-                if viewModel.isRunning {
+                if isSavingBookmark {
+                    bookmarkSection(stop: stop)
+                } else if viewModel.isRunning {
                     runningSection
                 } else {
                     setupSection(stop: stop)
@@ -236,6 +255,36 @@ struct StopAlarmView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(!canStart)
+            .padding(.top, 16)
+        }
+    }
+
+    private var isSavingBookmark: Bool { onSaveBookmark != nil }
+
+    /// 즐겨찾기로 저장하기 전 확인. 길 건너편 같은 이름의 정류장과 헷갈리지 않게 지도에서 보고 고른다.
+    private func bookmarkSection(stop: BusStopRecord) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("지도에서 맞는 정류장인지 확인하세요. 다른 핀을 누르면 바뀌어요.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .padding(.top, 20)
+
+            if asksBookmarkName {
+                TextField("즐겨찾기 이름 (비우면 \(stop.name))", text: $bookmarkName)
+                    .textFieldStyle(.roundedBorder)
+                    .padding(.top, 12)
+            }
+
+            Button {
+                onSaveBookmark?(stop, bookmarkName)
+            } label: {
+                Text("이 정류장으로 저장")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
             .padding(.top, 16)
         }
     }

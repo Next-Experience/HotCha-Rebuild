@@ -89,6 +89,23 @@ final class RouteAlarmSession: ObservableObject {
         isRunning && self.bus?.busRouteId == bus.busRouteId && self.bus?.city_code == bus.city_code
     }
 
+    /// 지도에서 거의 겹쳐 보이는 같은 이름의 정류장들(눌린 것 포함, 노선 순서대로).
+    /// 대부분 길 양쪽의 상행 · 하행이다. 둘 사이가 이만큼보다 가까우면 지도에서 손가락으로 가려 누를 수 없다.
+    static func overlappingStops(at index: Int, in stops: [BusStop], within meters: Double = 120) -> [Int] {
+        guard stops.indices.contains(index) else { return [] }
+        let here = CLLocation(latitude: stops[index].gpsY, longitude: stops[index].gpsX)
+        return stops.indices.filter { other in
+            let stop = stops[other]
+            return isSelectable(stop) && stop.stationNm == stops[index].stationNm
+                && CLLocation(latitude: stop.gpsY, longitude: stop.gpsX).distance(from: here) <= meters
+        }
+    }
+
+    /// 이 정류장 다음에 서는 곳. 이름이 같은 정류장을 버스가 가는 방향으로 가려 보여 줄 때 쓴다.
+    func nextStopName(after index: Int) -> String? {
+        stops.indices.contains(index + 1) ? stops[index + 1].stationNm : nil
+    }
+
     /// 고를 수 없는 정류장. 이름에 미정차·가상이 붙은 곳은 버스가 서지 않는다.
     static func isSelectable(_ stop: BusStop) -> Bool {
         !stop.stationNm.contains("미정차") && !stop.stationNm.contains("가상")

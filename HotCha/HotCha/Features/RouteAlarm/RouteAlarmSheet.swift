@@ -12,6 +12,8 @@ struct RouteAlarmSheet: View {
     let bus: Bus_info_seoul
     let mode: RouteAlarmScreen.Mode
     @Binding var detent: PresentationDetent
+    /// 지도에서 누른 곳에 겹친 같은 이름의 정류장들. 있으면 목록 맨 위에서 방향을 보고 고른다.
+    @Binding var overlapChoices: [Int]
     let onFinish: () -> Void
     let onBookmarkSaved: () -> Void
 
@@ -53,6 +55,17 @@ struct RouteAlarmSheet: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // 고르기 전에는 제목 아래에 지도에서 고르라고 적는다. 시트 아래쪽은 검색창이 덮는다.
+                if !session.isRunning && !session.isLoading && session.destinationStop == nil {
+                    ToolbarItem(placement: .principal) {
+                        VStack(spacing: 1) {
+                            Text(title).font(.headline)
+                            Text(overlapChoices.isEmpty ? "지도에서 정류장을 누르세요" : "아래에서 방향을 고르세요")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
                 if !session.isRunning && !session.isLoading && !session.loadFailed {
                     ToolbarItem(placement: .confirmationAction) {
                         primaryButton
@@ -81,6 +94,19 @@ struct RouteAlarmSheet: View {
     private var choosingList: some View {
         ScrollViewReader { proxy in
             List {
+                if !overlapChoices.isEmpty {
+                    Section {
+                        ForEach(overlapChoices, id: \.self) { index in
+                            stopRow(index: index, stop: session.stops[index])
+                        }
+                    } header: {
+                        Text("어느 쪽 정류장인가요?")
+                    } footer: {
+                        Text("이름이 같은 정류장이 길 양쪽에 있어요. 버스가 다음에 가는 곳을 보고 고르세요.")
+                    }
+                    .id(Self.overlapSectionID)
+                }
+
                 if session.destinationStop != nil {
                     Section("알림") {
                         Stepper(value: $stopsBefore, in: 1...5) {
@@ -112,10 +138,24 @@ struct RouteAlarmSheet: View {
                 // 정류장을 고르면 맨 위의 알림 설정이 보이게 올린다.
                 withAnimation { proxy.scrollTo(Self.alarmSectionID, anchor: .top) }
             }
+            .onChange(of: overlapChoices) { _, choices in
+                guard !choices.isEmpty else { return }
+                withAnimation { proxy.scrollTo(Self.overlapSectionID, anchor: .top) }
+            }
         }
     }
 
     private static let alarmSectionID = "alarm-section"
+    private static let overlapSectionID = "overlap-section"
+
+    /// 노선에 두 번 이상 나오는 정류장 이름. 이런 정류장은 목록에 다음 정류장을 함께 적어 방향을 가린다.
+    private var repeatedNames: Set<String> {
+        var seen = Set<String>(), repeated = Set<String>()
+        for stop in session.stops where !seen.insert(stop.stationNm).inserted {
+            repeated.insert(stop.stationNm)
+        }
+        return repeated
+    }
 
     private var filteredStops: [(offset: Int, element: BusStop)] {
         let all = Array(session.stops.enumerated())
@@ -129,6 +169,7 @@ struct RouteAlarmSheet: View {
         let selectable = RouteAlarmSession.isSelectable(stop)
         return Button {
             session.destinationIndex = index
+            overlapChoices = []
             query = ""
             detent = .medium
         } label: {
@@ -140,8 +181,10 @@ struct RouteAlarmSheet: View {
                     Text(stop.stationNm)
                         .font(.body.weight(isDestination ? .semibold : .regular))
                         .foregroundStyle(selectable ? .primary : .tertiary)
-                    if stop.stationNo > 0 {
-                        Text(String(format: "%05d", stop.stationNo))
+                    let number = stop.stationNo > 0 ? String(format: "%05d", stop.stationNo) : nil
+                    let next = repeatedNames.contains(stop.stationNm) ? session.nextStopName(after: index) : nil
+                    if number != nil || next != nil {
+                        Text([number, next.map { "다음 \($0)" }].compactMap { $0 }.joined(separator: " · "))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
