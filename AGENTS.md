@@ -101,7 +101,8 @@ HotCha-Rebuild/
 │   │   ├── Features/          # 화면 단위
 │   │   ├── Shared/            # 폰트 · 확장 · 유틸
 │   │   └── Resources/         # 에셋 · 알람 소리 · BusData.sqlite
-│   └── HotchaLive/            # Live Activity 위젯 익스텐션
+│   ├── HotchaLive/            # Live Activity · 다이내믹 아일랜드 화면 (위젯 익스텐션)
+│   └── LiveActivityShared/    # Live Activity 데이터 모양. 앱과 위젯이 함께 컴파일한다
 ├── Tools/build_bus_db.py      # BusData.sqlite 생성
 └── scripts/                   # verify.sh · check-project-rules.sh
 ```
@@ -117,6 +118,8 @@ HotCha-Rebuild/
 | 버스·정류장 검색 | `Data/Local/BusDatabase.swift` → `Resources/BusData.sqlite` |
 | 노선의 정류장 순서 | API. `Data/Network/BusAPI.swift` 가 서울/지방을 가른다 |
 | 즐겨찾기·이용 기록 | SwiftData (`Data/Models/`) |
+| 진행 중인 안내 | `RouteAlarmSession`(버스) · `StopAlarmViewModel`(정류장). 탭 전체가 하나씩 나눠 쓴다 |
+| Live Activity 데이터 모양 | `HotCha/LiveActivityShared/HotChaActivityAttributes.swift` |
 
 ---
 
@@ -126,10 +129,14 @@ HotCha-Rebuild/
 2. **알람 규칙은 `HotChaKit` 에서만 고친다.** 화면 쪽(`NearestBusViewModel`)은 결과를 화면·알림으로 옮기기만 한다.
    규칙을 바꿀 땐 실패하는 테스트를 먼저 쓴다.
 3. **검색은 내장 DB 에서만 한다.** 검색을 위해 네트워크를 부르지 않는다. 장소 검색(MapKit)만 예외다.
-4. **색과 폰트는 에셋과 커스텀 폰트만 쓴다.** 색은 `Color("이름")`, 글자는 `.pretendard(굵기, size:)`.
-   디자인 계약은 작성 중이다 — 초안은 작업공간 루트의 `디자인.md`, 확정되면 `hotcha/DESIGN.md`.
+4. **화면은 시스템 기본 컴포넌트로 만든다.** `List` · `Form` · `.sheet` · `.alert` · `.searchable` · `Picker` · 시스템 글꼴.
+   색은 강조색 `Color("mainpurple")` 하나와 시스템 색(`.primary` · `.secondary`)만 쓴다. 어두운 고정 배경을 만들지 않는다.
+   바탕은 `HotChaContentBackground` 다. 디자인 규칙은 작업공간 루트 `디자인.md` 의 「확정 규칙」 절에 있다.
+   **모서리 반경은 `HotChaRadius.card`(12) · `.tile`(8) · `.badge`(4) 만 쓴다.** 숫자를 직접 적으면 규칙 10 이 막는다.
+   배너·카드의 바탕은 무늬 없는 `mainpurple` 단색이다. 예외는 안내가 없을 때의 홈 배너 하나 — 흰 바탕이다.
 5. **`ObservableObject` 안에서 `@EnvironmentObject` 를 쓰지 않는다.** 뷰가 아니라서 읽는 순간 죽는다.
 6. **실험용 화면·더미 데이터를 앱 폴더에 두지 않는다.** 폴더가 통째로 타깃에 들어가 출시 빌드에 실린다.
+7. **안내는 한 번에 하나다.** 버스 안내를 시작하면 정류장 안내는 끝나고, 버스 안내 중에는 정류장 안내를 시작할 수 없다.
 
 ---
 
@@ -165,9 +172,12 @@ HotCha-Rebuild/
 
 - **API 키** — 서비스 키가 소스 다섯 군데에 박힌 채 공개 저장소에 올라갔다. 키를 읽는 함수가 있었는데도 실제 요청은 하드코딩 값을 썼다.
 - **타깃에 딸려 가는 파일** — 프로젝트가 폴더를 통째로 타깃에 넣는다. `test.swift` · `gg.swift` · 더미 데이터가 그대로 출시 빌드에 들어갔다.
-- **검색 결과 이동** — 결과 줄의 `NavigationLink` 는 검색이 닫히며 줄이 사라지면 이동하지 못한다. 이동은 `MainView` 가 `SearchDestination` 으로 맡는다.
+- **검색 결과 이동** — 결과 줄의 `NavigationLink` 는 검색이 닫히며 줄이 사라지면 이동하지 못한다. 이동은 `HomeScreen` 이 `SearchDestination` 으로 맡는다.
+- **`.alert` 의 버튼** — 파괴 역할 버튼만 두면 시스템이 `Cancel` 을 하나 더 붙인다. 다른 버튼에 `.cancel` 역할을 준다.
+- **뷰 안의 `badge(...)`** — 뷰 구조체 안에서 `badge` 라는 함수를 부르면 SwiftUI 의 `.badge` 수식어로 읽힌다.
+- **시트 아래의 지도** — 시트가 화면 아래 절반을 덮는다. 보여 줄 점을 지도 중심에 두면 시트에 가린다. 중심을 남쪽으로 내려서 맞춘다.
 - **`onReceive($값)` 안에서 뷰모델을 다시 읽지 않는다** — 게시 시점에는 아직 이전 값이다. 넘어온 새 값을 쓴다. 현재 정류장 표시가 한 박자 늦었다.
-- **Live Activity** — `HotchaLiveAttributes` 가 앱과 위젯에 따로 적혀 있다. 한쪽만 바꾸면 컴파일은 되고 잠금 화면만 안 뜬다.
+- **Live Activity** — 데이터 모양이 앱과 위젯에 따로 적혀 있던 때는 한쪽만 바꾸면 컴파일은 되고 잠금 화면만 안 떴다. 지금은 `LiveActivityShared` 한 곳에 있다. 다이내믹 아일랜드 영역을 `EmptyView` 로 두면 아무것도 안 뜬다.
 - **내장 DB** — 정류장 파일에는 노선이 없다. 노선 목록은 API 에서 받아 같은 DB 에 넣는다. 같은 정류장이 서울·경기 양쪽 시스템에 따로 올라와 있어 이름+번호로 한 번만 보여 준다.
 - **장소 검색** — 한국에서 `MKLocalSearch` 는 정확한 이름에만 반응한다("선릉" → 중국 선전). `MKLocalSearchCompleter` 를 쓴다.
 - **지도 핀 선택** — `Map(selection:)` 은 내용이 다시 그려질 때 선택이 다른 핀으로 튄다. 핀을 직접 그리고 탭으로 고른다.
@@ -183,10 +193,15 @@ HotCha-Rebuild/
 
 ---
 
-## 현재 상태 (2026-10-13)
+## 현재 상태 (2026-10-14)
 
-- `refactor/offline-bus-data` 브랜치에서 구조 재배치 · 내장 DB 검색 · 정류장 알람 · 하네스를 넣었다. **커밋 전이다.**
+- `refactor/offline-bus-data` 브랜치. `82082a1` 위에 화면 재설계가 **커밋되지 않은 채** 쌓여 있다.
+- 탭은 홈 · 이용 기록 · 나의 핫챠 · 검색 넷이다. 검색 탭은 화면이 아니라 홈 위쪽 검색창을 여는 버튼이다.
+- 설정은 「나의 핫챠」 안에 있다. 거기에 닉네임(`NicknameGenerator`)과 이동 거리·시간(`JourneyLog`)도 있다.
+- 알람이 울리면 루트(`NavigationView`)가 `AlarmRingingView` 를 전체 화면으로 띄운다. 안내 화면의 시트는 그동안 내려간다. 개발자 메뉴는 「나의 핫챠」의 버전을 다섯 번 누르면 열린다.
+- 버스 그림은 `BusArt` 가 노선 유형으로 고른다. 클레이 그림(`Assets.xcassets/Clay`)은 `ClayIcon` · `Clay` 로 쓴다. 위젯에는 줄인 사본(216px)을 따로 둔다 — 큰 그림은 Live Activity 에서 안 뜬다.
+- 노선 화면 · 정류장 화면은 지도 + 시스템 시트다. 노선 안내 중에는 지도가 내 위치를 따라가고 시트는 절반 높이로 열린다. 시트는 화면의 92% 까지만 올라간다 — `.large` 는 뒤 화면을 하얗게 바꾼다. 옛 어두운 화면(`AlarmSetting` · `AlarmEnd` · 옛 `MainView`)은 지웠다.
 - 저장소가 공개인데 **옛 서비스 키가 git 이력에 남아 있다.** 재발급이 필요하다.
-- 디자인 계약은 작성 중이다(작업공간 루트의 `디자인.md`). 지금 화면은 기존 에셋 색과 Pretendard 를 그대로 쓴다.
 - 실기기에서 확인하지 않은 것: 백그라운드 위치 추적 · 잠금 화면 Live Activity · 소리와 진동.
+- 시뮬레이터에서 확인하지 않은 것: 온보딩 · 스플래시의 새 바탕 · 즐겨찾기 저장 흐름 · 정류장 안내 중의 홈 배너.
 - GitHub Actions 는 커밋 위생 검사만 있다. 빌드 CI 는 없다.
