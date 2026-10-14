@@ -30,7 +30,7 @@ final class AlarmRinger: ObservableObject {
     /// 시스템 알람 목록에서 그 알람을 한 번이라도 봤는가. 건 직후 목록에 아직 없을 때를 꺼진 것으로 읽지 않는다.
     private var seenInSystem = false
     /// 알람을 지금보다 이만큼 뒤로 건다. AlarmKit 은 지난 시각의 `.fixed` 알람을 받지 않는다.
-    private static let scheduleLead: TimeInterval = 1
+    private static let scheduleLead: TimeInterval = 2
 
     private init() {
         authorization = manager.authorizationState
