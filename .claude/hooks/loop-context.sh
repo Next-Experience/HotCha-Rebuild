@@ -2,7 +2,7 @@
 # UserPromptSubmit 훅 — 매 요청에 작업 루프와 현재 위치를 주입한다.
 #
 # stdout 이 그대로 모델 컨텍스트로 들어간다. 매 요청마다 돌기 때문에 짧고 빨라야 한다.
-# 규약: CLAUDE.md 루프 절
+# 규약: AGENTS.md 「무엇이 이 흐름을 강제하나」
 set -uo pipefail
 
 # 훅은 세션 cwd 에서 돌지만, 입력 JSON 의 cwd 가 더 정확하다.
@@ -13,10 +13,11 @@ if command -v jq >/dev/null 2>&1 && [ -n "$input" ]; then
 fi
 
 cat <<'LOOP'
-## 작업 루프 — 이 순서로 간다 (CLAUDE.md 루프 절)
-0 브랜치 → 1 문서(동작·계약이 바뀔 때만) → 2 개발 → 3 검증 → 4 커밋 → 5 PR
+## 작업 흐름 — 이 순서로 간다 (AGENTS.md)
+0 브랜치 → 1 허브 requirements.md(동작이 바뀔 때만, FR-ID) → 2 개발 → 3 검증(./scripts/verify.sh) → 4 커밋 → 5 PR
+커밋·PR 제목: type(scope): 한국어 요약 — FR-ID · 이슈. 문서와 코드가 다르면 문서가 이긴다.
 PR 에서 멈춘다. 병합은 사람이 누른다.
-칸을 건너뛰면 건너뛴다고 한 줄 말한다. 조용히 건너뛰는 것이 이 루프가 막으려는 것이다.
+칸을 건너뛰면 건너뛴다고 한 줄 말한다.
 LOOP
 
 # 저장소 하나의 상태를 한 줄로

@@ -25,6 +25,7 @@ description: 핫챠 작업을 완료했다고 보고하기 전에 실행하는 �
 
 | 단계 | 내용 | 실패하면 |
 | --- | --- | --- |
+| Xcode 버전 | 로컬 메이저가 `.xcode-version` 과 같다 | **차단** |
 | 프로젝트 규칙 | 목록은 `./scripts/check-project-rules.sh --list` | **차단** |
 | 코드 포맷 | `swift format lint` | 경고만 |
 | SwiftLint | `--strict` (설치 시) | 차단 |

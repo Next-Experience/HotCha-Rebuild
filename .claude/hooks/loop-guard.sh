@@ -6,7 +6,7 @@
 #   2. `develop`·`main` 직접 푸시 — 커밋이 아니라 푸시라 pre-commit 이 못 본다.
 # 그 외에는 막지 않는다. 막을 게 많아지면 사람이 훅을 꺼 버린다.
 #
-# 규약: CLAUDE.md 루프 절
+# 규약: AGENTS.md 「무엇이 이 흐름을 강제하나」
 set -uo pipefail
 
 deny() {
@@ -41,7 +41,7 @@ branch="$(git -C "$target" branch --show-current 2>/dev/null || true)"
 
 # ── 1. pre-commit 우회 ────────────────────────────────────────
 if [[ "$cmd" =~ (^|[[:space:]])git([[:space:]]|.)*(commit|merge) ]] && [[ "$cmd" =~ --no-verify|[[:space:]]-n([[:space:]]|$) ]]; then
-  deny "\`--no-verify\` 는 .githooks/pre-commit 을 통째로 무력화합니다 — 검증 스탬프·통합 브랜치 보호·CLAUDE.md=AGENTS.md 검사가 전부 꺼집니다.
+  deny "\`--no-verify\` 는 .githooks/pre-commit 을 통째로 무력화합니다 — 검증 스탬프·통합 브랜치 보호·CLAUDE.md=@AGENTS.md 검사가 전부 꺼집니다.
 
 검증이 아직 안 돌았다면 돌리세요:
     ./scripts/verify.sh
@@ -49,7 +49,7 @@ if [[ "$cmd" =~ (^|[[:space:]])git([[:space:]]|.)*(commit|merge) ]] && [[ "$cmd"
 정말 게이트를 열어야 하는 상황이라면, 무엇을 여는지 이름을 붙여 여세요:
     LOOP_SKIP_VERIFY=1 git commit ...     검증 스탬프만
     LOOP_ALLOW_MAIN=1 git commit ...      develop·main 위 커밋만
-둘 다 훅이 경고를 찍습니다. (CLAUDE.md 루프 절)"
+둘 다 훅이 경고를 찍습니다. (AGENTS.md)"
 fi
 
 # ── 2. main 직접 푸시 ─────────────────────────────────────────
@@ -71,7 +71,7 @@ if [[ "$cmd" =~ (^|[[:space:]])git([[:space:]]|.)*push ]]; then
     git push -u origin HEAD
     gh pr create
 
-루프는 PR 에서 멈춥니다. 병합은 사람이 누릅니다. (CLAUDE.md 루프 절)"
+PR 에서 멈춥니다. 병합은 사람이 누릅니다. (AGENTS.md)"
   fi
 fi
 

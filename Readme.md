@@ -79,7 +79,7 @@ git config core.hooksPath .githooks   # 클론마다 한 번
 cd HotChaKit && swift test
 ```
 
-작업 순서와 규칙은 [CLAUDE.md](CLAUDE.md) 에 있다.
+작업 순서와 규칙은 [AGENTS.md](AGENTS.md) 에 있다.
 
 ---
 # 📌 개발 규칙

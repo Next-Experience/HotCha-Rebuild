@@ -4,13 +4,13 @@
 # 에이전트 훅은 명령 문자열을 파싱해야 해서 우회가 쉽고, 사람이 직접 커밋할 땐 아예 안 걸린다.
 # 그래서 진짜 차단은 여기서 한다. 세 가지를 본다.
 #   1. develop·main 위 커밋 — 브랜치 → PR 을 커밋 시점에 강제한다 (통합 브랜치는 develop)
-#   2. CLAUDE.md=AGENTS.md — 둘은 같은 문서다. 갈라지면 어느 쪽이 진짜인지 알 수 없다
+#   2. CLAUDE.md=@AGENTS.md — 원본은 AGENTS.md 하나다. CLAUDE.md 에 규칙을 따로 적으면 둘이 갈라진다
 #   3. 검증 스탬프        — 검증이 안 돌았거나, 돈 뒤에 코드가 바뀌었으면 막는다
 #
 # 설치 (클론마다 한 번):
 #   git config core.hooksPath .githooks
 #
-# 규약: CLAUDE.md 루프 절
+# 규약: AGENTS.md 「무엇이 이 흐름을 강제하나」
 set -uo pipefail
 
 repo="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
@@ -32,11 +32,11 @@ if [ "$branch" = "main" ] || [ "$branch" = "master" ] || [ "$branch" = "develop"
   fi
 fi
 
-# ── 2. CLAUDE.md 와 AGENTS.md 는 같은 문서다 ────────────────
-# 도구마다 읽는 파일명이 다를 뿐 내용은 하나다. 실제로 갈라진 적이 있어 검사로 옮겼다.
-if [ -f CLAUDE.md ] && [ -f AGENTS.md ] && ! cmp -s CLAUDE.md AGENTS.md; then
-  say "CLAUDE.md 와 AGENTS.md 의 내용이 다릅니다. 둘은 같은 문서입니다:"
-  say "    cp CLAUDE.md AGENTS.md && git add AGENTS.md"
+# ── 2. CLAUDE.md 는 AGENTS.md 를 불러오기만 한다 ─────────────
+# 도구마다 읽는 파일명이 다를 뿐 원본은 AGENTS.md 하나다. 복사본을 두던 때 실제로 갈라졌다.
+if [ -f CLAUDE.md ] && [ "$(cat CLAUDE.md)" != "@AGENTS.md" ]; then
+  say "CLAUDE.md 는 '@AGENTS.md' 한 줄이어야 합니다. 규칙은 AGENTS.md 에 적습니다:"
+  say "    printf '@AGENTS.md\\n' > CLAUDE.md && git add CLAUDE.md"
   fail=1
 fi
 
@@ -74,5 +74,5 @@ if [ -x scripts/verify.sh ]; then
   fi
 fi
 
-[ "$fail" = "0" ] || say "— 막힌 이유는 CLAUDE.md 의 루프 절에 있습니다."
+[ "$fail" = "0" ] || say "— 막힌 이유는 AGENTS.md 의 「무엇이 이 흐름을 강제하나」에 있습니다."
 exit $fail

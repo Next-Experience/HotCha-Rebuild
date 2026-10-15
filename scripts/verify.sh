@@ -28,6 +28,18 @@ skip() { printf '%s  – %s (미설치)%s\n' "$DIM" "$1" "$OFF"; skipped+=("$2")
 # 포맷은 새로 쓰는 코드가 모이는 곳만 본다. 예전 화면 코드는 한 번에 정리하기 전까지 지적이 수백 건이다.
 FORMAT_DIRS="HotChaKit/Sources HotChaKit/Tests HotCha/LiveActivityShared HotCha/HotCha/Data/Local HotCha/HotCha/Features/RouteAlarm HotCha/HotCha/Features/StopAlarm"
 
+# ── 0. Xcode 버전 ──────────────────────────────────────────
+# 팀이 쓰기로 한 메이저 버전(.xcode-version)과 맞는지 먼저 본다. 낮은 Xcode 로는 여기서 통과하고
+# 아카이브(Xcode Cloud 는 "최신 릴리스"를 따라간다)에서만 깨진다. 마이너는 보지 않는다.
+step "Xcode 버전"
+REQUIRED_XCODE=$(tr -d '[:space:]' < .xcode-version)
+LOCAL_XCODE=$(xcodebuild -version 2>/dev/null | awk '/^Xcode/ { print $2 }')
+if [ "${LOCAL_XCODE%%.*}" = "$REQUIRED_XCODE" ]; then
+  ok "Xcode $LOCAL_XCODE (.xcode-version $REQUIRED_XCODE)"
+else
+  bad "Xcode $REQUIRED_XCODE 가 필요한데 지금은 ${LOCAL_XCODE:-없음} 이다 — .xcode-version 과 맞춘다"
+fi
+
 # ── 1. 프로젝트 전용 규칙 ────────────────────────────────────
 step "프로젝트 규칙"
 ./scripts/check-project-rules.sh || fail=1

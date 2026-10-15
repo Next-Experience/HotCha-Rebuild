@@ -2,7 +2,7 @@
 # 핫챠 전용 규칙 검사.
 #
 # 기성 린터가 모르는 것만 본다. 전부 이 저장소에서 실제로 한 번씩 사고를 냈거나,
-# 어긋나면 조용히 깨지는 것들이다. 근거는 CLAUDE.md 의 「함정」 절에 있다.
+# 어긋나면 조용히 깨지는 것들이다. 근거는 AGENTS.md 의 「함정」 절에 있다.
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -47,7 +47,7 @@ scanned=$(find "$KIT" "$KIT_TESTS" "$APP" "$LIVE" -name '*.swift' 2>/dev/null | 
 
 # 알람 규칙을 실제로 지키는 것은 아래 grep 이 아니라 이 테스트들이다.
 # 파일이나 테스트가 사라지면 방어선이 사라진 것이므로 여기서 막는다.
-# 이름은 hotcha/quality/invariants.md 의 표와 정확히 같아야 한다.
+# 이름은 hotcha/reference/invariants.md 의 표와 정확히 같아야 한다.
 CORE_TESTS=(
   "$KIT_TESTS/RouteTrackerTests.swift:가장_가까운_정류장에서_출발한다"
   "$KIT_TESTS/RouteTrackerTests.swift:목적지를_지난_정류장은_출발점이_아니다"
