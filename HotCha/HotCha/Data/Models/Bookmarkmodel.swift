@@ -25,6 +25,8 @@ class Bookmarkmodel: Identifiable {
     var stop_longitude: Double = 0
     var stop_ars: String = ""
     var stop_city_name: String = ""
+    /// 정류장 즐겨찾기가 기차역이다. 이 값이 생기기 전 즐겨찾기는 false 로 읽힌다.
+    var stop_is_train: Bool = false
 
     init(bus: BusFavoriteHistory, route_id: String, city_code: String, destination_stop_id: String, destination_stop_name: String, bus_no: String, route_type: String, bookmark_label: String, bookmark_type: Int) {
         self.bus = bus
@@ -52,6 +54,7 @@ class Bookmarkmodel: Identifiable {
         stop_longitude = stop.longitude
         stop_ars = stop.arsNumber
         stop_city_name = stop.cityName
+        stop_is_train = stop.isTrainStation
     }
 
     var isStop: Bool { kind == "stop" }
@@ -61,11 +64,13 @@ class Bookmarkmodel: Identifiable {
         guard isStop else { return nil }
         return BusStopRecord(
             id: destination_stop_id, name: destination_stop_name, latitude: stop_latitude,
-            longitude: stop_longitude, arsNumber: stop_ars, cityName: stop_city_name)
+            longitude: stop_longitude, arsNumber: stop_ars, cityName: stop_city_name,
+            isTrainStation: stop_is_train)
     }
 
     /// 목록의 설명 줄. "152번 · 미아초교" · "정류장 · 미아초교"
     var summary: String {
-        isStop ? "정류장 · \(destination_stop_name)" : "\(bus_no)번 · \(destination_stop_name)"
+        guard isStop else { return "\(bus_no)번 · \(destination_stop_name)" }
+        return "\(stop_is_train ? "기차역" : "정류장") · \(destination_stop_name)"
     }
 }

@@ -71,7 +71,7 @@ struct HomeScreen: View {
                 text: $homeSearchQuery,
                 isPresented: $isSearchPresented,
                 placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "버스 · 정류장 · 장소"
+                prompt: "버스 · 정류장 · 기차역 · 장소"
             )
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
@@ -180,7 +180,7 @@ struct HomeScreen: View {
         }
         if let stop = stopAlarm.runningStop {
             let guidance = HotChaGuidance(
-                kind: .stop,
+                kind: stop.isTrainStation ? .train : .stop,
                 busNumber: "",
                 destination: stop.name,
                 remainingStops: nil,

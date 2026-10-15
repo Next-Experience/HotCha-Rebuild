@@ -70,6 +70,14 @@ class LocationViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
 
+    /// 기차는 시속 300km 로 달리고 터널이 길다. 기차 안내 동안은 가장 정확하게, 움직이지 않아도 위치를 받는다.
+    /// 위치가 끊긴 시간을 재야 해서(`StationApproach`) 거리 필터를 두지 않는다.
+    func useTrainTracking(_ isTrain: Bool) {
+        manager.activityType = isTrain ? .otherNavigation : .other
+        manager.desiredAccuracy = isTrain ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = isTrain ? kCLDistanceFilterNone : 20
+    }
+
     // 위치 추적 종료
     func stopTrackingLocation() {
         manager.stopUpdatingLocation()

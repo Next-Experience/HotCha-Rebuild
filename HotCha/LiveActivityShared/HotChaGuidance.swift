@@ -44,9 +44,13 @@ struct HotChaGuidance: Equatable {
         return .locating
     }
 
-    /// 맨 위 작은 글자. "152번" · "정류장 알림"
+    /// 맨 위 작은 글자. "152번" · "정류장 알림" · "기차역 알림"
     var label: String {
-        kind == .route ? "\(busNumber)번" : "정류장 알림"
+        switch kind {
+        case .route: return "\(busNumber)번"
+        case .stop: return "정류장 알림"
+        case .train: return "기차역 알림"
+        }
     }
 
     /// 큰 글자 옆 꼬리표. 알람 뒤 단계에만 있다.

@@ -70,10 +70,14 @@ struct HotchaLiveLiveActivity: Widget {
     }
 }
 
-/// 알람이 울린 뒤에는 종, 아니면 버스(정류장 알림은 핀)
+/// 알람이 울린 뒤에는 종, 아니면 버스(정류장 알림은 핀, 기차역 알림은 기차)
 private func symbolName(_ guidance: HotChaGuidance) -> String {
     if guidance.hasAlarmFired { return "bell.fill" }
-    return guidance.kind == .route ? "bus.fill" : "mappin.and.ellipse"
+    switch guidance.kind {
+    case .route: return "bus.fill"
+    case .stop: return "mappin.and.ellipse"
+    case .train: return "train.side.front.car"
+    }
 }
 
 /// 잠금 화면과 알림 배너에 뜨는 모양. 내용은 홈 배너와 같은 HotChaGuidanceCard 이고, 바탕은 시스템 것을 쓴다.

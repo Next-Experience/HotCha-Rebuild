@@ -56,6 +56,10 @@ CORE_TESTS=(
   "$KIT_TESTS/RouteTrackerTests.swift:N정류장_전에_알람이_한_번만_울린다"
   "$KIT_TESTS/RouteTrackerTests.swift:알람_정류장을_건너뛰어도_울린다"
   "$KIT_TESTS/RouteTrackerTests.swift:시작부터_N보다_가까우면_바로_울리지_않고_한_정류장_전에_울린다"
+  "$KIT_TESTS/StationApproachTests.swift:반경_안에_들어오면_한_번만_울린다"
+  "$KIT_TESTS/StationApproachTests.swift:흐린_위치로는_울리지_않고_거리도_바꾸지_않는다"
+  "$KIT_TESTS/StationApproachTests.swift:반경_두_배_안에서_신호가_끊기면_미리_울린다"
+  "$KIT_TESTS/StationApproachTests.swift:멀리서_신호가_끊기면_울리지_않는다"
 )
 for entry in "${CORE_TESTS[@]}"; do
   file="${entry%%:*}"; name="${entry##*:}"

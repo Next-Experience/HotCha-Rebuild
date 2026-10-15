@@ -29,6 +29,8 @@ struct StopAlarmView: View {
     @EnvironmentObject private var viewModel: StopAlarmViewModel
     @EnvironmentObject private var routeAlarm: RouteAlarmSession
     @AppStorage("stopAlarmRadius") private var alarmRadius: Double = 500
+    /// 기차역은 시속 100~300km 로 다가와서 버스 정류장과 반경을 따로 둔다.
+    @AppStorage("trainAlarmRadius") private var trainRadius: Double = 10_000
 
     @State private var candidates: [BusStopRecord] = []
     @State private var selectedStopID: String?
@@ -37,6 +39,7 @@ struct StopAlarmView: View {
     @State private var bookmarkName = ""
 
     private static let radiusOptions: [Double] = [300, 500, 1000]
+    static let trainRadiusOptions: [Double] = [3_000, 5_000, 10_000, 20_000]
     /// 길 건너편·같은 이름의 다른 정류장까지 보이도록 주변을 함께 불러온다.
     private static let candidateRadius: CLLocationDistance = 400
 
@@ -80,6 +83,14 @@ struct StopAlarmView: View {
     private var selectedStop: BusStopRecord? {
         candidates.first { $0.id == selectedStopID }
     }
+
+    /// 기차역을 열었다. 주변 버스 정류장을 후보로 늘어놓지 않고, 알람 반경도 km 단위다.
+    private var isTrain: Bool { initialStop?.isTrainStation == true }
+
+    /// 지금 화면의 알람 반경. 정류장과 기차역이 따로 기억한다.
+    private var radius: Double { isTrain ? trainRadius : alarmRadius }
+
+    private var radiusSelection: Binding<Double> { isTrain ? $trainRadius : $alarmRadius }
 
     /// 시트 높이. 바뀌지 않으므로 지도의 안쪽 여백도 이 값으로 고정한다.
     private static let sheetHeight: CGFloat = 300
@@ -141,7 +152,8 @@ struct StopAlarmView: View {
             dismiss()
         }
         .task {
-            let nearby = await BusDatabase.shared.stops(near: center, radius: Self.candidateRadius)
+            let nearby =
+                isTrain ? [] : await BusDatabase.shared.stops(near: center, radius: Self.candidateRadius)
             // 미리 고른 정류장이 반경 계산에서 빠지는 일이 없도록 합친다.
             candidates = (initialStop.map { [$0] } ?? []) + nearby.filter { $0.id != initialStop?.id }
             if !isSavingBookmark, let running = viewModel.runningStop {
@@ -153,13 +165,13 @@ struct StopAlarmView: View {
             }
             viewModel.select(selectedStop)
             if let stop = selectedStop {
-                camera = Self.camera(for: stop.coordinate, radius: alarmRadius)
+                camera = Self.camera(for: stop.coordinate, radius: radius)
             }
             // 이미 알람 거리 안이거나 버스 안내가 진행 중이면 시작하지 않고 화면만 연다.
             if startsImmediately, let stop = selectedStop, !viewModel.isRunning, !routeAlarm.isRunning,
                 !isAlreadyInside
             {
-                viewModel.start(stop: stop, radius: alarmRadius)
+                viewModel.start(stop: stop, radius: radius)
             }
         }
         .onChange(of: selectedStopID) { _, _ in
@@ -186,7 +198,7 @@ struct StopAlarmView: View {
             }
 
             if !isSavingBookmark, let stop = selectedStop {
-                MapCircle(center: stop.coordinate, radius: alarmRadius)
+                MapCircle(center: stop.coordinate, radius: radius)
                     .foregroundStyle(Color("mainpurple").opacity(0.12))
                     .stroke(Color("mainpurple").opacity(0.6), lineWidth: 1)
             }
@@ -195,7 +207,7 @@ struct StopAlarmView: View {
             ForEach(orderedCandidates) { stop in
                 let isSelected = stop.id == selectedStopID
                 Annotation(stop.name, coordinate: stop.coordinate, anchor: .center) {
-                    StopPin(isSelected: isSelected)
+                    StopPin(isSelected: isSelected, isTrain: stop.isTrainStation)
                         .onTapGesture {
                             // 알람 중에는 목적지를 바꾸지 않는다. 즐겨찾기를 고르는 중이면 안내와 상관없다.
                             guard isSavingBookmark || !viewModel.isRunning else { return }
@@ -209,11 +221,11 @@ struct StopAlarmView: View {
             MapUserLocationButton()
             MapCompass()
         }
-        .onChange(of: alarmRadius) { _, _ in
+        .onChange(of: radius) { _, _ in
             // 알람 반경 원이 화면에 다 들어오도록 맞춘다.
             guard let stop = selectedStop else { return }
             withAnimation {
-                camera = Self.camera(for: stop.coordinate, radius: alarmRadius)
+                camera = Self.camera(for: stop.coordinate, radius: radius)
             }
         }
     }
@@ -261,8 +273,8 @@ struct StopAlarmView: View {
                 .foregroundStyle(.secondary)
                 .padding(.top, 20)
 
-            Picker("알람 거리", selection: $alarmRadius) {
-                ForEach(Self.radiusOptions, id: \.self) { option in
+            Picker("알람 거리", selection: radiusSelection) {
+                ForEach(isTrain ? Self.trainRadiusOptions : Self.radiusOptions, id: \.self) { option in
                     Text(StopAlarmViewModel.format(option)).tag(option)
                 }
             }
@@ -271,7 +283,7 @@ struct StopAlarmView: View {
 
             let canStart = !isAlreadyInside && !routeAlarm.isRunning
             Button {
-                viewModel.start(stop: stop, radius: alarmRadius)
+                viewModel.start(stop: stop, radius: radius)
             } label: {
                 Text(startTitle)
                     .font(.headline)
@@ -290,7 +302,7 @@ struct StopAlarmView: View {
     /// 즐겨찾기로 저장하기 전 확인. 길 건너편 같은 이름의 정류장과 헷갈리지 않게 지도에서 보고 고른다.
     private func bookmarkSection(stop: BusStopRecord) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("지도에서 맞는 정류장인지 확인하세요. 다른 핀을 누르면 바뀌어요.")
+            Text(isTrain ? "지도에서 맞는 역인지 확인하세요." : "지도에서 맞는 정류장인지 확인하세요. 다른 핀을 누르면 바뀌어요.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .padding(.top, 20)
@@ -304,7 +316,7 @@ struct StopAlarmView: View {
             Button {
                 onSaveBookmark?(stop, bookmarkName)
             } label: {
-                Text("이 정류장으로 저장")
+                Text(isTrain ? "이 역으로 저장" : "이 정류장으로 저장")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
@@ -329,7 +341,7 @@ struct StopAlarmView: View {
             }
             .padding(.top, 20)
 
-            Text("\(StopAlarmViewModel.format(alarmRadius)) 앞에서 알려드릴게요.")
+            Text("\(StopAlarmViewModel.format(viewModel.radius)) 앞에서 알려드릴게요.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.top, 6)
@@ -347,7 +359,7 @@ struct StopAlarmView: View {
 
     private var isAlreadyInside: Bool {
         guard let distance = viewModel.distance else { return false }
-        return distance <= alarmRadius
+        return distance <= radius
     }
 
     private func subtitle(for stop: BusStopRecord) -> String {
@@ -366,9 +378,10 @@ struct StopAlarmView: View {
 /// 지도 위 정류장 핀
 private struct StopPin: View {
     let isSelected: Bool
+    var isTrain = false
 
     var body: some View {
-        Image(systemName: "bus.fill")
+        Image(systemName: isTrain ? "train.side.front.car" : "bus.fill")
             .font(.system(size: isSelected ? 18 : 11, weight: .semibold))
             .foregroundStyle(isSelected ? Color.white : Color.secondary)
             .frame(width: isSelected ? 42 : 26, height: isSelected ? 42 : 26)

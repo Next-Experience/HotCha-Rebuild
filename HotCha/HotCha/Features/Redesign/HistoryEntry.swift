@@ -14,6 +14,7 @@ enum HistoryEntry: Identifiable {
     enum Kind: String, CaseIterable, Identifiable {
         case bus = "버스"
         case stop = "정류장"
+        case train = "기차역"
         var id: String { rawValue }
     }
 
@@ -32,7 +33,7 @@ enum HistoryEntry: Identifiable {
     var kind: Kind {
         switch self {
         case .bus: return .bus
-        case .stop: return .stop
+        case .stop(let record): return record.stop.isTrainStation ? .train : .stop
         }
     }
 
@@ -55,6 +56,11 @@ enum HistoryEntry: Identifiable {
         // 화면 문구가 한국어라 날짜도 기기 언어와 상관없이 한국어로 적는다.
         let format = Date.FormatStyle(date: .abbreviated, time: .shortened).locale(Locale(identifier: "ko_KR"))
         return "\(kind.rawValue) · \(date.formatted(format))"
+    }
+
+    /// 클레이 그림이 없는 종류는 시스템 기호로 그린다. 기차역이 그렇다.
+    var symbolName: String? {
+        kind == .train ? "train.side.front.car" : nil
     }
 
     var imageName: String {
@@ -83,7 +89,19 @@ struct HistoryRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            ClayIcon(imageName: entry.imageName)
+            if let symbol = entry.symbolName {
+                Image(systemName: symbol)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color("mainpurple"))
+                    .frame(width: 48, height: 48)
+                    .background(
+                        Color("mainpurple").opacity(0.10),
+                        in: RoundedRectangle(cornerRadius: HotChaRadius.tile, style: .continuous)
+                    )
+                    .accessibilityHidden(true)
+            } else {
+                ClayIcon(imageName: entry.imageName)
+            }
             VStack(alignment: .leading, spacing: 3) {
                 Text(entry.title)
                     .font(.body.weight(.semibold))

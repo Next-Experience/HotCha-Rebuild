@@ -8,6 +8,7 @@
 import Combine
 import CoreLocation
 import Foundation
+import HotChaKit
 import SwiftUI
 
 final class StopAlarmViewModel: ObservableObject {
@@ -29,6 +30,10 @@ final class StopAlarmViewModel: ObservableObject {
     private var startedAt: Date?
     /// 안내를 시작했을 때 정류장까지의 거리. 이동 거리를 재는 기준이다.
     private var startDistance: CLLocationDistance?
+    /// 기차역 안내일 때만 있다. 언제 울릴지는 HotChaKit 이 정한다(터널에서 위치가 끊기는 경우까지).
+    private var stationApproach: StationApproach?
+    /// 위치가 끊겨도 시간이 흐른 것을 규칙에 알려 주는 타이머. 기차역 안내 동안만 돈다.
+    private var signalTimer: Timer?
 
     init() {
         // 알람을 시작하기 전에도 "현재 위치에서 몇 m" 를 보여주기 위해 위치를 받는다.
@@ -84,12 +89,23 @@ final class StopAlarmViewModel: ObservableObject {
         // 알람은 AlarmKit 시스템 알람이다. 처음이면 여기서 권한을 묻는다.
         Task { @MainActor in AlarmRinger.shared.requestAuthorizationIfNeeded() }
 
+        stationApproach =
+            stop.isTrainStation
+            ? StationApproach(
+                destination: GeoPoint(latitude: stop.latitude, longitude: stop.longitude), radius: radius)
+            : nil
+        locationViewModel.useTrainTracking(stop.isTrainStation)
         locationViewModel.requestalwaysPermission()
         locationViewModel.startTrackingLocation()
+        if stationApproach != nil {
+            signalTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+                self?.checkSignal()
+            }
+        }
 
         LiveActivityController.shared.start(
             attributes: HotChaActivityAttributes(
-                kind: .stop,
+                kind: stop.isTrainStation ? .train : .stop,
                 busNumber: "",
                 destination: stop.name,
                 alarmPoint: "\(Self.format(radius)) 전",
@@ -123,7 +139,11 @@ final class StopAlarmViewModel: ObservableObject {
         isRunning = false
         didFire = false
         runningStop = nil
+        stationApproach = nil
+        signalTimer?.invalidate()
+        signalTimer = nil
         locationViewModel.stopTrackingLocation()
+        locationViewModel.useTrainTracking(false)
         LiveActivityController.shared.end()
     }
 
@@ -134,15 +154,44 @@ final class StopAlarmViewModel: ObservableObject {
         guard isRunning else { return }
         if startDistance == nil { startDistance = meters }
 
-        if meters <= radius && !didFire {
-            didFire = true
-            isRinging = true
-            let title = "\(target.name)에서 내려요"
-            Task { @MainActor in AlarmRinger.shared.ring(title: title) }
+        if var approach = stationApproach {
+            let update = approach.update(
+                location: GeoPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude),
+                accuracy: location.horizontalAccuracy, at: location.timestamp)
+            stationApproach = approach
+            // 흐린 위치(터널 안 기지국 위치)는 거리 표시에도 쓰지 않는다. 마지막으로 믿을 만했던 거리를 둔다.
+            distance = update.distance
+            if update.shouldFireAlarm { ring(target) }
+        } else if meters <= radius && !didFire {
+            ring(target)
         }
+        report()
+    }
 
-        // 50m 단위로 달라질 때만 갱신한다. 알람이 울린 것은 controller 가 상태 차이로 알아챈다.
-        let bucket = Int(meters / 50) * 50
+    /// 위치가 오지 않는 동안에도 몇 초마다 부른다. 터널에서 끊긴 시간을 규칙이 재게 한다.
+    private func checkSignal() {
+        guard isRunning, let target, var approach = stationApproach else { return }
+        let update = approach.tick(now: Date())
+        stationApproach = approach
+        if update.shouldFireAlarm {
+            ring(target)
+            report()
+        }
+    }
+
+    private func ring(_ target: BusStopRecord) {
+        guard !didFire else { return }
+        didFire = true
+        isRinging = true
+        let title = "\(target.name)에서 내려요"
+        Task { @MainActor in AlarmRinger.shared.ring(title: title) }
+    }
+
+    /// 50m(기차역은 100m) 단위로 달라질 때만 갱신한다. 알람이 울린 것은 controller 가 상태 차이로 알아챈다.
+    private func report() {
+        guard let distance else { return }
+        let step = stationApproach == nil ? 50.0 : 100.0
+        let bucket = Int(distance / step) * Int(step)
         if bucket != lastReportedDistance || didFire {
             lastReportedDistance = bucket
             LiveActivityController.shared.update(liveState(meters: bucket))

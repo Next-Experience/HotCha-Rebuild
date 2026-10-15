@@ -18,6 +18,33 @@ struct BusStopRecord: Identifiable, Hashable, Codable {
     let longitude: Double
     let arsNumber: String  // 정류장에 적힌 모바일 단축번호
     let cityName: String
+    /// 버스 정류장이 아니라 기차역이다. 기차역은 내장 DB 가 아니라 `TrainStationCatalog` 에서 온다.
+    /// 알람 반경 · 위치 추적 · 문구가 달라진다. 이 값이 생기기 전에 저장한 기록에는 없어서 false 로 읽는다.
+    var isTrainStation = false
+
+    init(
+        id: String, name: String, latitude: Double, longitude: Double, arsNumber: String, cityName: String,
+        isTrainStation: Bool = false
+    ) {
+        self.id = id
+        self.name = name
+        self.latitude = latitude
+        self.longitude = longitude
+        self.arsNumber = arsNumber
+        self.cityName = cityName
+        self.isTrainStation = isTrainStation
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        latitude = try container.decode(Double.self, forKey: .latitude)
+        longitude = try container.decode(Double.self, forKey: .longitude)
+        arsNumber = try container.decode(String.self, forKey: .arsNumber)
+        cityName = try container.decode(String.self, forKey: .cityName)
+        isTrainStation = try container.decodeIfPresent(Bool.self, forKey: .isTrainStation) ?? false
+    }
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)

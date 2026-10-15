@@ -14,6 +14,8 @@ struct HotChaActivityAttributes: ActivityAttributes {
         case route
         /// 정류장만 골라 남은 거리로 안내한다.
         case stop
+        /// 기차역만 골라 남은 거리로 안내한다. 정류장 안내와 같고 문구와 그림만 다르다.
+        case train
     }
 
     /// 안내하는 동안 바뀌는 값

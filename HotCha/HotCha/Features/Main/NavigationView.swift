@@ -76,7 +76,7 @@ struct NavigationView: View {
         }
         if stopAlarmSession.isRinging, let stop = stopAlarmSession.runningStop {
             let guidance = HotChaGuidance(
-                kind: .stop, busNumber: "", destination: stop.name, remainingStops: nil,
+                kind: stop.isTrainStation ? .train : .stop, busNumber: "", destination: stop.name, remainingStops: nil,
                 remainingMeters: stopAlarmSession.distance.map { Int($0) }, hasAlarmFired: true)
             return AlarmRingingContent(destination: stop.name, detail: "\(guidance.label) · \(guidance.headline)")
         }

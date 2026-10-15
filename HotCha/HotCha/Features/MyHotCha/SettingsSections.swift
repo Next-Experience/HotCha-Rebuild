@@ -5,6 +5,7 @@ struct SettingsSections: View {
     @ObservedObject private var ringer = AlarmRinger.shared
     @AppStorage("alarmStopDistanceFromDestination") private var stopsBefore = 2
     @AppStorage("stopAlarmRadius") private var stopAlarmRadius: Double = 500
+    @AppStorage("trainAlarmRadius") private var trainAlarmRadius: Double = 10_000
 
     @AppStorage("developerMode") private var developerMode = false
 
@@ -27,6 +28,11 @@ struct SettingsSections: View {
                 Text("300m 전").tag(300.0)
                 Text("500m 전").tag(500.0)
                 Text("1km 전").tag(1000.0)
+            }
+            Picker("기차역 알림", selection: $trainAlarmRadius) {
+                ForEach(StopAlarmView.trainRadiusOptions, id: \.self) { option in
+                    Text("\(StopAlarmViewModel.format(option)) 전").tag(option)
+                }
             }
         } header: {
             Text("알림 시점")

@@ -115,6 +115,8 @@ HotCha-Rebuild/
 | 무엇 | 어디 |
 | --- | --- |
 | 노선 알람이 언제 울리나 | `HotChaKit/Sources/HotChaKit/RouteTracker.swift` |
+| 기차역 알람이 언제 울리나 (터널 포함) | `HotChaKit/Sources/HotChaKit/StationApproach.swift` |
+| 기차역 검색 · 좌표 확인 | `Data/Local/TrainStationCatalog.swift` → `Resources/TrainStations.json` (`Tools/build_train_stations.py`) |
 | 알람을 어떻게 울리나 | `Core/Alarm/AlarmRinger.swift` — AlarmKit 시스템 알람 하나. 로컬 알림 · 앱 소리는 쓰지 않는다 |
 | 버스·정류장 검색 | `Data/Local/BusDatabase.swift` → `Resources/BusData.sqlite` |
 | 노선의 정류장 순서 | API. `Data/Network/BusAPI.swift` 가 서울/지방을 가른다 |
@@ -131,6 +133,7 @@ HotCha-Rebuild/
 2. **알람 규칙은 `HotChaKit` 에서만 고친다.** 화면 쪽(`NearestBusViewModel`)은 결과를 화면·알림으로 옮기기만 한다.
    규칙을 바꿀 땐 실패하는 테스트를 먼저 쓴다.
 3. **검색은 내장 DB 에서만 한다.** 검색을 위해 네트워크를 부르지 않는다. 장소 검색(MapKit)만 예외다.
+   기차역도 내장 목록(`TrainStations.json`)에서 찾는다. 고른 역의 **좌표 확인**만 MapKit 을 부른다(결정 0006).
 4. **화면은 시스템 기본 컴포넌트로 만든다.** `List` · `Form` · `.sheet` · `.alert` · `.searchable` · `Picker` · 시스템 글꼴.
    색은 강조색 `Color("mainpurple")` 하나와 시스템 색(`.primary` · `.secondary`)만 쓴다. 어두운 고정 배경을 만들지 않는다.
    바탕은 `HotChaContentBackground` 다. 디자인 규칙은 작업공간 루트 `디자인.md` 의 「확정 규칙」 절에 있다.
@@ -155,6 +158,10 @@ HotCha-Rebuild/
 | 알람은 한 번만 울린다 | `N정류장_전에_알람이_한_번만_울린다` |
 | 알람 정류장을 놓쳐도 울린다 | `알람_정류장을_건너뛰어도_울린다` |
 | 타자마자 울리지 않는다 | `시작부터_N보다_가까우면_바로_울리지_않고_한_정류장_전에_울린다` |
+| 기차역 반경 안에서 한 번만 울린다 | `반경_안에_들어오면_한_번만_울린다` |
+| 흐린 위치로는 울리지 않는다 | `흐린_위치로는_울리지_않고_거리도_바꾸지_않는다` |
+| 반경 두 배 안에서 신호가 끊기면 미리 울린다 | `반경_두_배_안에서_신호가_끊기면_미리_울린다` |
+| 멀리서 신호가 끊기면 울리지 않는다 | `멀리서_신호가_끊기면_울리지_않는다` |
 
 ---
 
@@ -165,6 +172,8 @@ HotCha-Rebuild/
 - **정류장 ID ≠ 정류장 번호.** ID 는 시스템 값(`SEB122000606`), 번호는 정류장에 적힌 다섯 자리(`23813`)다.
   사용자에게 보여 주는 것은 번호다.
 - **순번(seq)으로 빼지 않는다.** API 에 따라 1 부터일 수도 1001 부터일 수도 있다. 남은 정류장 수는 배열의 자리로 센다.
+- **기차역은 `BusStopRecord.isTrainStation` 이다.** 정류장 알람과 같은 화면 · 엔진을 쓰고 반경(km) · 위치 추적 · 문구만 다르다.
+  공공데이터 역 좌표는 수십 km 틀린 것이 있어 알람 좌표로 쓰지 않는다. 목록은 「어느 역이 있나」 와 「어디쯤」 만 믿는다.
 - **노선 알람 ≠ 정류장 알람.** 노선 알람은 버스를 고르고 남은 **정류장 수**로 울린다. 정류장 알람은 정류장만 고르고 **거리**로 울린다.
 - **좌표 이름.** `gpsX` 가 경도, `gpsY` 가 위도다.
 

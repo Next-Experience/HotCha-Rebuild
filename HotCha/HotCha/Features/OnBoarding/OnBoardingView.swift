@@ -136,7 +136,7 @@ struct OnBoardingView: View {
             OnboardingFeatureRow(
                 symbol: "magnifyingglass",
                 title: "한 번에 찾기",
-                detail: "버스 · 정류장 · 장소를 검색해요"
+                detail: "버스 · 정류장 · 기차역 · 장소를 검색해요"
             )
             Divider().padding(.leading, 56)
             OnboardingFeatureRow(

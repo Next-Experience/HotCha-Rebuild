@@ -13,6 +13,7 @@ import CoreLocation
 enum SearchScope: String, CaseIterable, Identifiable {
     case bus = "버스"
     case stop = "정류장"
+    case train = "기차역"
     case place = "장소"
 
     var id: String { rawValue }
@@ -120,6 +121,10 @@ struct SearchView: View {
     // 검색 결과 상태 관리
     @State private var buses: [Bus_info_seoul] = []
     @State private var stops: [BusStopRecord] = []
+    @State private var trainStations: [TrainStation] = []
+    /// 고른 기차역의 좌표를 MapKit 으로 확인하는 중인 역
+    @State private var resolvingStation: TrainStation?
+    @State private var showsStationError = false
     @StateObject private var placeCompleter = PlaceSearchCompleter()
     @State private var scope: SearchScope = .bus
     @State private var isSearching = false
@@ -127,7 +132,7 @@ struct SearchView: View {
 
     /// 즐겨찾기는 노선 기준으로 저장하므로 버스만 보여준다.
     private var scopes: [SearchScope] {
-        isBookmark ? [.bus, .stop] : SearchScope.allCases
+        isBookmark ? [.bus, .stop, .train] : SearchScope.allCases
     }
 
     var body: some View {
@@ -166,6 +171,7 @@ struct SearchView: View {
                             switch scope {
                             case .bus: busRows
                             case .stop: stopRows
+                            case .train: trainRows
                             case .place: placeRows
                             }
                         }
@@ -200,7 +206,7 @@ struct SearchView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 120, height: 120)
-                        Text("버스 번호나 정류장을 검색하세요")
+                        Text("버스 번호나 정류장, 기차역을 검색하세요")
                             .font(.title3.weight(.bold))
                         Text("장소 이름으로도 찾을 수 있어요.")
                             .font(.subheadline)
@@ -238,6 +244,7 @@ struct SearchView: View {
         switch scope {
         case .bus: return buses.count
         case .stop: return stops.count
+        case .train: return trainStations.count
         case .place: return placeCompleter.results.count
         }
     }
@@ -267,6 +274,37 @@ struct SearchView: View {
             .onTapGesture {
                 destination = .stop(stop)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var trainRows: some View {
+        ForEach(trainStations) { station in
+            resultRow(icon: "train.side.front.car", title: station.displayName, detail: station.detail)
+                .overlay(alignment: .trailing) {
+                    if resolvingStation == station {
+                        ProgressView()
+                            .padding(.trailing, 24)
+                    }
+                }
+                .onTapGesture {
+                    guard resolvingStation == nil else { return }
+                    resolvingStation = station
+                    Task {
+                        let record = await TrainStationCatalog.resolve(station)
+                        resolvingStation = nil
+                        if let record {
+                            destination = .stop(record)
+                        } else {
+                            showsStationError = true
+                        }
+                    }
+                }
+        }
+        .alert("역 위치를 확인하지 못했어요", isPresented: $showsStationError) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text("인터넷에 연결된 상태에서 다시 골라 주세요. 역 위치는 지도에서 확인해요.")
         }
     }
 
@@ -357,6 +395,7 @@ struct SearchView: View {
         guard !text.trimmingCharacters(in: .whitespaces).isEmpty else {
             buses = []
             stops = []
+            trainStations = []
             placeCompleter.search("", near: nil)
             isSearching = false
             return
@@ -386,9 +425,14 @@ struct SearchView: View {
         if DevBus.matches(searchText) { buses.insert(DevBus.info, at: 0) }
         #endif
         stops = foundStops
+        trainStations = TrainStationCatalog.search(searchText)
         // 버스 번호로 찾은 게 없으면 정류장 탭을 먼저 보여준다.
         if !scopes.contains(scope) || count(of: scope) == 0 {
             scope = scopes.first { count(of: $0) > 0 } ?? scope
+        }
+        // 「대전역」 처럼 역 이름을 그대로 쳤으면 같은 이름의 버스 정류장보다 기차역을 먼저 보여 준다.
+        if buses.isEmpty, TrainStationCatalog.hasExactMatch(searchText) {
+            scope = .train
         }
         isSearching = false
 
