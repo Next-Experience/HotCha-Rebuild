@@ -1,0 +1,2 @@
+// 앱 타깃 공통 설정. 비밀 값은 Secrets.xcconfig 에 둔다(없어도 빌드는 된다).
+#include? "Secrets.xcconfig"

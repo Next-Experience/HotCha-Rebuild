@@ -1,0 +1,33 @@
+name: 커밋 위생
+
+# 커밋 기록에는 사람만 남는다.
+# `.githooks/commit-msg` 가 지우지만 훅은 `--no-verify` 로 건너뛸 수 있다 —
+# 건너뛴 것이 develop·main 에 들어가지 않게 하는 최종 강제가 여기다.
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  trailers:
+    name: AI 협업자 흔적 검사
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 검사 범위 정하기
+        id: range
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "value=${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=HEAD~20..HEAD" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 검사
+        run: ./.githooks/no-ai-trailers.sh '${{ steps.range.outputs.value }}'

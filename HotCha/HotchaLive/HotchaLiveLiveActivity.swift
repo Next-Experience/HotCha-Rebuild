@@ -2,163 +2,96 @@
 //  HotchaLiveLiveActivity.swift
 //  HotchaLive
 //
-//  Created by 문재윤 on 5/6/25.
+//  안내 중에 잠금 화면과 다이내믹 아일랜드에 뜨는 화면.
+//  데이터 모양은 LiveActivityShared/HotChaActivityAttributes.swift 에 있다.
 //
 
 import ActivityKit
-import WidgetKit
 import SwiftUI
-
-struct HotchaLiveAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-            var progress: Double       // 진행 상태 (0.0 ~ 1.0)
-            var currentStop: String    // 현재 정류장
-            var stopsRemaining: Int    // 남은 정류장 수
-            var alarmstop: String       // 알람 정류장
-            var destinationStation: String // 도착 정류장
-            var Updatetime: String // 업데이트 시간
-        }
-
-        var title: String         // 라이브 액티비티 제목
-        var description: String   // 설명
-        var busname: String         // 버스 이름
-        var routeType: String?      // 버스 타입
-    }
-
+import WidgetKit
 
 struct HotchaLiveLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: HotchaLiveAttributes.self) { context in
-            // Lock screen/banner UI 만 사용
-            
-            VStack(spacing: 0) {
-                VStack(spacing: 0) {
-                    HStack {
-                        // 버스 번호 및 정류장 정보
-                        HStack {
-                            let busColor = getBusColor(for: context.attributes.routeType ?? "")
-                            
-                            Text("\(context.attributes.busname)")
-                                .font(.pretendard(.semibold, size: 14))
-                                .foregroundStyle(busColor)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(busColor.opacity(0.2))
-                                .cornerRadius(4)
-                            
-                            Text("\(context.state.destinationStation)")
-                                .font(.pretendard(.semibold, size: 14))
-                                .foregroundStyle(.gray800)
-                        }
-                        
-                        Spacer()
-                        
-                        HStack {
-                            Image("WidgetAppIcon")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            
-                            Text("핫챠")
-                                .font(.pretendard(.semibold, size: 14))
-                                .foregroundStyle(.gray400)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 30)
-                    
-                    HStack {
-                        Text("\(abs(context.state.stopsRemaining))")
-                            .font(.pretendard(.semibold, size: 20))
-                            .foregroundStyle(context.state.stopsRemaining < 0 ? .redc :  .purplec)
-                            .padding(.trailing, 4)
-                        
-                        Text(Int(context.state.stopsRemaining) >= 0 ? "정류장 전" : "정류장 지났어요.")
-                            .font(.pretendard(.semibold, size: 20))
-                            .foregroundStyle(.gray700)
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 15)
-                    .padding(.bottom)
-                }
-                .background(.white)
-                
-                VStack(spacing: 0) {
-                    // 정류장 및 방향 정보
-                    HStack {
-                        Text("\(context.state.currentStop)")
-                            .font(.pretendard(.semibold, size: 16))
-                            .foregroundStyle(.gray800)
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.pretendard(.semibold, size: 16))
-                            .foregroundStyle(.gray800)
-                            .padding(.horizontal, 4)
-                        
-                        
-                        Image("bell_live")
-                        Text("\(context.state.alarmstop)")
-                            .font(.pretendard(.medium, size: 12))
-                            .foregroundColor(.gray600)
-                        
-                        Spacer()
-                        Text("\(context.state.Updatetime)")
-                            .font(.pretendard(.medium, size: 4))
-                            .background(.gray100)
-                            
-                    }
-                    .padding(20)
-                }
-                .background(.gray150)
-            }
-            .frame(width: .infinity, height: .infinity)
-            
+        ActivityConfiguration(for: HotChaActivityAttributes.self) { context in
+            // 바탕을 칠하지 않는다. 잠금 화면 바탕은 시스템이 외관(라이트 · 다크)에 맞춰 정한다.
+            LockScreenView(attributes: context.attributes, state: context.state)
         } dynamicIsland: { context in
-            DynamicIsland {
+            let guidance = HotChaGuidance(attributes: context.attributes, state: context.state)
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    EmptyView()
+                    Label(guidance.label, systemImage: symbolName(guidance))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color("mainpurple"))
+                        .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    EmptyView()
+                    Text(guidance.compact)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Color("mainpurple"))
+                        .contentTransition(.numericText())
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    EmptyView()
+                    VStack(alignment: .leading, spacing: 8) {
+                        // 꼬리표를 오른쪽 끝에 두면 아일랜드의 둥근 모서리에 잘린다. 문장 앞에 붙인다.
+                        Text(guidance.phaseTag.map { "\($0) · \(guidance.detail)" } ?? guidance.detail)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        StopTrack(
+                            guidance: guidance,
+                            markerImage: context.attributes.kind == .route ? context.attributes.imageName : nil,
+                            compact: true
+                        )
+                    }
+                    .padding(.top, 4)
                 }
             } compactLeading: {
-                EmptyView()
+                // 좁은 자리에는 버스 번호와 남은 양만 둔다.
+                if context.attributes.kind == .route && !guidance.hasAlarmFired {
+                    Text(context.attributes.busNumber)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color("mainpurple"))
+                } else {
+                    Image(systemName: symbolName(guidance))
+                        .foregroundStyle(Color("mainpurple"))
+                }
             } compactTrailing: {
-                EmptyView()
+                Text(guidance.compact)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color("mainpurple"))
+                    .contentTransition(.numericText())
             } minimal: {
-                EmptyView()
+                Image(systemName: symbolName(guidance))
+                    .foregroundStyle(Color("mainpurple"))
             }
-        }
-    }
-    
-    private func getBusColor(for routeType: String) -> Color {
-        switch routeType {
-        case "1": // 공항
-            return Color("bluec")
-        case "2": // 마을
-            return Color("olivec")
-        case "3": // 간선
-            return Color("skybluec")
-        case "4": // 지선
-            return Color("greenc")
-        case "5": // 순환
-            return Color("purplec")
-        case "6": // 광역
-            return Color("orangec")
-        case "7": // 인천
-            return Color("bluec")
-        case "8": // 경기
-            return Color("brownc")
-        default:
-            return Color("bluec")
+            .keylineTint(Color("mainpurple"))
         }
     }
 }
 
+/// 알람이 울린 뒤에는 종, 아니면 버스(정류장 알림은 핀, 기차역 알림은 기차)
+private func symbolName(_ guidance: HotChaGuidance) -> String {
+    if guidance.hasAlarmFired { return "bell.fill" }
+    switch guidance.kind {
+    case .route: return "bus.fill"
+    case .stop: return "mappin.and.ellipse"
+    case .train: return "train.side.front.car"
+    }
+}
 
+/// 잠금 화면과 알림 배너에 뜨는 모양. 내용은 홈 배너와 같은 HotChaGuidanceCard 이고, 바탕은 시스템 것을 쓴다.
+/// mainpurple 은 버스 번호와 큰 수치, 앞으로 갈 길에만 쓴다.
+private struct LockScreenView: View {
+    let attributes: HotChaActivityAttributes
+    let state: HotChaActivityAttributes.ContentState
 
-
+    var body: some View {
+        HotChaGuidanceCard(
+            guidance: HotChaGuidance(attributes: attributes, state: state),
+            currentStop: state.currentStop,
+            markerImage: attributes.kind == .route ? attributes.imageName : nil
+        )
+        .padding(16)
+    }
+}

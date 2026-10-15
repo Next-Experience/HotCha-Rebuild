@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# pre-commit — 작업 루프의 실제 게이트.
+#
+# 에이전트 훅은 명령 문자열을 파싱해야 해서 우회가 쉽고, 사람이 직접 커밋할 땐 아예 안 걸린다.
+# 그래서 진짜 차단은 여기서 한다. 세 가지를 본다.
+#   1. develop·main 위 커밋 — 브랜치 → PR 을 커밋 시점에 강제한다 (통합 브랜치는 develop)
+#   2. CLAUDE.md=@AGENTS.md — 원본은 AGENTS.md 하나다. CLAUDE.md 에 규칙을 따로 적으면 둘이 갈라진다
+#   3. 검증 스탬프        — 검증이 안 돌았거나, 돈 뒤에 코드가 바뀌었으면 막는다
+#
+# 설치 (클론마다 한 번):
+#   git config core.hooksPath .githooks
+#
+# 규약: AGENTS.md 「무엇이 이 흐름을 강제하나」
+set -uo pipefail
+
+repo="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$repo" || exit 0
+
+fail=0
+say() { printf 'pre-commit: %s\n' "$1" >&2; }
+
+# ── 1. 통합 브랜치 위에서는 커밋하지 않는다 ─────────────────
+branch="$(git branch --show-current 2>/dev/null || true)"
+if [ "$branch" = "main" ] || [ "$branch" = "master" ] || [ "$branch" = "develop" ]; then
+  if [ "${LOOP_ALLOW_MAIN:-0}" = "1" ]; then
+    say "⚠ LOOP_ALLOW_MAIN=1 — ${branch} 위 커밋을 허용합니다. 상시로 쓰면 게이트가 장식이 됩니다."
+  else
+    say "'${branch}' 위에서는 커밋하지 않습니다. 브랜치를 파세요:"
+    say "    git switch -c <type>/<주제>"
+    say "  부트스트랩·핫픽스라면: LOOP_ALLOW_MAIN=1 git commit ..."
+    fail=1
+  fi
+fi
+
+# ── 2. CLAUDE.md 는 AGENTS.md 를 불러오기만 한다 ─────────────
+# 도구마다 읽는 파일명이 다를 뿐 원본은 AGENTS.md 하나다. 복사본을 두던 때 실제로 갈라졌다.
+if [ -f CLAUDE.md ] && [ "$(cat CLAUDE.md)" != "@AGENTS.md" ]; then
+  say "CLAUDE.md 는 '@AGENTS.md' 한 줄이어야 합니다. 규칙은 AGENTS.md 에 적습니다:"
+  say "    printf '@AGENTS.md\\n' > CLAUDE.md && git add CLAUDE.md"
+  fail=1
+fi
+
+# ── 3. 검증 스탬프 ──────────────────────────────────────────
+# 스탬프는 sha256(HEAD + git diff HEAD) 다. git diff HEAD 는 정확히 '커밋될 내용' 이라
+# 검증 뒤에 한 글자라도 고치면 어긋난다. 스테이징은 diff HEAD 를 바꾸지 않아 영향이 없다.
+if [ -x scripts/verify.sh ]; then
+  needs_verify=0
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$f" in
+      *.md|docs/*|.github/*|.githooks/*|.claude/*|.gitignore|*/.gitignore|LICENSE) ;;
+      *) needs_verify=1 ;;
+    esac
+  done < <(git diff --cached --name-only)
+
+  if [ "$needs_verify" = "1" ]; then
+    if [ "${LOOP_SKIP_VERIFY:-0}" = "1" ]; then
+      say "⚠ LOOP_SKIP_VERIFY=1 — 검증 없이 커밋합니다. 무엇이 확인되지 않았는지 보고에 적으세요."
+    else
+      want="$(printf '%s' "$(git rev-parse HEAD 2>/dev/null || true)$(git diff HEAD 2>/dev/null || true)" | shasum -a 256 | cut -d' ' -f1)"
+      have="$(cat .claude/.verify-stamp 2>/dev/null || true)"
+      if [ "$want" != "$have" ]; then
+        if [ -z "$have" ]; then
+          say "검증 스탬프가 없습니다. 제품 코드를 바꿨으면 커밋 전에 전체 검증을 돌립니다:"
+        else
+          say "검증 스탬프가 낡았습니다 — 검증을 돌린 뒤에 코드가 바뀌었습니다. 다시 돌립니다:"
+        fi
+        say "    ./scripts/verify.sh"
+        say "  부분 검증(--quick·--unit)과 건너뛴 검사가 있는 실행은 스탬프를 쓰지 않습니다."
+        say "  정말 건너뛰어야 한다면: LOOP_SKIP_VERIFY=1 git commit ..."
+        fail=1
+      fi
+    fi
+  fi
+fi
+
+[ "$fail" = "0" ] || say "— 막힌 이유는 AGENTS.md 의 「무엇이 이 흐름을 강제하나」에 있습니다."
+exit $fail

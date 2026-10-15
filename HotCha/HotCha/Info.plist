@@ -26,18 +26,6 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Pretendard-Bold.otf</string>
-		<string>Pretendard-Medium.otf</string>
-		<string>Pretendard-Regular.otf</string>
-		<string>Pretendard-SemiBold.otf</string>
-		<string>Pretendard-Black.otf</string>
-		<string>Pretendard-ExtraBold.otf</string>
-		<string>Pretendard-ExtraLight.otf</string>
-		<string>Pretendard-Thin.otf</string>
-		<string>Pretendard-Light.otf</string>
-	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -55,10 +43,11 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>내릴 정류장에 가까워지면 무음 모드에서도 알람으로 깨워 드려요.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
-		<string>audio</string>
 		<string>fetch</string>
 	</array>
 </dict>
