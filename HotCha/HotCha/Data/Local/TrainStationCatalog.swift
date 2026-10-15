@@ -21,6 +21,8 @@ struct TrainStation: Identifiable, Hashable, Decodable {
     let lines: [String]
     /// 코레일 지역본부 또는 공단 지사. 노선이 없을 때 대신 보여 준다.
     let region: String
+    /// 영어 이름 "Dongdaegu". 공단 파일에 있는 역만 있다. MapKit 의 한국어 색인에 없는 역을 이 이름으로 찾는다.
+    let en: String?
     /// 공공데이터가 말하는 역 위치들. 서로 다를 수 있다. MapKit 결과를 고르는 기준으로만 쓴다.
     let hints: [[Double]]
     /// 두 공공 파일이 1km 안에서 일치한 좌표. MapKit 을 못 쓸 때 이것으로 대신한다.
@@ -41,16 +43,18 @@ struct TrainStation: Identifiable, Hashable, Decodable {
     }
 
     /// MapKit 에 넣을 검색어. "김천(구미)" 는 "김천구미역" 을 먼저, 안 되면 "김천역" 을 찾는다.
+    /// 한국어로 안 나오는 역(동대구)은 마지막에 영어 이름으로 찾는다.
     fileprivate var queries: [String] {
         let flat = name.replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "")
         let base = name.components(separatedBy: "(").first ?? name
-        return flat == base ? ["\(base)역"] : ["\(flat)역", "\(base)역"]
+        let korean = flat == base ? ["\(base)역"] : ["\(flat)역", "\(base)역"]
+        return korean + (en.map { ["\($0) Station"] } ?? [])
     }
 }
 
 enum TrainStationCatalog {
-    /// MapKit 결과가 공공데이터 위치에서 이만큼 안이어야 같은 역으로 본다. 역사를 옮긴 역(원주 · 안동)은 5km 쯤 어긋난다.
-    static let matchRadius: CLLocationDistance = 8_000
+    /// MapKit 결과가 공공데이터 위치에서 이만큼 안이어야 같은 역으로 본다. 역사를 옮긴 역(원주 · 안동)은 5km, 무안은 8km 쯤 어긋난다.
+    static let matchRadius: CLLocationDistance = 10_000
 
     static let all: [TrainStation] = {
         guard let url = Bundle.main.url(forResource: "TrainStations", withExtension: "json"),

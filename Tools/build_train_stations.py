@@ -25,6 +25,8 @@ DEFAULT_OUT = os.path.join(os.path.dirname(__file__), "..", "HotCha", "HotCha", 
 AGREE_METERS = 1000
 # 같은 역인데 두 파일의 이름이 다르다. 왼쪽 이름을 오른쪽으로 합친다.
 ALIASES = {"신경주": "경주"}
+# 여객 취급을 그만둔 역. 공단 파일에 남아 있고 MapKit 에도 없다 (2021-12 동해선 이설).
+CLOSED = {"불국사", "호계"}
 
 
 def normalize(name):
@@ -74,6 +76,13 @@ def base_lines(related):
     return seen
 
 
+def english(name):
+    """'Jinbu(Odaesan)' -> 'Jinbu', 'Dongdaegu Station' -> 'Dongdaegu'.
+    MapKit 의 한국어 색인에 없는 역(동대구)이 영어 이름으로는 찾아진다."""
+    name = re.sub(r"\(.*?\)", "", name).strip()
+    return re.sub(r"\s*Station$", "", name).strip()
+
+
 def main():
     if len(sys.argv) < 3:
         print(__doc__)
@@ -84,7 +93,9 @@ def main():
     stations = {}
 
     def entry(name):
-        return stations.setdefault(name, {"name": name, "lines": [], "region": "", "points": [], "extra": []})
+        return stations.setdefault(
+            name, {"name": name, "en": "", "lines": [], "region": "", "points": [], "extra": []}
+        )
 
     for row in read(korail_path):
         e = entry(normalize(row["역명"]))
@@ -95,6 +106,7 @@ def main():
     for row in read(kr_path):
         e = entry(normalize(row["역이름"]))
         e["lines"] = base_lines(row["관련노선"])
+        e["en"] = english(row["역이름_영어"])
         e["region"] = e["region"] or row["소속지사"].strip()
         if p := point(row["위도좌표"], row["경도좌표"]):
             e["points"].append(p)
@@ -107,6 +119,8 @@ def main():
 
     result, report = [], {"agree": 0, "disagree": [], "single": [], "extra": [], "none": []}
     for name in sorted(stations):
+        if name in CLOSED:
+            continue
         e = stations[name]
         pts = e["points"]
         coord = None
@@ -125,6 +139,8 @@ def main():
             report["none"].append(name)
             continue
         item = {"name": name, "lines": e["lines"][:3], "region": e["region"], "hints": hints}
+        if e["en"]:
+            item["en"] = e["en"]
         if coord:
             item["coord"] = coord
         result.append(item)

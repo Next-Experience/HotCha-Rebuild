@@ -304,7 +304,7 @@ struct SearchView: View {
         .alert("역 위치를 확인하지 못했어요", isPresented: $showsStationError) {
             Button("확인", role: .cancel) {}
         } message: {
-            Text("인터넷에 연결된 상태에서 다시 골라 주세요. 역 위치는 지도에서 확인해요.")
+            Text("역 위치는 지도에서 확인해요. 인터넷에 연결된 상태에서 다시 골라 주세요. 그래도 안 되면 아직 찾을 수 없는 역이에요.")
         }
     }
 
