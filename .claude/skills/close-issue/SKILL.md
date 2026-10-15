@@ -1,24 +1,23 @@
 ---
 name: close-issue
-description: 구현이 끝난 허브(hotcha) 기능을 닫는다 — 앱 PR 병합을 확인하고, 완료 정의 4항목을 대조하고, requirements.md의 [구현 필요]를 정리한 뒤 이슈를 직접 닫는다(원격이 있을 때). 구현 PR은 `Refs`로만 참조하므로 병합해도 이슈는 열려 있다. "이슈 닫아", "FR 마무리", "클로즈" 같은 요청이나, 허브 FR에 걸린 앱 PR을 병합한 직후에 쓴다.
+description: 구현이 끝난 허브(hotcha) 기능을 닫는다 — 앱 PR 병합을 확인하고, 완료 정의 4항목을 대조하고, requirements.md의 [구현 필요]를 정리한 뒤 이슈를 직접 닫는다. 구현 PR은 `Refs`로만 참조하므로 병합해도 이슈는 열려 있다. "이슈 닫아", "FR 마무리", "클로즈" 같은 요청이나, 허브 FR에 걸린 앱 PR을 병합한 직후에 쓴다.
 ---
 
-<!-- 허브 hotcha에서 옮겨 온 사본 — 원본: hotcha .claude/skills/close-issue/SKILL.md. 고칠 때는 허브를 먼저 고치고 이 사본을 맞춘다. -->
+<!-- 허브 hotcha에서 옮겨 온 사본 — 원본: Next-Experience/hotcha .claude/skills/close-issue/SKILL.md. 고칠 때는 허브를 먼저 고치고 이 사본을 맞춘다. -->
 > 이 절차의 경로(`AGENTS.md` · `requirements.md` · `contracts/` 등)와 명령은 **허브 hotcha 기준**이다.
-> 작업공간의 허브 폴더(`../hotcha`)에서 실행한다.
+> 작업공간의 허브 폴더(`../hotcha`)에서 실행하고, 없으면 `gh repo clone Next-Experience/hotcha` 로 받는다.
 
 # 허브 기능 닫기
 
 완료 정의(DoD)의 원문은 `AGENTS.md` "이슈 → 구현 → 클로즈"다 — 먼저 읽는다.
 하나라도 거짓이면 닫지 않는다.
 
-**허브 원격이 아직 없으면** 이슈 대신 FR-ID로 대조하고, 결과를 사용자에게 보고하는 것으로 닫는다.
-`AGENTS.md` "현재 상태"에 그 항목이 있으면 지운다.
+아래 `$HUB`는 허브 저장소 `Next-Experience/hotcha`다. `AGENTS.md` "현재 상태"에 그 항목이 있으면 지운다.
 
 ## 1. 이슈와 PR을 모은다
 
 ```bash
-gh issue view N --repo "$HUB" --json title,labels,state,body                                  # 원격이 있을 때
+gh issue view N --repo "$HUB" --json title,labels,state,body
 gh pr list --repo Next-Experience/HotCha-Rebuild --state all --search "FR-<ID>" --json number,title,state
 git -C ../HotCha-Rebuild log --oneline --all --grep "FR-<ID>"
 ```

@@ -13,7 +13,7 @@ SwiftUI · iOS 26.1+(AlarmKit, 결정 0005) · 라이트 고정 · SwiftData · 
 
 ## SSoT — 제품·계약은 hotcha 허브에
 
-이 앱은 **hotcha 허브 저장소의 요구사항·계약을 구현**한다. 로컬에선 작업공간의 형제 폴더 `../hotcha`(원격은 아직 없다).
+이 앱은 **hotcha 허브 저장소의 요구사항·계약을 구현**한다. 원격은 [Next-Experience/hotcha](https://github.com/Next-Experience/hotcha)(비공개), 로컬에선 작업공간의 형제 폴더 `../hotcha`.
 
 - **어떤 기능을 왜 만드는가**(사용자 관점) → hotcha `requirements.md` (`FR-<도메인>-NN`)
 - **앱 밖과 주고받는 규격**(버스 데이터 · 공공 API · 기차역 목록) → hotcha `contracts/`
@@ -108,14 +108,14 @@ GitHub Actions에는 커밋 위생 검사(`commit-hygiene.yml`)만 있다. 빌�
    그다음 **통합 브랜치에 직접 커밋·푸시하지 않는다.** 작업마다 `feat/` · `fix/` · `docs/` · `chore/` · `refactor/` 브랜치를 파서 커밋하고,
    푸시한 뒤 `develop`으로 PR을 연다. **병합은 사람이 누르고, 머지 커밋으로 한다(squash·rebase 금지)** — FR-ID별 커밋 추적을 살리기 위해서다.
    병합한 작업 브랜치는 지운다. 같은 체크아웃을 다른 세션이 쓰고 있을 수 있다 — 내 파일만 골라 커밋한다.
-   구현이 허브 이슈에 대응하면 PR 본문에 `Refs <허브>#N`으로 참조한다. **`Closes`·`Fixes`는 쓰지 않는다** — 병합 후 허브의 `close-issue` 절차로 닫는다.
+   구현이 허브 이슈에 대응하면 PR 본문에 `Refs Next-Experience/hotcha#N`으로 참조한다. **`Closes`·`Fixes`는 쓰지 않는다** — 병합 후 허브의 `close-issue` 절차로 닫는다.
    커밋 메시지는 **Conventional Commits + FR-ID**: `type(scope): 한국어 요약 — FR-ID · 이슈`
    (기능 변경엔 FR-ID 필수, 순수 잡무엔 생략). 전체 규칙은 hotcha `AGENTS.md`의 '커밋 메시지 규칙'. **Co-Authored-By에 AI 도구를 넣지 않는다.**
 2. **문서 동기화는 작업 완료 조건이다.** 기능 동작이 바뀌면 hotcha `requirements.md`를, 데이터 규격이 바뀌면 hotcha `contracts/`를
    같은 작업에서 갱신한다. 코드와 문서가 다르면 그 작업은 끝나지 않은 것이다.
 3. **문서·주석은 현재 상태만 서술한다.** 변경 이력·작성일·"기존 A에서 B로 교체" 서술 금지 — 변경 맥락은 커밋 메시지가 담당한다.
    주석은 "지금 이 코드가 무엇을 하는지"와 비자명한 "왜"만 적는다. **주석에 FR-ID·이슈 번호를 적지 않는다.**
-4. **미해결 제약·보류 작업은 허브로 추적한다.** 허브 원격이 생기기 전에는 hotcha `AGENTS.md` "현재 상태"에 적는다. 이 저장소 안에 별도 목록 문서를 두지 않는다.
+4. **미해결 제약·보류 작업은 허브 이슈로 추적한다.** 이 저장소 안에 별도 목록 문서를 두지 않는다.
 5. **API 키를 소스에 적지 않는다.** `Config/Secrets.xcconfig` 에 두고 `BusAPI.serviceKey` 로만 읽는다.
 6. **알람 규칙은 `HotChaKit` 에서만 고친다.** 화면 쪽(`NearestBusViewModel`)은 결과를 화면·알림으로 옮기기만 한다.
    규칙을 바꿀 땐 실패하는 테스트를 먼저 쓴다.
@@ -235,7 +235,7 @@ HotCha-Rebuild/
 
 ## 현재 상태 (2026-10-15)
 
-- 재설계는 로컬 브랜치에 쌓여 있다 — 원격 `develop` 은 옛 코드다. 쌓인 브랜치가 다 딸려 가므로 원격 PR 은 아직 열지 않았다.
+- 재설계는 `feat/rebuild-redesign` 에 모여 원격에 올라가 있다 — `develop` 에는 아직 병합되지 않았다(`develop` 은 옛 코드다).
 - 탭은 홈 · 이용 기록 · 지도 · 나의 핫챠 넷이다(FR-HOME-01). 설정 · 닉네임 · 이동 거리는 「나의 핫챠」 안에 있다.
 - 알람이 울리면 루트(`NavigationView`)가 `AlarmRingingView` 를 전체 화면으로 띄운다. 안내 화면의 시트는 그동안 내려간다.
 - 버스 그림은 `BusArt` 가 노선 유형으로 고른다. 클레이 그림(`Assets.xcassets/Clay`)은 `ClayIcon` · `Clay` 로 쓴다. 위젯에는 줄인 사본(216px)을 따로 둔다 — 큰 그림은 Live Activity 에서 안 뜬다.
